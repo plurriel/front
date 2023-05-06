@@ -20,7 +20,7 @@ export function MailsRow({ ...props }) {
   return (
     <Stack col surface fill {...props}>
       <Stack surface> 
-        <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}'s</small> {currentFolder.name}</Stack>
+        <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}&apos;s</small> {currentFolder.name}</Stack>
         <Settings />
       </Stack>
       <Container scroll fill>
