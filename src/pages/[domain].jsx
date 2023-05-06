@@ -19,9 +19,12 @@ import { Send } from "@/components/icons/Send";
 import { createContext, useContext, useState } from "react";
 import { DomainRow } from "@/components/domain/DomainRow";
 import { MailsRow } from "@/components/domain/MailsRow";
+import { MailRow } from "@/components/domain/MailRow";
 
 const AppContext = createContext({
   subdomains: [],
+  addresses: [],
+  folders: [],
   // Array of { name, imgSrc, addresses, id }
   // addresses: array of { name, imgSrc, folders, id } or null
   // folders: array of { name, mailsMeta } or null
@@ -39,15 +42,21 @@ export function useAppContext() {
 
 export default function Home(props) {
   const [subdomains, setSubdomains] = useState(props.subdomains);
+  const [addresses, setAddresses] = useState(props.addresses);
+  const [folders, setFolders] = useState(props.folders);
+  const [mailsMeta, setMailsMeta] = useState(props.mailsMeta);
   const [toggledSubdomains, setToggledSubdomains] = useState(new Set(props.lastToggledSubdomains));
   const [selectedAddress, setSelectedAddress] = useState(props.lastSelectedAddress);
   const [viewedAddress, setViewedAddress] = useState(selectedAddress);
-  const [selectedMail, setSelectedMail] = useState(selectedAddress);
+  const [selectedMail, setSelectedMail] = useState(null);
 
   return (
     <AppContext.Provider value={{
       domain: props.domain,
       subdomains: [subdomains, setSubdomains],
+      addresses: [addresses, setAddresses],
+      folders: [folders, setFolders],
+      mailsMeta: [mailsMeta, setMailsMeta],
       toggledSubdomains: [toggledSubdomains, setToggledSubdomains],
       viewedAddress: [viewedAddress, setViewedAddress],
       selectedAddress: [selectedAddress, setSelectedAddress],
@@ -56,83 +65,7 @@ export default function Home(props) {
       <main className={styles.main}>
         <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
         <MailsRow customClasses={[styles.mails]} />
-        <Stack col surface fill customClasses={[styles.mail]}>
-          <Container scroll>
-            <RelatedStack col>
-              <RelatedStack surface uncollapsable>
-                <Container pad>
-                  <Forward block />
-                </Container>
-                <Container fill />
-                <Container pad>
-                  <Archive block />
-                </Container>
-                <Container pad>
-                  <MoveTo block />
-                </Container>
-                <Container pad>
-                  <Schedule block />
-                </Container>
-                <Container pad>
-                  <MarkUnread block />
-                </Container>
-                <Container pad>
-                  <Delete block />
-                </Container>
-                <Container pad>
-                  <ReportSpam block />
-                </Container>
-              </RelatedStack>
-              <Container surface>
-                Licence of your code and works and DMCA enquiry
-              </Container>
-              <Stack surface uncollapsable pad="0">
-                <Stack center pad w="256px">
-                  <small>From:</small>
-                  <Person name="John Doe" />
-                </Stack>
-                <Stack center pad w="256px">
-                  <small>At:</small>
-                  <Container summarize oneline>02:02 29/04/2023</Container>
-                </Stack>
-                <Stack center pad w="256px">
-                  <small>To:</small>
-                  <Person name="Me" />
-                </Stack>
-                <Container fill />
-                <Container pad>
-                  <ChevronDown block />
-                </Container>
-              </Stack>
-              <Container surface>
-                Hello immjs,<br />
-                <br />
-                I am reaching out to you with regards to the license of your code and works, and to make an enquiry under the Digital Millennium Copyright Act (DMCA).<br />
-                We have reason to believe that your code and works may be infringing upon the intellectual property rights of our client. Specifically, we have found that your code bears a striking resemblance to certain proprietary code that our client owns.<br />
-                <br />
-                We are therefore requesting that you provide us with information regarding the license under which you are using and distributing your code and works. We also ask that you provide us with any and all documentation related to the creation, distribution, and use of your code and works.<br />
-                <br />
-                Furthermore, we are submitting this email as an official DMCA enquiry under the Digital Millennium Copyright Act, which allows us to request that your website or other online platform take down any infringing content.<br />
-                <br />
-                We strongly advise that you take this matter seriously and respond promptly with the requested information. Failure to do so may result in legal action being taken against you.<br />
-                <br />
-                Thank you for your attention to this matter.<br />
-                Sincerely,<br />
-                Jonathan Doe
-              </Container>
-            </RelatedStack>
-          </Container>
-          <RelatedStack uncollapsable>
-            <Stack surface>
-              <Reply block />
-              <ChevronDown block />
-            </Stack>
-            <Container surface fill>Reply...</Container>
-            <Container surface>
-              <Send block />
-            </Container>
-          </RelatedStack>
-        </Stack>
+        <MailRow customClasses={[styles.mail]} />
       </main>
     </AppContext.Provider>
   );
@@ -144,195 +77,233 @@ export function getServerSideProps() {
       domain: {
         name: `immjs.dev`,
         imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+        subdomains: [
+          'kw49xov8icsjcvhy25ofhoqx',
+          'xi00cx7rphrr4mkybgo4vu12'
+        ],
       },
-      subdomains: [
-        {
-          id: 0xfe364d53deef63,
+      subdomains: {
+        'kw49xov8icsjcvhy25ofhoqx': {
           name: 'immjs.dev',
           imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
           addresses: [
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'immjs',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [
-                    {
-                      sender: 'Jonathan Joe',
-                      subject: 'DMCA or stuff',
-                      sendDate: Date.now(),
-                    },
-                    {
-                      sender: 'Dad',
-                      subject: 'Disappointment...',
-                      sendDate: Date.now(),
-                    },
-                    {
-                      sender: 'Mom',
-                      subject: 'Failure!',
-                      sendDate: Date.now(),
-                    },
-                  ],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'personal',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'work',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
+            'w1npqwtqnxdvxev31p20z3in',
+            'oplvkbji7w7nu3fl8rw8zh5w',
+            'tj8ia4w74lpr0h27256hzglw',
           ],
         },
-        {
-          id: 0xfe364d53deef63,
+        'xi00cx7rphrr4mkybgo4vu12': {
           name: 'social.immjs.dev',
           imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
           addresses: [
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'twitter',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [
-                    {
-                      sender: 'Twitter',
-                      subject: 'Some subject',
-                      sendDate: Date.now(),
-                    },
-                    {
-                      sender: 'Twitter',
-                      subject: 'Some subject',
-                      sendDate: Date.now(),
-                    },
-                    {
-                      sender: 'Twitter',
-                      subject: 'Some subject',
-                      sendDate: Date.now(),
-                    },
-                  ],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'slack',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
-            {
-              id: 0xfef45efdc0284d03e,
-              name: 'discord',
-              imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
-              folders: [
-                {
-                  name: 'Inbox',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Sent',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Spam',
-                  mailsMeta: [],
-                },
-                {
-                  name: 'Deleted',
-                  mailsMeta: [],
-                },
-              ],
-            },
+            'ipuoo4fr2y0a6l5ofbw6vwe8',
+            'p9wug7y0uqschxcdkaes0gpf',
+            'bfa0wouqehrjdxb43a5tik2u',
           ],
         },
-      ],
-      lastToggledSubdomains: [0],
-      lastSelectedAddress: [0, 0, 0],
+      },
+      addresses: {
+        'w1npqwtqnxdvxev31p20z3in': {
+          name: 'immjs',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'g2k9m1iu5imi1d2b9ax0xtyx',
+            'zkbl4x0ci61iw9nh4qko5bmf',
+            'kiwvee43k90locbqxvetut6e',
+            'i9gvgl62gej58m1vbw5rn7ij',
+          ],
+        },
+        'oplvkbji7w7nu3fl8rw8zh5w': {
+          name: 'personal',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'qq0akp6kgl2wk7vwd3dzur58',
+            'yt50k8m5zklqron714zdj4in',
+            'wor6tdx85nshnbk8a2kevedd',
+            'i5d0jpbdw1vye4l5cl9jmjj7',
+          ],
+        },
+        'tj8ia4w74lpr0h27256hzglw': {
+          name: 'work',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'bgrs3h6twkm9kjqhx0eov94h',
+            'sqhew32mrlkh7maaqnd8th3m',
+            'nmrn3ojqj4suo3nnyrg97rx4',
+            'okvu5xc7veli50s5rwsgavm4',
+          ],
+        },
+        'ipuoo4fr2y0a6l5ofbw6vwe8': {
+          name: 'twitter',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'qs2aiv5dbg5x47or1vn3w81k',
+            'd6b26bwgr2ksmc38ss9wl4ia',
+            'r0ia3qwkcs75a7fvlu02nubr',
+            'o8u8yxkgzx4drt1hk60umzv8',
+          ],
+        },
+        'p9wug7y0uqschxcdkaes0gpf': {
+          name: 'slack',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'rj1g3rpv1gypleoai9y5sje6',
+            'a76h18djiilikv7l5vqk4q1o',
+            'sy8cal9v0mgxqw3x9sa6y7vx',
+            'pz7frksimnahilotg09mkh18',
+          ],
+        },
+        'bfa0wouqehrjdxb43a5tik2u': {
+          name: 'discord',
+          imgSrc: `https://picsum.photos/200/200?r=${Math.random()}`,
+          folders: [
+            'grpfqeofax87488aohwquy1c',
+            'kbgr6sktktebwxnzeqtpcio3',
+            'ckrj3jhnhxlkv695njubbnci',
+            'vd16uqkayuyml53ekrtjjype',
+          ],
+        },
+      },
+      folders: {
+        'g2k9m1iu5imi1d2b9ax0xtyx': {
+          name: 'Inbox',
+          mailsMeta: [
+            'ycn6i3u84uq86yhghygf9749',
+            'bob8zsej74zyvhogg7x9upwj',
+            'bpzwiuc0lhcni0k1bku7nfi5',
+          ],
+        },
+        'zkbl4x0ci61iw9nh4qko5bmf': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'kiwvee43k90locbqxvetut6e': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'i9gvgl62gej58m1vbw5rn7ij': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+        'qq0akp6kgl2wk7vwd3dzur58': {
+          name: 'Inbox',
+          mailsMeta: [],
+        },
+        'yt50k8m5zklqron714zdj4in': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'wor6tdx85nshnbk8a2kevedd': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'i5d0jpbdw1vye4l5cl9jmjj7': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+        'bgrs3h6twkm9kjqhx0eov94h': {
+          name: 'Inbox',
+          mailsMeta: null,
+        },
+        'sqhew32mrlkh7maaqnd8th3m': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'nmrn3ojqj4suo3nnyrg97rx4': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'okvu5xc7veli50s5rwsgavm4': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+        'qs2aiv5dbg5x47or1vn3w81k': {
+          name: 'Inbox',
+          mailsMeta: [
+            'llhpljzx5qugr96roa6d038u',
+            'fvkbzs3429hii02iu2xpm33c',
+            'ih5vzpt13v20nv7gxydm1qlo',
+          ],
+        },
+        'd6b26bwgr2ksmc38ss9wl4ia': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'r0ia3qwkcs75a7fvlu02nubr': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'o8u8yxkgzx4drt1hk60umzv8': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+        'rj1g3rpv1gypleoai9y5sje6': {
+          name: 'Inbox',
+          mailsMeta: [],
+        },
+        'a76h18djiilikv7l5vqk4q1o': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'sy8cal9v0mgxqw3x9sa6y7vx': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'pz7frksimnahilotg09mkh18': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+        'grpfqeofax87488aohwquy1c': {
+          name: 'Inbox',
+          mailsMeta: [],
+        },
+        'kbgr6sktktebwxnzeqtpcio3': {
+          name: 'Sent',
+          mailsMeta: [],
+        },
+        'ckrj3jhnhxlkv695njubbnci': {
+          name: 'Spam',
+          mailsMeta: [],
+        },
+        'vd16uqkayuyml53ekrtjjype': {
+          name: 'Deleted',
+          mailsMeta: [],
+        },
+      },
+      mailsMeta: {
+        'ycn6i3u84uq86yhghygf9749': {
+          sender: 'Jonathan Joe',
+          subject: 'DMCA or stuff',
+          sendDate: Date.now(),
+        },
+        'bob8zsej74zyvhogg7x9upwj': {
+          sender: 'Dad',
+          subject: 'Disappointment...',
+          sendDate: Date.now(),
+        },
+        'bpzwiuc0lhcni0k1bku7nfi5': {
+          sender: 'Mom',
+          subject: 'Failure!',
+          sendDate: Date.now(),
+        },
+        'llhpljzx5qugr96roa6d038u': {
+          sender: 'Twitter',
+          subject: 'Some subject',
+          sendDate: Date.now(),
+        },
+        'fvkbzs3429hii02iu2xpm33c': {
+          sender: 'Twitter',
+          subject: 'Some subject',
+          sendDate: Date.now(),
+        },
+        'ih5vzpt13v20nv7gxydm1qlo': {
+          sender: 'Twitter',
+          subject: 'Some subject',
+          sendDate: Date.now(),
+        },
+      },
+      lastToggledSubdomains: ['kw49xov8icsjcvhy25ofhoqx'],
+      lastSelectedAddress: ['kw49xov8icsjcvhy25ofhoqx', 'w1npqwtqnxdvxev31p20z3in', 'g2k9m1iu5imi1d2b9ax0xtyx'],
     }
   };
 }

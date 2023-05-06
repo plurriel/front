@@ -8,17 +8,19 @@ import styles from "../../styles/domain/MailsRow.module.css";
 export function MailsRow({ ...props }) {
   const {
     subdomains: [subdomains],
+    addresses: [addresses],
+    folders: [folders],
     selectedAddress: [selectedAddress],
   } = useAppContext();
 
   const currentSubdomain = subdomains[selectedAddress[0]];
-  const currentAddress = currentSubdomain.addresses[selectedAddress[1]];
-  const currentFolder = currentAddress.folders[selectedAddress[2]];
+  const currentAddress = addresses[selectedAddress[1]];
+  const currentFolder = folders[selectedAddress[2]];
 
   return (
     <Stack col surface fill {...props}>
       <Stack surface> 
-        <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}</small> {currentFolder.name}</Stack>
+        <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}'s</small> {currentFolder.name}</Stack>
         <Settings />
       </Stack>
       <Container scroll fill>
@@ -33,13 +35,12 @@ export function MailsRow({ ...props }) {
 
 function MailsList() {
   const {
-    subdomains: [subdomains],
+    folders: [folders],
+    mailsMeta: [mailsMeta],
     selectedAddress: [selectedAddress],
   } = useAppContext();
 
-  const currentSubdomain = subdomains[selectedAddress[0]];
-  const currentAddress = currentSubdomain.addresses[selectedAddress[1]];
-  const currentFolder = currentAddress.folders[selectedAddress[2]];
+  const currentFolder = folders[selectedAddress[2]];
 
   if (!currentFolder.mailsMeta) return <Stack col h center>Loading...</Stack>
   if (!currentFolder.mailsMeta.length) return <Stack col h center>No E-Mails yet</Stack>
@@ -47,12 +48,12 @@ function MailsList() {
   return (
     <Stack col>
       {
-        currentFolder.mailsMeta.map((mailMeta, mailIdx) => <MailPreview
-          sender={mailMeta.sender}
-          subject={mailMeta.subject}
-          sendDate={mailMeta.sendDate}
-          mailIdx={mailIdx}
-          key={mailIdx}
+        currentFolder.mailsMeta.map((mailMetaId) => <MailPreview
+          sender={mailsMeta[mailMetaId].sender}
+          subject={mailsMeta[mailMetaId].subject}
+          sendDate={mailsMeta[mailMetaId].sendDate}
+          mailIdx={mailMetaId}
+          key={mailMetaId}
         />)
       }
     </Stack>
@@ -70,7 +71,6 @@ function MailPreview({
     selectedMail: [selectedMail, setSelectedMail],
   } = useAppContext();
   const isSelected = selectedMail === mailIdx;
-  
 
   const dateSent = new Date(sendDate);
   const isSameDate = new Date().toLocaleDateString() === dateSent.toLocaleDateString();

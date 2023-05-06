@@ -1,29 +1,28 @@
 import cls from "clsx";
 import styles from "@/styles/Layout.module.css";
 
-export function Container(props) {
-  const {
-    w,
-    h,
-    pad,
-    br,
-    gap,
-    fill,
-    summarize,
-    customClasses,
-    surface,
-    highlight,
-    scroll,
-    center,
-    children,
-    uncollapsable,
-    expandable,
-    expanded,
-    oneline,
-    style,
-    ...rest
-  } = props;
-  return <div {...rest} style={Object.fromEntries(Object.entries({
+export function Container({
+  w,
+  h,
+  pad,
+  br,
+  gap,
+  fill,
+  summarize,
+  customClasses,
+  surface,
+  highlight,
+  scroll,
+  center,
+  children,
+  uncollapsable,
+  expandable,
+  expanded,
+  oneline,
+  style,
+  ...props
+}) {
+  return <div {...props} style={Object.fromEntries(Object.entries({
     width: w === true ? '100%' : w,
     height: h === true ? '100%' : h,
     padding: pad === true ? '1em' : pad,
@@ -46,16 +45,15 @@ export function Container(props) {
   )}>{children}</div>
 }
 
-export function Stack(props) {
-  const {
-    center,
-    col,
-    customClasses,
-    children,
-    ...rest
-  } = props
+export function Stack({
+  center,
+  col,
+  customClasses,
+  children,
+  ...props
+}) {
   return (
-    <Container {...rest} customClasses={[
+    <Container {...props} customClasses={[
       styles.stack,
       center && styles.center,
       col && styles.v,

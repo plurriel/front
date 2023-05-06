@@ -2,14 +2,12 @@ import { Container, Stack } from "./Layout.jsx";
 import { ProfilePicture } from "./ProfilePicture.jsx";
 import styles from '../styles/PersonCard.module.css';
 
-export function Person(props) {
-  const {
-    name,
-    subname,
-    img,
-    reversed,
-    ...rest
-  } = props;
+export function Person({
+  name,
+  subname,
+  img,
+  reversed
+}) {
   if (reversed) {
     return (
       <>
