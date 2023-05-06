@@ -1,0 +1,4 @@
+.preview_subject {
+  height: 1em;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,35 @@
+.main {
+  display: flex;
+  gap: 0.5em;
+  padding: 1em;
+}
+
+
+.mails {
+  display: none;
+}
+.mail {
+  display: none;
+}
+
+@media screen and (min-width: 766px) { /* 256px + 384px + 7em */
+  .address {
+    width: calc(2em + 256px);
+    flex: unset;
+  }
+  .mails {
+    display: flex;
+    flex: 1;
+  }
+}
+
+@media screen and (min-width: 1261px) { /* 256px + 384px + 7em */
+  .mails {
+    width: calc(2em + 384px);
+    flex: unset;
+  }
+  .mail {
+    display: flex;
+    flex: 1;
+  }
+}

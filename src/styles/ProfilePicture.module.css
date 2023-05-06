@@ -1,0 +1,15 @@
+.pfp {
+  margin: -0.5em 0;
+  width: 2em;
+  height: 2em;
+  border-radius: 1em;
+  background-color: white;
+}
+
+.pfp:first-child {
+  margin-left: -0.5em;
+}
+
+.pfp:last-child {
+  margin-right: -0.5em;
+}

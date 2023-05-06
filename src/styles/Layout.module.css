@@ -1,0 +1,102 @@
+.container {
+  overflow: hidden;
+}
+
+.summarize {
+  text-overflow: ellipsis;
+}
+.oneline {
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: fit-content;
+}
+
+.uncollapsable {
+  flex-shrink: 0;
+}
+
+.stack {
+  display: flex;
+  gap: 0.5em;
+  overflow: hidden;
+}
+
+.stack.v {
+  flex-direction: column;
+}
+
+.surface {
+  --bg: var(--bg1);
+  --fg: var(--fg1);
+  --ns: var(--bg2);
+  --fgs: var(--bg);
+  background-color: var(--bg);
+  color: var(--fg);
+  fill: var(--fg);
+  padding: 1em;
+  gap: 1em;
+  border-radius: 1em;
+}
+
+.stack .fill {
+  flex: 1;
+}
+
+.surface .stack {
+  gap: 0.5em;
+}
+.surface .surface {
+  --bg: var(--bg2);
+  --fg: var(--fg2);
+  --ns: var(--bg3);
+  --fgs: var(--bg);
+  border-radius: 0.5em;
+}
+.surface .surface .surface {
+  --bg: var(--bg3);
+  --fg: var(--fg3);
+  --ns: var(--bg4);
+  --fgs: var(--bg);
+}
+
+.center {
+  align-items: center;
+  justify-content: center;
+}
+
+.related {
+  border-radius: 1em;
+  gap: 0.5em;
+}
+.related.surface {
+  padding: 0;
+}
+
+.related .related {
+  border-radius: 0.5em;
+}
+
+.scroll {
+  overflow: auto;
+  margin-right: -1em;
+  scrollbar-gutter: stable;
+  min-height: min-content;
+  display: block;
+}
+
+.highlight {
+  background-color: var(--bgs);
+  color: var(--fgs);
+  fill: var(--fgs);
+}
+
+.expandable {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 500ms;
+  overflow: hidden;
+}
+
+.expanded {
+  grid-template-rows: 1fr;
+}

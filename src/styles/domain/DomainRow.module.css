@@ -1,0 +1,34 @@
+.cat {
+  border-radius: 0.25em;
+}
+
+.chevron {
+  transform: rotate(180deg);
+}
+
+.expanded_cat .chevron {
+  transform: none;
+}
+
+#domain {
+  height: 3em;
+}
+
+.emailaddr {
+  padding: 0;
+}
+
+.actualemail {
+  padding: 1em;
+}
+
+#address {
+  flex: 1;
+}
+
+@media screen and (min-width: 766px) { /* 256px + 384px + 7em */
+  #address {
+    width: calc(2em + 256px);
+    flex: unset;
+  }
+}
