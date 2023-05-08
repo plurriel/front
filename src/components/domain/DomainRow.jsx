@@ -138,7 +138,7 @@ function EmailAddress({
                 <Stack
                   surface
                   key={folderId}
-                  highlight={(isSelected && folderId === selectedAddress?.[2]) || !isViewed}
+                  highlight={isViewed ? (isSelected && folderId === selectedAddress?.[2]) : isSelected}
                   onClick={() => {
                     if (!isSelected || selectedAddress[2] !== folderId) {
                       setSelectedAddress([subdomainId, addressId, folderId])
