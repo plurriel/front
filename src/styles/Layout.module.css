@@ -29,7 +29,7 @@
   --bg: var(--bg1);
   --fg: var(--fg1);
   --ns: var(--bg2);
-  --fgs: var(--bg);
+  /* --fgs: var(--bg); */
   background-color: var(--bg);
   color: var(--fg);
   fill: var(--fg);
@@ -49,14 +49,14 @@
   --bg: var(--bg2);
   --fg: var(--fg2);
   --ns: var(--bg3);
-  --fgs: var(--bg);
+  /* --fgs: var(--bg); */
   border-radius: 0.5em;
 }
 .surface .surface .surface {
   --bg: var(--bg3);
   --fg: var(--fg3);
   --ns: var(--bg4);
-  --fgs: var(--bg);
+  /* --fgs: var(--bg); */
 }
 
 .center {
@@ -68,11 +68,16 @@
   border-radius: 1em;
   gap: 0.5em;
 }
-.related.surface {
+.surface .related.surface {
   padding: 0;
 }
 
-.related .related {
+.surface .related .related,
+.surface.related .related {
+  border-radius: 0.5em;
+}
+
+.related > * {
   border-radius: 0.5em;
 }
 
@@ -85,9 +90,21 @@
 }
 
 .highlight {
-  background-color: var(--bgs);
-  color: var(--fgs);
-  fill: var(--fgs);
+  background-color: var(--fg);
+  color: var(--bg);
+  fill: var(--bg);
+}
+
+.cta {
+  background-color: var(--bgcta);
+  color: var(--bg);
+  fill: var(--bg);
+  border-radius: 1em !important;
+  font-weight: bold;
+}
+
+.cta * {
+  font-weight: bolder;
 }
 
 .expandable {

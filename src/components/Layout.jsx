@@ -12,6 +12,7 @@ export function Container({
   customClasses,
   surface,
   highlight,
+  cta,
   scroll,
   center,
   children,
@@ -20,18 +21,20 @@ export function Container({
   expanded,
   oneline,
   style,
+  related,
   ...props
 }) {
   return <div {...props} style={Object.fromEntries(Object.entries({
     width: w === true ? '100%' : w,
     height: h === true ? '100%' : h,
     padding: pad === true ? '1em' : pad,
-    borderRadius: br,
-    gap: gap,
+    borderRadius: br === true ? '1em' : br,
+    gap: gap === true ? '1em' : gap,
     ...style,
   }).filter(([k, v]) => v != null))} className={cls(
     styles.container,
     highlight && styles.highlight,
+    cta && styles.cta,
     fill && styles.fill,
     summarize && styles.summarize,
     scroll && styles.scroll,
@@ -41,6 +44,7 @@ export function Container({
     expanded && styles.expanded,
     uncollapsable && styles.uncollapsable,
     center && styles.center,
+    related && styles.related,
     ...(customClasses || [])
   )}>{children}</div>
 }
@@ -59,12 +63,6 @@ export function Stack({
       col && styles.v,
       ...(customClasses || [])
     ]}>{children}</Container>
-  );
-}
-
-export function RelatedStack({ customClasses, children, ...props }) {
-  return (
-    <Stack {...props} customClasses={[styles.related, ...(customClasses || [])]}>{children}</Stack>
   );
 }
 

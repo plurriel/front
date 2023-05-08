@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --bg0: #232634;
   --bg1: #303446;
   --bg2: #414559;
@@ -6,9 +6,29 @@
   --fg1: #C6D0F5;
   --fg2: #C6D0F5;
   --fg3: #C6D0F5;
-  --bgs: #EF9F76;
-  --fgs: var(--bg);
+  --bgcta: #EF9F76;
+  --fgcta: var(--bg);
+} */
+:root {
+  --bg0: #1e1e2e;
+  --bg1: #313244;
+  --bg2: #45475a;
+  --bg3: #585b70;
+  --fg1: #cdd6f4;
+  --fg2: #cdd6f4;
+  --fg3: #cdd6f4;
+  --bgcta: #f38ba8;
 }
+/* :root {
+  --bg3: #eff1f5;
+  --bg2: #ccd0da;
+  --bg1: #bcc0cc;
+  --bg0: #acb0be;
+  --fg1: #4c4f69;
+  --fg2: #4c4f69;
+  --fg3: #4c4f69;
+  --bgcta: #d20f39;
+} */
 
 * {
   fill: inherit;
@@ -32,7 +52,7 @@ main {
   --bg: var(--bg0);
   --fg: var(--fg0);
   --ns: var(--bg1);
-  --fgs: var(--bg);
+  /* --fgs: var(--bg); */
   background-color: var(--bg0);
   width: 100%;
   height: 100%;
@@ -55,10 +75,4 @@ small {
 }
 ::-webkit-scrollbar-thumb:hover {
   border: calc(1em / 4) solid transparent;
-}
-
-*:focus-visible {
-  outline: none;
-  filter: brightness(2);
-  backdrop-filter: brightness(2);
 }

@@ -1,54 +1,23 @@
-import { Add } from "@/components/icons/Add";
-import { ArrowForward } from "@/components/icons/ArrowForward";
-import { ChevronDown } from "@/components/icons/ChevronDown";
-import { Edit } from "@/components/icons/Edit";
-import { Settings } from "@/components/icons/Settings";
-import { Stack, RelatedStack, Container } from "@/components/Layout";
+"use client"; // PLEASE FIX SOON!!
 
-import styles from "./domain.module.css";
-import { Person } from "@/components/PersonCard";
-import { Forward } from "@/components/icons/Forward";
-import { Archive } from "@/components/icons/Archive";
-import { MoveTo } from "@/components/icons/MoveTo";
-import { Schedule } from "@/components/icons/Schedule";
-import { MarkUnread } from "@/components/icons/MarkUnread";
-import { Delete } from "@/components/icons/Delete";
-import { ReportSpam } from "@/components/icons/ReportSpam";
-import { Reply } from "@/components/icons/Reply";
-import { Send } from "@/components/icons/Send";
-import { createContext, useContext, useState } from "react";
+import styles from "@/styles/domain.module.css";
+import { useState } from "react";
 import { DomainRow } from "@/components/domain/DomainRow";
 import { MailsRow } from "@/components/domain/MailsRow";
 import { MailRow } from "@/components/domain/MailRow";
-
-const AppContext = createContext({
-  subdomains: [],
-  addresses: [],
-  folders: [],
-  // Array of { name, imgSrc, addresses, id }
-  // addresses: array of { name, imgSrc, folders, id } or null
-  // folders: array of { name, mailsMeta } or null
-  // mailsMeta: array of { sender, subject, sendDate, contents, id } or null
-  // contents: { content, attachments, followUps }
-  toggledSubdomains: [],
-  toggledSubdomains: null,
-  selectedAddress: [],
-  selectedMail: null,
-});
-
-export function useAppContext() {
-  return useContext(AppContext);
-}
+import { AppContext } from "@/components/domain/AppContext";
+import cls from "clsx";
 
 export default function Home(props) {
   const [subdomains, setSubdomains] = useState(props.subdomains);
   const [addresses, setAddresses] = useState(props.addresses);
   const [folders, setFolders] = useState(props.folders);
-  const [mailsMeta, setMailsMeta] = useState(props.mailsMeta);
+  const [mails, setMails] = useState(props.mails);
   const [toggledSubdomains, setToggledSubdomains] = useState(new Set(props.lastToggledSubdomains));
   const [selectedAddress, setSelectedAddress] = useState(props.lastSelectedAddress);
   const [viewedAddress, setViewedAddress] = useState(selectedAddress);
   const [selectedMail, setSelectedMail] = useState(null);
+  const [currentFirstPane, setCurrentFirstPane] = useState(1);
 
   return (
     <AppContext.Provider value={{
@@ -56,13 +25,17 @@ export default function Home(props) {
       subdomains: [subdomains, setSubdomains],
       addresses: [addresses, setAddresses],
       folders: [folders, setFolders],
-      mailsMeta: [mailsMeta, setMailsMeta],
+      mails: [mails, setMails],
       toggledSubdomains: [toggledSubdomains, setToggledSubdomains],
       viewedAddress: [viewedAddress, setViewedAddress],
       selectedAddress: [selectedAddress, setSelectedAddress],
       selectedMail: [selectedMail, setSelectedMail],
+      currentFirstPane: [currentFirstPane, setCurrentFirstPane],
     }}>
-      <main className={styles.main}>
+      <main className={cls([
+        [styles.first_is_first, styles.first_is_second, styles.first_is_third][currentFirstPane],
+        styles.main
+      ])}>
         <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
         <MailsRow customClasses={[styles.mails]} />
         <MailRow customClasses={[styles.mail]} />
@@ -167,7 +140,7 @@ export function getServerSideProps() {
       folders: {
         'g2k9m1iu5imi1d2b9ax0xtyx': {
           name: 'Inbox',
-          mailsMeta: [
+          mails: [
             'ycn6i3u84uq86yhghygf9749',
             'bob8zsej74zyvhogg7x9upwj',
             'bpzwiuc0lhcni0k1bku7nfi5',
@@ -175,51 +148,51 @@ export function getServerSideProps() {
         },
         'zkbl4x0ci61iw9nh4qko5bmf': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'kiwvee43k90locbqxvetut6e': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'i9gvgl62gej58m1vbw5rn7ij': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
         'qq0akp6kgl2wk7vwd3dzur58': {
           name: 'Inbox',
-          mailsMeta: [],
+          mails: [],
         },
         'yt50k8m5zklqron714zdj4in': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'wor6tdx85nshnbk8a2kevedd': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'i5d0jpbdw1vye4l5cl9jmjj7': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
         'bgrs3h6twkm9kjqhx0eov94h': {
           name: 'Inbox',
-          mailsMeta: null,
+          mails: null,
         },
         'sqhew32mrlkh7maaqnd8th3m': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'nmrn3ojqj4suo3nnyrg97rx4': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'okvu5xc7veli50s5rwsgavm4': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
         'qs2aiv5dbg5x47or1vn3w81k': {
           name: 'Inbox',
-          mailsMeta: [
+          mails: [
             'llhpljzx5qugr96roa6d038u',
             'fvkbzs3429hii02iu2xpm33c',
             'ih5vzpt13v20nv7gxydm1qlo',
@@ -227,50 +200,50 @@ export function getServerSideProps() {
         },
         'd6b26bwgr2ksmc38ss9wl4ia': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'r0ia3qwkcs75a7fvlu02nubr': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'o8u8yxkgzx4drt1hk60umzv8': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
         'rj1g3rpv1gypleoai9y5sje6': {
           name: 'Inbox',
-          mailsMeta: [],
+          mails: [],
         },
         'a76h18djiilikv7l5vqk4q1o': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'sy8cal9v0mgxqw3x9sa6y7vx': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'pz7frksimnahilotg09mkh18': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
         'grpfqeofax87488aohwquy1c': {
           name: 'Inbox',
-          mailsMeta: [],
+          mails: [],
         },
         'kbgr6sktktebwxnzeqtpcio3': {
           name: 'Sent',
-          mailsMeta: [],
+          mails: [],
         },
         'ckrj3jhnhxlkv695njubbnci': {
           name: 'Spam',
-          mailsMeta: [],
+          mails: [],
         },
         'vd16uqkayuyml53ekrtjjype': {
           name: 'Deleted',
-          mailsMeta: [],
+          mails: [],
         },
       },
-      mailsMeta: {
+      mails: {
         'ycn6i3u84uq86yhghygf9749': {
           sender: 'Jonathan Joe',
           subject: 'DMCA or stuff',

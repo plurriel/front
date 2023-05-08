@@ -5,7 +5,7 @@ import { ArrowForward } from "../icons/ArrowForward";
 import { Person } from "../PersonCard";
 import { Back } from "../icons/Back";
 import { ChevronDown } from "../icons/ChevronDown";
-import { useAppContext } from "@/pages/[domain]";
+import { useAppContext } from "./AppContext";
 
 import styles from '../../styles/domain/DomainRow.module.css';
 import { Inbox } from "../icons/Inbox";
@@ -13,30 +13,28 @@ import { Send } from "../icons/Send";
 import { ReportSpam } from "../icons/ReportSpam";
 import { Delete } from "../icons/Delete";
 
-export function DomainRow() {
+export function DomainRow({ ...props }) {
   const {
     domain,
  } = useAppContext();
 
   return (
-    <Stack col id={styles.address}>
-      <RelatedStack surface oneline id={styles.domain}>
-        <Container surface oneline>
+    <Stack col surface fill id={styles.address} {...props}>
+      <Stack surface pad="0" oneline id={styles.domain}>
+        <Container oneline surface>
           <Back block />
         </Container>
-        <Stack surface fill oneline>
+        <Stack fill oneline surface>
           <Person name={domain.name} img={domain.imgSrc} />
         </Stack>
-      </RelatedStack>
-      <Stack col surface fill>
-        <Stack scroll fill>
-          <Stack col>
-            {domain.subdomains.map((subdomainId) => <SubdomainStack key={subdomainId} subdomainId={subdomainId} />)}
-          </Stack>
+      </Stack>
+      <Stack scroll fill>
+        <Stack col>
+          {domain.subdomains.map((subdomainId) => <SubdomainStack key={subdomainId} subdomainId={subdomainId} />)}
         </Stack>
-        <Stack surface center w="fit-content" br="1em">
-          <Add /> Create Address
-        </Stack>
+      </Stack>
+      <Stack surface center w="fit-content" cta>
+        <Add /> Create
       </Stack>
     </Stack>
   );
@@ -65,7 +63,7 @@ function SubdomainStack({ subdomainId }) {
           }
           return newToggledSubdomains;
         });
-      }} customClasses={[styles.cat, isExpanded && styles.expanded_cat]} highlight={!isExpanded && subdomainId === selectedAddress[0]}>
+      }} customClasses={[styles.cat, isExpanded && styles.expanded_cat]} highlight={!isExpanded && subdomainId === selectedAddress?.[0]}>
         <ChevronDown customClasses={[styles.chevron]} />
         <Container fill>
           {subdomain.name}
@@ -85,7 +83,7 @@ function AddressesStack({ tabbable, subdomainId, ...props }) {
     subdomains: [subdomains],
   } = useAppContext();
   return (
-    <RelatedStack col {...props}>
+    <Stack related col {...props}>
       {
         subdomains[subdomainId].addresses.map((addressId) => (
           <EmailAddress
@@ -95,7 +93,7 @@ function AddressesStack({ tabbable, subdomainId, ...props }) {
           />
         ))
       }
-    </RelatedStack>
+    </Stack>
   );
 }
 
@@ -111,13 +109,17 @@ function EmailAddress({
     viewedAddress: [viewedAddress, setViewedAddress],
     selectedAddress: [selectedAddress, setSelectedAddress],
     selectedMail: [selectedMail, setSelectedMail],
+    currentFirstPane: [currentFirstPane, setCurrentFirstPane],
   } = useAppContext();
   
   const subdomain = subdomains[subdomainId];
   const address = addresses[addressId];
 
-  const isViewed = viewedAddress[0] === subdomainId && viewedAddress[1] === addressId;
-  const isSelected = selectedAddress[0] === subdomainId && selectedAddress[1] === addressId;
+  const isViewed = viewedAddress[0] === subdomainId
+    && viewedAddress[1] === addressId;
+  const isSelected = selectedAddress
+    && selectedAddress[0] === subdomainId
+    && selectedAddress[1] === addressId;
 
   return (
     <Container surface customClasses={[styles.emailaddr, isSelected && styles.selected]} highlight={isSelected && !isViewed}>
@@ -132,23 +134,26 @@ function EmailAddress({
       </ClickableContainer>
       <Container expandable expanded={isViewed}>
         <Container>
-          <RelatedStack col>
+          <Stack related col>
             {
               address.folders.map((folderId) => (
                 <Stack
                   surface
                   key={folderId}
-                  highlight={isSelected && isViewed && folderId === selectedAddress[2]}
+                  highlight={isSelected && isViewed && folderId === selectedAddress?.[2]}
                   onClick={() => {
-                    setSelectedAddress([subdomainId, addressId, folderId])
-                    setSelectedMail(null);
+                    if (!isSelected) {
+                      setSelectedAddress([subdomainId, addressId, folderId])
+                      setSelectedMail(null);
+                    }
+                    if (currentFirstPane === 0) setCurrentFirstPane(1);
                   }}
                 >
                   <RelevantIcon name={folders[folderId].name} /> {folders[folderId].name}
                 </Stack>
               ))
             }
-          </RelatedStack>
+          </Stack>
         </Container>
       </Container>
     </Container>

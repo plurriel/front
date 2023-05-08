@@ -1,17 +1,28 @@
-import { useAppContext } from "@/pages/[domain]";
+import { useAppContext } from "./AppContext";
 import { ClickableContainer, Container, Stack } from "../Layout";
 import { Edit } from "../icons/Edit";
 import { Settings } from "../icons/Settings";
 
 import styles from "../../styles/domain/MailsRow.module.css";
+import { Back } from "../icons/Back";
 
 export function MailsRow({ ...props }) {
   const {
     subdomains: [subdomains],
     addresses: [addresses],
     folders: [folders],
-    selectedAddress: [selectedAddress],
+    selectedAddress: [selectedAddress, setSelectedAddress],
+    currentFirstPane: [currentFirstPane, setCurrentFirstPane],
   } = useAppContext();
+
+  if (!selectedAddress) {
+    return (
+      <Stack col surface fill center {...props}>
+        <b>No Selected Address</b>
+        <p>Please select an address using the leftmost panel</p>
+      </Stack>
+    );
+  }
 
   const currentSubdomain = subdomains[selectedAddress[0]];
   const currentAddress = addresses[selectedAddress[1]];
@@ -19,15 +30,25 @@ export function MailsRow({ ...props }) {
 
   return (
     <Stack col surface fill {...props}>
-      <Stack surface> 
+      <Stack surface>
+        {
+          currentFirstPane != 0
+          && <ClickableContainer
+              onFire={() => {
+                setCurrentFirstPane(0);
+              }}
+            >
+              <Back block />
+            </ClickableContainer>
+        }
         <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}&apos;s</small> {currentFolder.name}</Stack>
-        <Settings />
+        <Settings block />
       </Stack>
       <Container scroll fill>
         <MailsList />
       </Container>
-      <Stack surface center w="fit-content" br="1em">
-        <Edit /> Compose E-Mail
+      <Stack surface center w="fit-content" cta>
+        <Edit /> Compose
       </Stack>
     </Stack>
   );
@@ -36,22 +57,22 @@ export function MailsRow({ ...props }) {
 function MailsList() {
   const {
     folders: [folders],
-    mailsMeta: [mailsMeta],
+    mails: [mails],
     selectedAddress: [selectedAddress],
   } = useAppContext();
 
   const currentFolder = folders[selectedAddress[2]];
 
-  if (!currentFolder.mailsMeta) return <Stack col h center>Loading...</Stack>
-  if (!currentFolder.mailsMeta.length) return <Stack col h center>No E-Mails yet</Stack>
+  if (!currentFolder.mails) return <Stack col h center>Loading...</Stack>
+  if (!currentFolder.mails.length) return <Stack col h center>No E-Mails yet</Stack>
 
   return (
     <Stack col>
       {
-        currentFolder.mailsMeta.map((mailMetaId) => <MailPreview
-          sender={mailsMeta[mailMetaId].sender}
-          subject={mailsMeta[mailMetaId].subject}
-          sendDate={mailsMeta[mailMetaId].sendDate}
+        currentFolder.mails.map((mailMetaId) => <MailPreview
+          sender={mails[mailMetaId].sender}
+          subject={mails[mailMetaId].subject}
+          sendDate={mails[mailMetaId].sendDate}
           mailIdx={mailMetaId}
           key={mailMetaId}
         />)
@@ -69,6 +90,7 @@ function MailPreview({
 }) {
   const {
     selectedMail: [selectedMail, setSelectedMail],
+    currentFirstPane: [currentFirstPane, setCurrentFirstPane],
   } = useAppContext();
   const isSelected = selectedMail === mailIdx;
 
@@ -84,7 +106,8 @@ function MailPreview({
     <ClickableContainer
       col
       onFire={() => {
-        setSelectedMail(mailIdx)
+        setSelectedMail(mailIdx);
+        setCurrentFirstPane(2);
       }}
     >
       <Stack col surface highlight={isSelected} gap="0" {...props}>
