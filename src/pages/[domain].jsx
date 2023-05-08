@@ -33,7 +33,7 @@ export default function Home(props) {
       currentFirstPane: [currentFirstPane, setCurrentFirstPane],
     }}>
       <main className={cls([
-        [styles.first_is_first, styles.first_is_second, styles.first_is_third][currentFirstPane],
+        [styles.require_first, styles.require_second, styles.require_third][currentFirstPane],
         styles.main
       ])}>
         <DomainRow customClasses={[styles.address]} subdomains={subdomains} />

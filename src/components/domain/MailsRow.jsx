@@ -4,6 +4,7 @@ import { Edit } from "../icons/Edit";
 import { Settings } from "../icons/Settings";
 
 import styles from "../../styles/domain/MailsRow.module.css";
+import pageStyles from '@/styles/domain.module.css';
 import { Back } from "../icons/Back";
 
 export function MailsRow({ ...props }) {
@@ -11,7 +12,7 @@ export function MailsRow({ ...props }) {
     subdomains: [subdomains],
     addresses: [addresses],
     folders: [folders],
-    selectedAddress: [selectedAddress, setSelectedAddress],
+    selectedAddress: [selectedAddress],
     currentFirstPane: [currentFirstPane, setCurrentFirstPane],
   } = useAppContext();
 
@@ -37,6 +38,7 @@ export function MailsRow({ ...props }) {
               onFire={() => {
                 setCurrentFirstPane(0);
               }}
+              customClasses={[pageStyles.hide_three_pane]}
             >
               <Back block />
             </ClickableContainer>
@@ -47,8 +49,10 @@ export function MailsRow({ ...props }) {
       <Container scroll fill>
         <MailsList />
       </Container>
-      <Stack surface center w="fit-content" cta>
-        <Edit /> Compose
+      <Stack jc="flex-end">
+        <Stack surface center w="fit-content" cta>
+          <Edit /> Compose
+        </Stack>
       </Stack>
     </Stack>
   );

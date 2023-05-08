@@ -1,17 +1,17 @@
 import { useContext, useEffect, useState } from "react";
 import { ClickableContainer, Container, RelatedStack, Stack } from "../Layout";
-import { Add } from "../icons/Add";
-import { ArrowForward } from "../icons/ArrowForward";
-import { Person } from "../PersonCard";
-import { Back } from "../icons/Back";
-import { ChevronDown } from "../icons/ChevronDown";
-import { useAppContext } from "./AppContext";
+import { Add } from "@/components/icons/Add";
+import { ArrowForward } from "@/components/icons/ArrowForward";
+import { Person } from "@/components/PersonCard";
+import { Back } from "@/components/icons/Back";
+import { ChevronDown } from "@/components/icons/ChevronDown";
+import { useAppContext } from "@/components/domain/AppContext";
 
-import styles from '../../styles/domain/DomainRow.module.css';
-import { Inbox } from "../icons/Inbox";
-import { Send } from "../icons/Send";
-import { ReportSpam } from "../icons/ReportSpam";
-import { Delete } from "../icons/Delete";
+import styles from '@/styles/domain/DomainRow.module.css';
+import { Inbox } from "@/components/icons/Inbox";
+import { Send } from "@/components/icons/Send";
+import { ReportSpam } from "@/components/icons/ReportSpam";
+import { Delete } from "@/components/icons/Delete";
 
 export function DomainRow({ ...props }) {
   const {
@@ -20,21 +20,19 @@ export function DomainRow({ ...props }) {
 
   return (
     <Stack col surface fill id={styles.address} {...props}>
-      <Stack surface pad="0" oneline id={styles.domain}>
-        <Container oneline surface>
-          <Back block />
-        </Container>
-        <Stack fill oneline surface>
-          <Person name={domain.name} img={domain.imgSrc} />
-        </Stack>
+      <Stack surface oneline id={styles.domain}>
+        <Back block />
+        <Person name={domain.name} img={domain.imgSrc} />
       </Stack>
       <Stack scroll fill>
         <Stack col>
           {domain.subdomains.map((subdomainId) => <SubdomainStack key={subdomainId} subdomainId={subdomainId} />)}
         </Stack>
       </Stack>
-      <Stack surface center w="fit-content" cta>
-        <Add /> Create
+      <Stack jc="flex-end">
+        <Stack surface center w="fit-content" cta>
+          <Add /> Create
+        </Stack>
       </Stack>
     </Stack>
   );
@@ -140,7 +138,7 @@ function EmailAddress({
                 <Stack
                   surface
                   key={folderId}
-                  highlight={isSelected && isViewed && folderId === selectedAddress?.[2]}
+                  highlight={(isSelected && folderId === selectedAddress?.[2]) || !isViewed}
                   onClick={() => {
                     if (!isSelected || selectedAddress[2] !== folderId) {
                       setSelectedAddress([subdomainId, addressId, folderId])

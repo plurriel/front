@@ -53,9 +53,9 @@
   border-radius: 0.5em;
 }
 .surface .surface .surface {
-  --bg: var(--bg3);
-  --fg: var(--fg3);
-  --ns: var(--bg4);
+  --bg: var(--bg3, var(--bg2));
+  --fg: var(--fg3, var(--bg2));
+  --ns: var(--bg4, var(--bg3));
   /* --fgs: var(--bg); */
 }
 
@@ -90,15 +90,15 @@
 }
 
 .highlight {
-  background-color: var(--fg);
-  color: var(--bg);
-  fill: var(--bg);
+  background-color: var(--bgsel, var(--fg));
+  color: var(--fgsel, var(--bg));
+  fill: var(--fgsel, var(--bg));
 }
 
 .cta {
-  background-color: var(--bgcta);
-  color: var(--bg);
-  fill: var(--bg);
+  background-color: var(--bgcta, var(--fg));
+  color: var(--fgcta, var(--bg));
+  fill: var(--fgcta, var(--bg));
   border-radius: 1em !important;
   font-weight: bold;
 }
@@ -110,7 +110,7 @@
 .expandable {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 500ms;
+  transition: grid-template-rows 500ms ease-in-out;
   overflow: hidden;
 }
 

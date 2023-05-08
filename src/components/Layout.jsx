@@ -54,10 +54,17 @@ export function Stack({
   col,
   customClasses,
   children,
+  jc,
+  ai,
+  style,
   ...props
 }) {
   return (
-    <Container {...props} customClasses={[
+    <Container {...props} style={Object.fromEntries(Object.entries({
+      justifyContent: jc === true ? 'center' : jc,
+      alignItems: ai === true ? 'center' : ai,
+      ...style,
+    }).filter(([k, v]) => v != null))} customClasses={[
       styles.stack,
       center && styles.center,
       col && styles.v,

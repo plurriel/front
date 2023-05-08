@@ -14,25 +14,23 @@ import { Send } from "../icons/Send";
 export function MailRow({ ...props }) {
   return (
     <Stack surface col {...props}>
-      <Stack col br gap>
-        <Stack col surface pad="0">
-          <ActionRow />
-          <Stack pad>
-            <Container fill>
-              <b>Licence of your code and DMCA enquiry</b>
-            </Container>
-          </Stack>
+      <Stack col surface pad="0" br="1em 1em 0.5em 0.5em">
+        <ActionRow />
+        <Stack pad>
+          <Container fill>
+            <b>Licence of your code and DMCA enquiry</b>
+          </Container>
         </Stack>
-        <Container scroll fill >
-          <Stack col gap>
-            <MailContents />
-            <MailContents />
-            <MailContents />
-            <MailContents />
-          </Stack>
-        </Container>
-        <ReplyBar />
       </Stack>
+      <Container scroll fill >
+        <Stack col gap>
+          <MailContents />
+          <MailContents />
+          <MailContents />
+          <MailContents />
+        </Stack>
+      </Container>
+      <ReplyBar br="0.5em 0.5em 1em 1em" />
     </Stack>
   );
 }
@@ -117,7 +115,7 @@ function MetaRow({ ...props }) {
 
 function ReplyBar({ ...props }) {
   return (
-    <Stack related {...props} uncollapsable br="0.5em">
+    <Stack related {...props} uncollapsable>
       <Stack surface>
         <Reply block />
         <ChevronDown block />
