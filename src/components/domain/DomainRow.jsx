@@ -142,7 +142,7 @@ function EmailAddress({
                   key={folderId}
                   highlight={isSelected && isViewed && folderId === selectedAddress?.[2]}
                   onClick={() => {
-                    if (!isSelected) {
+                    if (!isSelected || !selectedAddress[2] === folderId) {
                       setSelectedAddress([subdomainId, addressId, folderId])
                       setSelectedMail(null);
                     }
