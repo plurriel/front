@@ -69,14 +69,14 @@ function SubdomainStack({ subdomainId }) {
       </ClickableContainer>
       <Container expandable expanded={isExpanded}>
         <Container>
-          <AddressesStack subdomainId={subdomainId} tabbable={isExpanded}/>
+          <AddressesStack subdomainId={subdomainId} tabbable={isExpanded} isShown={isExpanded}/>
         </Container>
       </Container>
     </Stack>
   );
 }
 
-function AddressesStack({ tabbable, subdomainId, ...props }) {
+function AddressesStack({ tabbable, subdomainId, isShown, ...props }) {
   const {
     subdomains: [subdomains],
   } = useAppContext();
@@ -88,6 +88,7 @@ function AddressesStack({ tabbable, subdomainId, ...props }) {
             key={addressId}
             subdomainId={subdomainId}
             addressId={addressId}
+            isShown={isShown}
           />
         ))
       }
@@ -98,6 +99,7 @@ function AddressesStack({ tabbable, subdomainId, ...props }) {
 function EmailAddress({
   subdomainId,
   addressId,
+  isShown,
   ...props
 }) {
   const {
@@ -113,42 +115,43 @@ function EmailAddress({
   const subdomain = subdomains[subdomainId];
   const address = addresses[addressId];
 
-  const isViewed = viewedAddress[0] === subdomainId
+  const isExpanded = viewedAddress[0] === subdomainId
     && viewedAddress[1] === addressId;
   const isSelected = selectedAddress
     && selectedAddress[0] === subdomainId
     && selectedAddress[1] === addressId;
 
   return (
-    <Container surface customClasses={[styles.emailaddr, isSelected && styles.selected]} highlight={isSelected && !isViewed}>
+    <Container surface customClasses={[styles.emailaddr, isSelected && styles.selected]} highlight={isSelected && !isExpanded}>
       <ClickableContainer onFire={() => {
-        if (isViewed) {
+        if (isExpanded) {
           setViewedAddress([subdomainId, null]);
         } else {
           setViewedAddress([subdomainId, addressId]);
         }
-      }} customClasses={[styles.actualemail]}>
+      }} customClasses={[styles.actualemail]} br="0.5em" unclickable={!isShown}>
         <Person name={`${address.name}@${subdomain.name}`} img={address.imgSrc} />
       </ClickableContainer>
-      <Container expandable expanded={isViewed}>
+      <Container expandable expanded={isExpanded}>
         <Container>
-          <Stack related col>
+          <Stack related col pad="0.5em 0 0 0">
             {
               address.folders.map((folderId) => (
-                <Stack
+                <ClickableContainer
                   surface
                   key={folderId}
-                  highlight={isViewed ? (isSelected && folderId === selectedAddress?.[2]) : isSelected}
-                  onClick={() => {
+                  highlight={isExpanded ? (isSelected && folderId === selectedAddress?.[2]) : isSelected}
+                  onFire={() => {
                     if (!isSelected || selectedAddress[2] !== folderId) {
                       setSelectedAddress([subdomainId, addressId, folderId])
                       setSelectedMail(null);
                     }
                     if (currentFirstPane === 0) setCurrentFirstPane(1);
                   }}
+                  unclickable={!isExpanded}
                 >
                   <RelevantIcon name={folders[folderId].name} /> {folders[folderId].name}
-                </Stack>
+                </ClickableContainer>
               ))
             }
           </Stack>

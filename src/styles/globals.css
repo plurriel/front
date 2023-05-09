@@ -128,3 +128,8 @@ small {
 ::-webkit-scrollbar-thumb:hover {
   border: calc(1em / 4) solid transparent;
 }
+
+:focus-visible {
+  outline: solid var(--fg) 2px;
+  outline-offset: -3px;
+}

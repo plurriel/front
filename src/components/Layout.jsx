@@ -88,14 +88,18 @@ export function ClickableContainer({
   };
   return (
     <Stack
+      {...props}
+      href="javascript:void(0)"
       onClick={fire}
       onKeyDown={(e) => {
-        e.preventDefault()
-        if (e.keyCode === 13) fire();
+        if (e.code === 'Enter') {
+          e.preventDefault();
+          fire();
+        }
       }}
-      tabIndex={!unclickable && 0}
-    {...props}>
-      {children}
+      tabIndex={!unclickable ? 0 : -1}
+    >
+        {children}
     </Stack>
   );
 }

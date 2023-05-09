@@ -89,10 +89,20 @@
   display: block;
 }
 
+@-moz-document url-prefix() {
+  .scroll {
+    margin-right: unset;
+  }
+}
+
 .highlight {
   background-color: var(--bgsel, var(--fg));
   color: var(--fgsel, var(--bg));
   fill: var(--fgsel, var(--bg));
+}
+.highlight:focus-visible, 
+.highlight :focus-visible {
+  outline-color: var(--fgsel, var(--bg));
 }
 
 .cta {
