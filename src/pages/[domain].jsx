@@ -17,6 +17,7 @@ export default function Home(props) {
   const [selectedAddress, setSelectedAddress] = useState(props.lastSelectedAddress);
   const [viewedAddress, setViewedAddress] = useState(selectedAddress);
   const [selectedMail, setSelectedMail] = useState(null);
+  const [contents, setContents] = useState(props.contents);
   const [currentFirstPane, setCurrentFirstPane] = useState(1);
 
   return (
@@ -30,6 +31,7 @@ export default function Home(props) {
       viewedAddress: [viewedAddress, setViewedAddress],
       selectedAddress: [selectedAddress, setSelectedAddress],
       selectedMail: [selectedMail, setSelectedMail],
+      contents: [contents, setContents],
       currentFirstPane: [currentFirstPane, setCurrentFirstPane],
     }}>
       <main className={cls([
@@ -245,34 +247,97 @@ export function getServerSideProps() {
       },
       mails: {
         'ycn6i3u84uq86yhghygf9749': {
-          sender: 'Jonathan Joe',
+          interlocutor: 'Jonathan Joe',
           subject: 'DMCA or stuff',
           sendDate: Date.now(),
+          contents: [
+            'npe13b2ggujxhubpfqaoww41',
+            'ypkxsrgro6il3jm4xxzw4w52',
+          ],
         },
         'bob8zsej74zyvhogg7x9upwj': {
-          sender: 'Dad',
+          interlocutor: 'Dad',
           subject: 'Disappointment...',
           sendDate: Date.now(),
+          contents: [
+            'kwhi87wxxboh734gtpoln0zg'
+          ],
         },
         'bpzwiuc0lhcni0k1bku7nfi5': {
-          sender: 'Mom',
+          interlocutor: 'Mom',
           subject: 'Failure!',
           sendDate: Date.now(),
+          contents: [
+            'jogt4r8tp2rbi8ppzj4ly3ft'
+          ],
         },
         'llhpljzx5qugr96roa6d038u': {
-          sender: 'Twitter',
+          interlocutor: 'Twitter',
           subject: 'Some subject',
           sendDate: Date.now(),
+          contents: [
+            'jfpstmw66mpuegueinwcla3k'
+          ],
         },
         'fvkbzs3429hii02iu2xpm33c': {
-          sender: 'Twitter',
+          interlocutor: 'Twitter',
           subject: 'Some subject',
           sendDate: Date.now(),
+          contents: [
+            'bmlcnss53sgxnk6ioy0w83ou'
+          ],
         },
         'ih5vzpt13v20nv7gxydm1qlo': {
-          sender: 'Twitter',
+          interlocutor: 'Twitter',
           subject: 'Some subject',
           sendDate: Date.now(),
+          contents: [
+            'lifgptlld8z8f9qj2bwdwpad'
+          ],
+        },
+      },
+      contents: {
+        'npe13b2ggujxhubpfqaoww41': {
+          sender: 'Jonathan Joe',
+          senderEmail: 'jojo@gmail.com',
+          receiver: 'Me',
+          receiverEmail: 'immjs@immjs.dev',
+          sendDate: Date.now() - 1000 * 60 * 60 * 24,
+          content: `Hello immjs,<br/>
+          <br/>
+I am reaching out to you with regards to the license of your code and works, and to make an enquiry under the Digital Millennium Copyright Act (DMCA).<br/>
+We have reason to believe that your code and works may be infringing upon the intellectual property rights of our client. Specifically, we have found that your code bears a striking resemblance to certain proprietary code that our client owns.<br/>
+<br/>
+We are therefore requesting that you provide us with information regarding the license under which you are using and distributing your code and works. We also ask that you provide us with any and all documentation related to the creation, distribution, and use of your code and works.<br/>
+<br/>
+Furthermore, we are submitting this email as an official DMCA enquiry under the Digital Millennium Copyright Act, which allows us to request that your website or other online platform take down any infringing content.<br/>
+<br/>
+We strongly advise that you take this matter seriously and respond promptly with the requested information. Failure to do so may result in legal action being taken against you.<br/>
+<br/>
+Thank you for your attention to this matter.<br/>
+Sincerely,<br/>
+Jonathan Joe`,
+        },
+        'ypkxsrgro6il3jm4xxzw4w52': {
+          sender: 'gb7lxmvtt4dvs5vok321dp7w',
+          senderEmail: 'gb7lxmvtt4dvs5vok321dp7w',
+          receiver: 'uoiiuf7int3af7bxat24trux',
+          sendDate: Date.now() - 1000 * 60 * 60,
+          content: `Hello Jonathan Joe,<br/>
+<br/>
+If you have any concerns, please talk to my lawyer over at lawyer@immjs,dev<br/>
+<br/>
+Thank you for your understanding,<br/>
+Jerome Wang`,
+        },
+        'kwhi87wxxboh734gtpoln0zg': {
+          sender: 'Dad',
+          senderEmail: 'dad@gmail.com',
+        }
+      },
+      people: {
+        '': {
+          
         },
       },
       lastToggledSubdomains: ['kw49xov8icsjcvhy25ofhoqx'],

@@ -54,15 +54,15 @@
   .require_second .mails {
     display: flex;
     flex: 1;
-    border-top-right-radius: 1em;
-    border-bottom-right-radius: 1em;
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
   }
   .require_second .address {
     display: flex;
     flex: 1;
     width: calc(2em + 256px);
-    border-top-left-radius: 1em;
-    border-bottom-left-radius: 1em;
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
   }
   .require_third .address {
     display: none;
@@ -139,6 +139,6 @@
     flex: 1;
   }
   .hide_three_pane {
-    display: none;
+    display: none !important;
   }
 }

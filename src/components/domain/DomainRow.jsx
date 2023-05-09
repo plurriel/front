@@ -1,7 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { ClickableContainer, Container, RelatedStack, Stack } from "../Layout";
+import { ClickableContainer, Container, Stack } from "../Layout";
 import { Add } from "@/components/icons/Add";
-import { ArrowForward } from "@/components/icons/ArrowForward";
 import { Person } from "@/components/PersonCard";
 import { Back } from "@/components/icons/Back";
 import { ChevronDown } from "@/components/icons/ChevronDown";
@@ -12,6 +10,7 @@ import { Inbox } from "@/components/icons/Inbox";
 import { Send } from "@/components/icons/Send";
 import { ReportSpam } from "@/components/icons/ReportSpam";
 import { Delete } from "@/components/icons/Delete";
+import { IconButton } from "../IconButton";
 
 export function DomainRow({ ...props }) {
   const {
@@ -21,7 +20,7 @@ export function DomainRow({ ...props }) {
   return (
     <Stack col surface fill id={styles.address} {...props}>
       <Stack surface oneline id={styles.domain}>
-        <Back block />
+        <IconButton icon={Back} />
         <Person name={domain.name} img={domain.imgSrc} />
       </Stack>
       <Stack scroll fill>
@@ -138,7 +137,7 @@ function EmailAddress({
             {
               address.folders.map((folderId) => (
                 <ClickableContainer
-                  surface
+                  pad
                   key={folderId}
                   highlight={isExpanded ? (isSelected && folderId === selectedAddress?.[2]) : isSelected}
                   onFire={() => {

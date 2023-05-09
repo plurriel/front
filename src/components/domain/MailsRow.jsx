@@ -6,6 +6,7 @@ import { Settings } from "../icons/Settings";
 import styles from "../../styles/domain/MailsRow.module.css";
 import pageStyles from '@/styles/domain.module.css';
 import { Back } from "../icons/Back";
+import { IconButton } from "../IconButton";
 
 export function MailsRow({ ...props }) {
   const {
@@ -31,20 +32,19 @@ export function MailsRow({ ...props }) {
 
   return (
     <Stack col surface fill {...props}>
-      <Stack surface>
+      <Stack surface ai="center">
         {
           currentFirstPane != 0
-          && <ClickableContainer
+          && <IconButton
               onFire={() => {
                 setCurrentFirstPane(0);
               }}
               customClasses={[pageStyles.hide_three_pane]}
-            >
-              <Back block />
-            </ClickableContainer>
+              icon={Back}
+            />
         }
-        <Stack fill><small>{currentAddress.name}@{currentSubdomain.name}&apos;s</small> {currentFolder.name}</Stack>
-        <Settings block />
+        <Stack fill col gap={0}><small>{currentAddress.name}@{currentSubdomain.name}&apos;s</small>{currentFolder.name}</Stack>
+        <IconButton icon={Settings} />
       </Stack>
       <Container scroll fill>
         <MailsList />
@@ -74,7 +74,7 @@ function MailsList() {
     <Stack col>
       {
         currentFolder.mails.map((mailMetaId) => <MailPreview
-          sender={mails[mailMetaId].sender}
+          interlocutor={mails[mailMetaId].interlocutor}
           subject={mails[mailMetaId].subject}
           sendDate={mails[mailMetaId].sendDate}
           mailIdx={mailMetaId}
@@ -86,7 +86,7 @@ function MailsList() {
 }
 
 function MailPreview({
-  sender,
+  interlocutor,
   subject,
   sendDate,
   mailIdx,
@@ -116,7 +116,7 @@ function MailPreview({
     >
       <Stack col surface highlight={isSelected} gap="0" {...props}>
         <Stack center>
-          <Stack fill><small>{sender}</small></Stack>
+          <Stack fill><small>{interlocutor}</small></Stack>
           <small>{new Intl.DateTimeFormat(
             'en-GB',
             dateFormat,

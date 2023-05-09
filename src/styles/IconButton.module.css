@@ -1,0 +1,17 @@
+.iconbtn {
+  margin: -1em 0;
+  padding: 1em;
+  border-radius: 0.5em;
+  transition: background-color 100ms ease-out;
+}
+
+.iconbtn:hover {
+  background-color: var(--ns);
+}
+
+.iconbtn:first-child {
+  margin-left: -1em;
+}
+.iconbtn:last-child {
+  margin-right: -1em;
+}
