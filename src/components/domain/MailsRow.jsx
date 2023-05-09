@@ -99,10 +99,11 @@ function MailPreview({
   } = useAppContext();
   const isSelected = selectedMail === mailIdx;
 
-  const dateSent = new Date(sendDate);
+  const [dateSent, setDateSent] = useState(null);
   const [isSameDate, setIsSameDate] = useState(false);
   
   useEffect(() => {
+    setDateSent(new Date(sendDate));
     setIsSameDate(new Date().toLocaleDateString() === new Date(sendDate).toLocaleDateString());
   }, [sendDate]);
 
@@ -122,10 +123,12 @@ function MailPreview({
       <Stack col surface highlight={isSelected} gap="0" {...props}>
         <Stack center>
           <Stack fill><small>{interlocutor}</small></Stack>
-          <small>{new Intl.DateTimeFormat(
-            'en-GB',
-            dateFormat,
-          ).format(dateSent)}</small>
+          <small>{dateSent
+          ? new Intl.DateTimeFormat(
+              'en-GB',
+              dateFormat,
+            ).format(dateSent)
+          : sendDate}</small>
         </Stack>
         <Container oneline customClasses={[!isSelected && styles.preview_subject]}>{subject}</Container>
       </Stack>
