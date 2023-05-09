@@ -21,6 +21,7 @@ export function Container({
   expanded,
   oneline,
   style,
+  unwrap,
   related,
   ...props
 }) {
@@ -44,6 +45,7 @@ export function Container({
     expanded && styles.expanded,
     uncollapsable && styles.uncollapsable,
     center && styles.center,
+    unwrap && styles.unwrap,
     related && styles.related,
     ...(customClasses || [])
   )}>{children}</div>

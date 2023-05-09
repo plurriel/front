@@ -7,6 +7,7 @@ import styles from "../../styles/domain/MailsRow.module.css";
 import pageStyles from '@/styles/domain.module.css';
 import { Back } from "../icons/Back";
 import { IconButton } from "../IconButton";
+import { useEffect, useState } from "react";
 
 export function MailsRow({ ...props }) {
   const {
@@ -32,7 +33,7 @@ export function MailsRow({ ...props }) {
 
   return (
     <Stack col surface fill {...props}>
-      <Stack surface ai="center">
+      <Stack center surface>
         {
           currentFirstPane != 0
           && <IconButton
@@ -99,7 +100,11 @@ function MailPreview({
   const isSelected = selectedMail === mailIdx;
 
   const dateSent = new Date(sendDate);
-  const isSameDate = new Date().toLocaleDateString() === dateSent.toLocaleDateString();
+  const [isSameDate, setIsSameDate] = useState(false);
+  
+  useEffect(() => {
+    setIsSameDate(new Date().toLocaleDateString() === new Date(sendDate).toLocaleDateString());
+  }, [sendDate]);
 
   let dateFormat = {
     timeStyle: 'short',
