@@ -5,7 +5,7 @@ import styles from "@/styles/Modal.module.css";
 import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { IconButton } from "./IconButton";
-import { Close } from "@/components/icons/close.jsx"
+import { Close } from "@/components/icons/Close.jsx"
 
 export function Modal({
   children,
