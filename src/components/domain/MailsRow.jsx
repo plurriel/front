@@ -8,6 +8,9 @@ import pageStyles from '@/styles/domain.module.css';
 import { Back } from "../icons/Back";
 import { IconButton } from "../IconButton";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import * as Dialog from "@radix-ui/react-dialog";
+import { CloseModal, Modal } from "../Modal";
 
 export function MailsRow({ ...props }) {
   const {
@@ -32,7 +35,7 @@ export function MailsRow({ ...props }) {
   const currentFolder = folders[selectedAddress[2]];
 
   return (
-    <Stack col surface fill {...props}>
+    <Stack col surface {...props}>
       <Stack center surface>
         {
           currentFirstPane != 0
@@ -54,6 +57,28 @@ export function MailsRow({ ...props }) {
         <Stack surface center w="fit-content" cta>
           <Edit /> Compose
         </Stack>
+        <Modal related pad="0">
+          <Stack related>
+            <Stack surface>
+              <small>Subject</small>
+            </Stack>
+            <Stack surface fill>
+              <CloseModal />
+            </Stack>
+          </Stack>
+          <Stack related>
+            <Stack surface>
+              <small>From</small>
+            </Stack>
+            <Stack surface fill></Stack>
+          </Stack>
+          <Stack related>
+            <Stack surface>
+              <small>To</small>
+            </Stack>
+            <Stack surface fill></Stack>
+          </Stack>
+        </Modal>
       </Stack>
     </Stack>
   );
@@ -69,7 +94,7 @@ function MailsList() {
   const currentFolder = folders[selectedAddress[2]];
 
   if (!currentFolder.mails) return <Stack col h center>Loading...</Stack>
-  if (!currentFolder.mails.length) return <Stack col h center>No E-Mails yet</Stack>
+  if (!currentFolder.mails.length) return <Stack col h center><Image width="96" height="144" src="./no_mails.svg" alt="Empty mailbox"/><br/>No E-Mails yet</Stack>
 
   return (
     <Stack col>

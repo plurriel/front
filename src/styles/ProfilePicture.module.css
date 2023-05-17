@@ -4,6 +4,7 @@
   height: 2em;
   border-radius: 1em;
   background-color: white;
+  user-select: none;
 }
 
 .pfp:first-child {

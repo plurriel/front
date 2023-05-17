@@ -7,6 +7,8 @@ import { MailsRow } from "@/components/domain/MailsRow";
 import { MailRow } from "@/components/domain/MailRow";
 import { AppContext } from "@/components/domain/AppContext";
 import cls from "clsx";
+import { Stack } from "@/components/Layout";
+import { TopBar } from "@/components/domain/TopBar";
 
 export default function Home(props) {
   const [subdomains, setSubdomains] = useState(props.subdomains);
@@ -34,14 +36,20 @@ export default function Home(props) {
       contents: [contents, setContents],
       currentFirstPane: [currentFirstPane, setCurrentFirstPane],
     }}>
-      <main className={cls([
-        [styles.require_first, styles.require_second, styles.require_third][currentFirstPane],
-        styles.main
-      ])}>
-        <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
-        <MailsRow customClasses={[styles.mails]} />
-        <MailRow customClasses={[styles.mail]} />
-      </main>
+      <Stack col customClasses={[styles.page]}>
+        <TopBar customClasses={[styles.topbar]} />
+        <Stack
+          customClasses={[
+            [styles.require_first, styles.require_second, styles.require_third][currentFirstPane],
+            styles.main
+          ]}
+          fill
+        >
+          <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
+          <MailsRow customClasses={[styles.mails]} />
+          <MailRow customClasses={[styles.mail]} />
+        </Stack>
+      </Stack>
     </AppContext.Provider>
   );
 }

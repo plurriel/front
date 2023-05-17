@@ -95,6 +95,13 @@
   }
 }
 
+/* Safari 13+ */
+@supports (-webkit-hyphens: none) and (not ((-webkit-marquee-repetition:infinite) and (object-fit:fill))) {
+  .scroll {
+    margin-right: unset;
+  }
+}
+
 .highlight {
   background-color: var(--bgsel, var(--fg));
   color: var(--fgsel, var(--bg));

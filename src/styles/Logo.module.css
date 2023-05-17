@@ -1,0 +1,11 @@
+.fg_color {
+  fill: var(--fg);
+}
+
+.accent_color {
+  fill: var(--bgcta);
+}
+
+.logo {
+  height: calc(1em + 32px);
+}
