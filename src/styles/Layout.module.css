@@ -139,3 +139,11 @@
   margin: -1em;
   padding: 1em;
 }
+
+.unselectable {
+  user-select: none;
+}
+
+.clickable {
+  cursor: pointer;
+}

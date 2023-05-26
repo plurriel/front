@@ -11,6 +11,7 @@ import { Send } from "@/components/icons/Send";
 import { ReportSpam } from "@/components/icons/ReportSpam";
 import { Delete } from "@/components/icons/Delete";
 import { IconButton } from "../IconButton";
+import { Modal } from "../Modal";
 
 export function DomainRow({ ...props }) {
   const {
@@ -29,9 +30,14 @@ export function DomainRow({ ...props }) {
         </Stack>
       </Stack>
       <Stack jc="flex-end">
-        <Stack surface center w="fit-content" cta>
-          <Add /> Create
-        </Stack>
+        <ClickableContainer>
+          <Stack surface center w="fit-content" cta>
+            <Add /> Create
+          </Stack>
+        </ClickableContainer>
+        <Modal>
+
+        </Modal>
       </Stack>
     </Stack>
   );

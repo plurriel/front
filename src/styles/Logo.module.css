@@ -1,4 +1,4 @@
-.fg_color {
+.foreground_color {
   fill: var(--fg);
 }
 
@@ -9,3 +9,4 @@
 .logo {
   height: calc(1em + 32px);
 }
+

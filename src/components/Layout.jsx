@@ -80,6 +80,8 @@ export function ClickableContainer({
   onFire,
   unclickable,
   children,
+  selectable,
+  customClasses,
   ...props
 }) {
   onFire = onFire || (() => {});
@@ -100,6 +102,7 @@ export function ClickableContainer({
         }
       }}
       tabIndex={!unclickable ? 0 : -1}
+      customClasses={[ !unclickable && styles.clickable, !selectable && styles.unselectable, ...(customClasses || []) ]}
     >
         {children}
     </Stack>

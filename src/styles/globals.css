@@ -1,5 +1,5 @@
 /* Catppuccin Dark */
-:root {
+/* :root {
   --bg0: #11111b;
   --bg1: #1e1e2e;
   --bg2: #313244;
@@ -8,7 +8,7 @@
   --fg2: #cdd6f4;
   --fg3: #cdd6f4;
   --bgcta: #f38ba8;
-}
+} */
 /* Nordic Light */
 /* :root {
   --bg0: #ffffff;
@@ -23,7 +23,7 @@
   --fgcta: #000000;
 } */
 /* Catppuccin Light */
-/* :root {
+:root {
   --bg0: #eff1f5;
   --bg1: #dce0e8;
   --bg2: #ccd0da;
@@ -34,6 +34,17 @@
   --fgsel: #d20f39;
   --bgcta: #d20f39;
   --fgcta: #000000;
+}
+/* Catpuccin Light (OLD) */
+/* :root {
+  --bg3: #eff1f5;
+  --bg2: #ccd0da;
+  --bg1: #bcc0cc;
+  --bg0: #acb0be;
+  --fg1: #4c4f69;
+  --fg2: #4c4f69;
+  --fg3: #4c4f69;
+  --bgcta: #d20f39;
 } */
 /* Nordic Dark */
 /* :root {
@@ -72,16 +83,6 @@
   --fgsel: #BF616A;
   --bgcta: #BF616A;
   --fgcta: #000000;
-} */
-/* :root {
-  --bg3: #eff1f5;
-  --bg2: #ccd0da;
-  --bg1: #bcc0cc;
-  --bg0: #acb0be;
-  --fg1: #4c4f69;
-  --fg2: #4c4f69;
-  --fg3: #4c4f69;
-  --bgcta: #d20f39;
 } */
 
 * {
