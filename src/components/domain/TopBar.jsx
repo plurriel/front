@@ -1,8 +1,8 @@
-import { Container, Stack } from "../Layout";
-import styles from "@/styles/domain/TopBar.module.css";
-import { Logo } from "../Logo";
-import { IconButton } from "../IconButton";
-import { Search } from "../icons/Search";
+import React from 'react';
+import { Container, Stack } from '../Layout';
+import { Logo } from '../Logo';
+import { IconButton } from '../IconButton';
+import { Search } from '../icons/Search';
 
 export function TopBar({ ...props }) {
   return (

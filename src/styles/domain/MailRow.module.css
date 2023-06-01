@@ -1,0 +1,4 @@
+.message_content {
+  border: none;
+  background-color: var(--ns);
+}

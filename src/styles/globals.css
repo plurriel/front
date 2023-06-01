@@ -1,5 +1,5 @@
 /* Catppuccin Dark */
-/* :root {
+:root {
   --bg0: #11111b;
   --bg1: #1e1e2e;
   --bg2: #313244;
@@ -8,7 +8,8 @@
   --fg2: #cdd6f4;
   --fg3: #cdd6f4;
   --bgcta: #f38ba8;
-} */
+  --link: #89b4fa;
+}
 /* Nordic Light */
 /* :root {
   --bg0: #ffffff;
@@ -23,10 +24,11 @@
   --fgcta: #000000;
 } */
 /* Catppuccin Light */
-:root {
+/* :root {
   --bg0: #eff1f5;
   --bg1: #dce0e8;
   --bg2: #ccd0da;
+  --bg3: #bcc0cc;
   --fg1: #000000;
   --fg2: #000000;
   --fg3: #000000;
@@ -34,7 +36,8 @@
   --fgsel: #d20f39;
   --bgcta: #d20f39;
   --fgcta: #000000;
-}
+  --link: #1e66f5;
+} */
 /* Catpuccin Light (OLD) */
 /* :root {
   --bg3: #eff1f5;
@@ -121,7 +124,7 @@ small {
   width: 1em;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: var(--ns);
+  background-color: var(--color);
   border-radius: 0.5em;
   border: calc(1em / 3) solid transparent;
   background-clip: padding-box;
@@ -143,4 +146,9 @@ small {
   bottom: 0;
   right: 0;
   pointer-events: none;
+}
+
+a {
+  text-decoration: none;
+  color: var(--link);
 }

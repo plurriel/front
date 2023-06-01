@@ -1,0 +1,33 @@
+/* .rainbow {
+  background-image: linear-gradient(to right, var(--rainbow), var(--rainbow), var(--rainbow-start));
+  height: 0.5em;
+  border-radius: 0.25em;
+  background-repeat: infinite;
+  background-size: 200px 100%;
+  animation: bg-move 1s infinite;
+  animation-timing-function: linear;
+}
+
+@keyframes bg-move {
+  0% {
+    background-position: 0px center;
+  }
+  100% {
+    background-position: 100px center;
+  }
+}
+
+.repulse {
+  filter: saturate(0);
+  animation: none;
+} */
+
+.rainbow {
+  background-color: var(--bgcta);
+  height: 0.5em;
+  border-radius: 0.25em;
+}
+
+.repulse {
+  background-color: var(--ns);
+}

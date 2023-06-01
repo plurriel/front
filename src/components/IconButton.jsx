@@ -1,4 +1,5 @@
-import { ClickableContainer } from "./Layout";
+import React from 'react';
+import { ClickableContainer } from './Layout';
 import styles from '@/styles/IconButton.module.css';
 
 export function IconButton({
@@ -15,5 +16,5 @@ export function IconButton({
     >
       <Icon block />
     </ClickableContainer>
-  )
+  );
 }

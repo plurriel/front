@@ -7,6 +7,7 @@
   height: calc(32px + 2em);
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+  display: none;
 }
 
 .main {
@@ -50,7 +51,7 @@
   .require_first .address {
     display: flex;
     width: calc(2em + 256px);
-    border-top-left-radius: 1em;
+    /* border-top-left-radius: 1em; */
     border-top-right-radius: 1em;
     border-bottom-right-radius: 1em;
   }
@@ -58,7 +59,7 @@
     display: flex;
     flex: 1;
     border-top-left-radius: 1em;
-    border-top-right-radius: 1em;
+    /* border-top-right-radius: 1em; */
     border-bottom-left-radius: 1em;
   }
   .require_second .mail {
@@ -68,16 +69,19 @@
     display: flex;
     flex: 1;
     border-top-left-radius: 1em;
-    border-top-right-radius: 1em;
+    /* border-top-right-radius: 1em; */
     border-bottom-left-radius: 1em;
   }
   .require_second .address {
     display: flex;
     flex: 1;
     width: calc(2em + 256px);
-    border-top-left-radius: 1em;
+    /* border-top-left-radius: 1em; */
     border-top-right-radius: 1em;
     border-bottom-right-radius: 1em;
+  }
+  .require_second .second_pane_back {
+    display: none;
   }
   .require_third .address {
     display: none;
@@ -86,13 +90,13 @@
     display: flex;
     width: calc(2em + min(max(33vw, 256px), 384px));
     flex: unset;
-    border-top-left-radius: 1em;
+    /* border-top-left-radius: 1em; */
     border-top-right-radius: 1em;
     border-bottom-right-radius: 1em;
   }
   .require_third .mail {
     border-top-left-radius: 1em;
-    border-top-right-radius: 1em;
+    /* border-top-right-radius: 1em; */
     border-bottom-left-radius: 1em;
   }
   .address {
@@ -109,6 +113,7 @@
   .main > .address {
     border-radius: 1em;
     border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
   }
   .main > .mails {
     border-radius: 1em;
@@ -116,6 +121,7 @@
   .main > .mail {
     border-radius: 1em;
     border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
   }
   .require_first .address {
     display: flex;
@@ -153,7 +159,7 @@
     display: flex;
     flex: 1;
   }
-  .hide_three_pane {
+  .second_pane_back {
     display: none !important;
   }
 }

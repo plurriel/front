@@ -1,5 +1,6 @@
+import React from 'react';
 import cls from 'clsx';
-import styles from "./Icon.module.css";
+import styles from '@/styles/Icon.module.css';
 
 export function Icon({
   block,
@@ -16,8 +17,9 @@ export function Icon({
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
-      <path d={pathdef}/>
+      <path d={pathdef} />
     </svg>
   );
 }

@@ -1,12 +1,12 @@
-.foreground_color {
-  fill: var(--fg);
-}
-
-.accent_color {
-  fill: var(--bgcta);
+@font-face {
+  font-family: Logo;
+  src: url(/Logo.woff);
 }
 
 .logo {
-  height: calc(1em + 32px);
+  font-family: Logo;
 }
 
+.highlight {
+  color: var(--bgcta);
+}

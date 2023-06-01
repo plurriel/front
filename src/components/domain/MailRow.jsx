@@ -1,30 +1,62 @@
-import { Container, RelatedStack, Stack } from "../Layout";
-import { Person } from "../PersonCard";
-import { Archive } from "../icons/Archive";
-import { ChevronDown } from "../icons/ChevronDown";
-import { Delete } from "../icons/Delete";
-import { Forward } from "../icons/Forward";
-import { MarkUnread } from "../icons/MarkUnread";
-import { MoveTo } from "../icons/MoveTo";
-import { Reply } from "../icons/Reply";
-import { ReportSpam } from "../icons/ReportSpam";
-import { Schedule } from "../icons/Schedule";
-import { Send } from "../icons/Send";
-import { useAppContext } from "./AppContext";
-
+import React, { useEffect, useState } from 'react';
 import * as DOMPurify from 'dompurify';
+import { Container, Stack } from '../Layout';
+import { Person } from '../PersonCard';
+import { Archive } from '../icons/Archive';
+import { ChevronDown } from '../icons/ChevronDown';
+import { Delete } from '../icons/Delete';
+import { Forward } from '../icons/Forward';
+import { MarkUnread } from '../icons/MarkUnread';
+import { MoveTo } from '../icons/MoveTo';
+import { Reply } from '../icons/Reply';
+import { ReportSpam } from '../icons/ReportSpam';
+import { Schedule } from '../icons/Schedule';
+import { Send } from '../icons/Send';
+import { useAppContext } from './AppContext';
+
+import { emailAddrUtils } from '@/lib/utils';
+
+import styles from '@/styles/domain/MailRow.module.css';
 
 export function MailRow({ ...props }) {
   const {
-    selectedMail: [selectedMail],
-    mails: [mails],
+    selectedConvo: [selectedConvo],
+    mails: [, setMails],
+    convos: [convos, setConvos],
   } = useAppContext();
 
-  if (!selectedMail) return (
-    <Stack surface center {...props}>
-      No selected mail
-    </Stack>
-  )
+  const convo = convos[selectedConvo];
+
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      if (convo && !convo.mails) {
+        const mailsInConvo = await fetch(`/api/convos/${selectedConvo}/mails`, { signal: controller.signal })
+          .then((res) => res.json());
+        setMails((mails) => {
+          const newMails = { ...mails };
+          setConvos((convos_) => {
+            const newConvos = { ...convos_ };
+            newConvos[selectedConvo].mails = mailsInConvo
+              .map((mail) => {
+                newMails[mail.id] = mail;
+                return mail.id;
+              });
+            return newConvos;
+          });
+          return newMails;
+        });
+      }
+    })();
+  }, [convo, setConvos, setMails, selectedConvo]);
+
+  if (!convo) {
+    return (
+      <Stack surface center {...props}>
+        No selected mail
+      </Stack>
+    );
+  }
 
   return (
     <Stack surface col {...props}>
@@ -32,23 +64,29 @@ export function MailRow({ ...props }) {
         <ActionRow />
         <Stack pad>
           <Container fill>
-            <b>{mails[selectedMail].subject}</b>
+            <b>{convo.subject}</b>
           </Container>
         </Stack>
       </Stack>
-      <Container scroll fill >
-        <Stack col gap>
-          {
-            mails[selectedMail].contents.map((contentId) => <MailContents contentId={contentId} key={contentId}/>)
-          }
-        </Stack>
-      </Container>
+      {
+          convo.mails
+            ? (
+              <Container scroll fill>
+                <Stack col gap>
+                  {
+                  convo.mails.map((mailId) => <MailContents mailId={mailId} key={mailId} />)
+                }
+                </Stack>
+              </Container>
+            )
+            : <Stack fill center><b>Loading...</b></Stack>
+        }
       <ReplyBar br="0.5em 0.5em 1em 1em" />
     </Stack>
   );
 }
 
-function ActionRow ({ ...props }) {
+function ActionRow({ ...props }) {
   return (
     <Stack related {...props} uncollapsable>
       <Container pad>
@@ -77,40 +115,60 @@ function ActionRow ({ ...props }) {
   );
 }
 
-function MailContents({ contentId }) {
+function MailContents({ mailId }) {
   const {
-    contents: [contents],
+    mails: [mails],
   } = useAppContext();
+
+  const mail = mails[mailId];
+
+  const [frameHeight, setFrameHeight] = useState(100);
+
+  window.addEventListener('message', (event) => {
+    if (event.source.parent === window && event.data.type === 'resize') {
+      setFrameHeight(event.data.value);
+    }
+  });
 
   return (
     <Stack related col br="0.5em">
-      <MetaRow />
-      <Container surface pad dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(contents[contentId].content) }} />
-    </Stack>
-  );
-}
-
-function MetaRow({ ...props }) {
-  return (
-    <Stack {...props} col pad="0" surface>
-      <Stack uncollapsable>
-        <Stack pad w="256px">
-          <small>From:</small>
-          <Person name="John Doe" img="https://picsum.photos/200/200/?r=2342342423523" />
+      <Stack col pad="0" surface>
+        <Stack uncollapsable>
+          <Stack pad w="256px">
+            <small>From:</small>
+            <Person name={emailAddrUtils.extractDisplayName(mail.from)} />
+          </Stack>
+          <Stack pad w="256px">
+            <small>At:</small>
+            <Container summarize oneline>02:02 29/04/2023</Container>
+          </Stack>
+          <Stack pad w="256px">
+            <small>To:</small>
+            <Person name={mail.to.map(emailAddrUtils.extractDisplayName)} />
+          </Stack>
+          <Container fill />
+          <Container pad>
+            <ChevronDown block />
+          </Container>
         </Stack>
-        <Stack pad w="256px">
-          <small>At:</small>
-          <Container summarize oneline>02:02 29/04/2023</Container>
-        </Stack>
-        <Stack pad w="256px">
-          <small>To:</small>
-          <Person name="Me" img="https://picsum.photos/200/200/?r=686994858" />
-        </Stack>
-        <Container fill />
-        <Container pad>
-          <ChevronDown block />
-        </Container>
       </Stack>
+      <iframe
+        style={{ height: frameHeight }}
+        title={mail.subject}
+        srcDoc={`<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<body>${DOMPurify.sanitize(mail.html)}</body>
+<style>body{background-color:white;font-family:'DM Sans',sans-serif;padding:1em;margin:0;overflow-y:hidden;}</style>
+<script>
+const resizeEl=document.querySelector('body')
+const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,a:console.log('HEY!!!')},"*");
+sendHeight()
+new ResizeObserver(()=>sendHeight()).observe(resizeEl)
+</script>`}
+        sandbox="allow-scripts"
+        className={styles.message_content}
+      />
     </Stack>
   );
 }

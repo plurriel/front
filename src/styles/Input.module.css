@@ -1,0 +1,16 @@
+.input::placeholder {
+  color: var(--fg);
+  opacity: 0.5;
+}
+
+.input {
+  -webkit-appearance: none;
+  background-color: var(--ns);
+  color: var(--fg);
+  outline: none;
+  border: none;
+  font-size: inherit;
+  padding: 1em;
+  line-height: 1em;
+  font-family: inherit;
+}

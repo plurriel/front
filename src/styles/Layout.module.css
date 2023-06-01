@@ -87,6 +87,11 @@
   scrollbar-gutter: stable;
   min-height: min-content;
   display: block;
+  --color: var(--ns);
+}
+
+.scroll:hover {
+  --color: var(--fg);
 }
 
 @-moz-document url-prefix() {
@@ -147,3 +152,15 @@
 .clickable {
   cursor: pointer;
 }
+
+.disabled {
+  filter: opacity(0.5);
+}
+
+/* .cc {
+  border: none;
+  padding: 0;
+  background-color: transparent;
+  font: inherit;
+  color: inherit;
+} */
