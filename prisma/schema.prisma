@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// model Content {
+//   id              String          @id @default(cuid())
+//   nonce           Bytes           @db.ByteA
+//   content         Bytes           @db.ByteA
+// }
+
+model Mail {
+  id              String          @id @default(cuid())
+  inbound         Boolean
+  from            String
+  to              String[]
+  at              DateTime
+  recvDelay       Int
+  messageId       String?         @db.VarChar(995)
+  subject         String?
+  html            String?
+
+  inReplyTo       String?         @db.VarChar(995)
+
+  convoId         String
+  convo           Convo           @relation(fields: [convoId], references: [id])
+}
+
+model Convo {
+  id              String          @id @default(cuid())
+  subject         String?
+  interlocutors   String[]
+  mails           Mail[]
+
+  latest          DateTime
+
+  folderId        String 
+  folder          Folder          @relation(fields: [folderId], references: [id])
+}
+
+enum FolderTypes {
+  Inbox
+  Sent
+  Drafts
+  Spam
+  Deleted
+  Other
+}
+
+model Folder {
+  id              String          @id @default(cuid())
+  name            String?
+  type            FolderTypes
+
+  addressId       String
+  address         Address         @relation(fields: [addressId], references: [id])
+
+  convos          Convo[]
+}
+
+model Address {
+  id              String          @id @default(cuid())
+  name            String          @db.VarChar(320) @unique
+  catchAll        Boolean
+
+  folders         Folder[]
+
+  subdomainId     String
+  subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
+  usersLink       UsersOnAddressesLink[]
+}
+
+model UsersOnAddressesLink {
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  addressId       String
+  address         Address         @relation(fields: [addressId], references: [id])
+  
+  consult         Boolean
+  view            Boolean
+  compose         Boolean
+  send            Boolean
+  delete          Boolean
+
+  @@id([userId, addressId])
+}
+
+model Subdomain {
+  id              String          @id @default(cuid())
+  name            String          @db.VarChar(249) @unique
+
+  domainId        String
+  domain          Domain          @relation(fields: [domainId], references: [id])
+  usersLink       UsersOnSubdomainsLink[]
+
+  addresses       Address[]
+}
+
+model UsersOnSubdomainsLink {
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  subdomainId     String
+  subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
+
+  consult         Boolean
+  view            Boolean
+  compose         Boolean
+  createMail      Boolean
+  send            Boolean
+  delete          Boolean
+
+  mute            Boolean
+
+  @@id([userId, subdomainId])
+}
+
+model Domain {
+  id              String          @id @default(cuid())
+  name            String          @db.VarChar(253) @unique
+  privDkim        String
+
+  usersLink       UsersOnDomainsLink[]
+  users           User[]
+
+  subdomains      Subdomain[]
+}
+
+model UsersOnDomainsLink {
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  domainId        String
+  domain          Domain          @relation(fields: [domainId], references: [id])
+
+  consult         Boolean
+  compose         Boolean
+  createMail      Boolean
+  createSub       Boolean
+  send            Boolean
+  delete          Boolean
+
+  mute            Boolean
+
+  @@id([userId, domainId])
+}
+
+model User {
+  id              String          @id @default(cuid())
+  username        String          @db.VarChar(255) @unique
+  webPushSubData  String?
+  passwordHash    String
+  lastPwChange    DateTime
+
+  domains         Domain[]
+  domainsLink     UsersOnDomainsLink[]
+  subdomainsLink  UsersOnSubdomainsLink[]
+  addressesLink   UsersOnAddressesLink[]
+}
