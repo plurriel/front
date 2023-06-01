@@ -1,22 +1,20 @@
-import { TextInput } from "@/components/Input";
-import { ClickableContainer, Container, Stack } from "@/components/Layout";
-import { Logo } from "@/components/Logo";
-import { ArrowForward } from "@/components/icons/ArrowForward";
+/* eslint-disable react/jsx-no-bind */
+import Link from 'next/link';
+import React, { useState } from 'react';
+import * as ecies from 'ecies-25519';
+import { utf8ToArray } from 'enc-utils';
+import { TextInput } from '@/components/Input';
+import { ClickableContainer, Container, Stack } from '@/components/Layout';
+import { Logo } from '@/components/Logo';
+import { ArrowForward } from '@/components/icons/ArrowForward';
 
-import styles from "@/styles/login.module.css";
-import Link from "next/link";
-import { useState } from "react";
-import nacl from "tweetnacl";
-import * as ecies from "ecies-25519";
-console.log(ecies)
-
-import { hexToArray, arrayToHex, utf8ToArray } from 'enc-utils';
+import styles from '@/styles/login.module.css';
 
 function base64ToArrayBuffer(base64) {
-  var binaryString = atob(base64);
-  var bytes = new Uint8Array(binaryString.length);
-  for (var i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i += 1) {
+    bytes[i] = binaryString.charCodeAt(i);
   }
   return bytes;
 }
@@ -29,18 +27,18 @@ function base64ToArrayBuffer(base64) {
 //   return bufView;
 // }
 
-const convertToHexa = (str = '') =>{
-  const res = [];
-  const { length: len } = str;
-  for (let n = 0, l = len; n < l; n ++) {
-     const hex = Number(str.charCodeAt(n)).toString(16);
-     res.push(hex);
-  };
-  return res.join('');
-}
+// const convertToHexa = (str = '') => {
+//   const res = [];
+//   const { length: len } = str;
+//   for (let n = 0, l = len; n < l; n++) {
+//     const hex = Number(str.charCodeAt(n)).toString(16);
+//     res.push(hex);
+//   }
+//   return res.join('');
+// };
 
 function next() {
-  return location.replace(new URLSearchParams(location.search).get('then') || '/');
+  return window.location.replace(new URLSearchParams(window.location.search).get('then') || '/');
 }
 
 export default function Login() {
@@ -51,38 +49,47 @@ export default function Login() {
 
   async function upload() {
     setErrorMessage(null);
-    const publicKey = hexToArray(process.env.NEXT_PUBLIC_USERS_TO_US_PUBLIC);
+    const publicKey = base64ToArrayBuffer(process.env.NEXT_PUBLIC_USERS_TO_US_PUBLIC);
 
-    const encryptedPassword = await ecies.encrypt(utf8ToArray(JSON.stringify({ password, time: Date.now() })), publicKey);
-    console.log(encryptedPassword, publicKey);
+    const encryptedPassword = await ecies.encrypt(
+      utf8ToArray(JSON.stringify({ password, time: Date.now() })),
+      publicKey,
+    );
 
-    const login = await fetch(`/api/login`, {
+    const login = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         username,
-        password: arrayToHex(encryptedPassword),
+        password: btoa(String.fromCharCode(...encryptedPassword)),
       }),
     });
     if (login.status === 200) return next();
+    return setErrorMessage(await login.text());
   }
 
   return (
     <Stack center customClasses={[styles.page]}>
       <Stack surface col customClasses={[styles.prompt]}>
-        <Stack ai="center"><h1>Login to</h1><Logo/></Stack>
+        <Stack ai="center">
+          <h1>Login to</h1>
+          <Logo />
+        </Stack>
+        { errorMessage !== '' && <b>{errorMessage}</b> }
         <b>Username</b>
         <Container br>
-          <TextInput w placeholder="johndoe" onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9\-_]/g, ''))} value={username}></TextInput>
+          <TextInput w placeholder="johndoe" onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9\-_]/g, ''))} value={username} />
         </Container>
         <b>Password</b>
         <Container br>
-          <TextInput w type="password" placeholder="••••••••••" onChange={(e) => setPassword(e.target.value)} value={password}></TextInput>
+          <TextInput w type="password" placeholder="••••••••••" onChange={(e) => setPassword(e.target.value)} value={password} />
         </Container>
         <Stack col ai="flex-end">
           <ClickableContainer surface cta disabled={!username || !password} onFire={upload}>
             <Stack>
-              Login <ArrowForward />
+              Login
+              {' '}
+              <ArrowForward />
             </Stack>
           </ClickableContainer>
           <Link href="signup">or sign up instead</Link>

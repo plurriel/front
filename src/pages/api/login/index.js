@@ -31,7 +31,7 @@ export default async function handler(req, res) {
       try {
         const passwordData = JSON.parse(arrayToUtf8(await ecies.decrypt(
           Buffer.from(hexToArray(req.body.password)),
-          Buffer.from(process.env.USERS_TO_US_PRIVATE, 'hex'),
+          Buffer.from(process.env.USERS_TO_US_PRIVATE, 'base64'),
         )));
         actualPassword = passwordData.password;
         timeOfEncryption = passwordData.time;
