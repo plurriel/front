@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { getCookie, setCookie } from 'cookies-next';
 import { isCuid } from '@paralleldrive/cuid2';
 import nacl from 'tweetnacl';
-import { hexToArray, arrayToUtf8, utf8ToArray } from 'enc-utils';
+import { arrayToUtf8, utf8ToArray } from 'enc-utils';
 import * as ecies from 'ecies-25519';
 import { prisma } from '@/lib/prisma';
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       let timeOfEncryption;
       try {
         const passwordData = JSON.parse(arrayToUtf8(await ecies.decrypt(
-          Buffer.from(hexToArray(req.body.password)),
+          Buffer.from(req.body.password, 'base64'),
           Buffer.from(process.env.USERS_TO_US_PRIVATE, 'base64'),
         )));
         actualPassword = passwordData.password;
