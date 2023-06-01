@@ -24,7 +24,7 @@ function next() {
   return window.location.replace(new URLSearchParams(window.location.search).get('then') || '/');
 }
 
-export default function Login({ props }) {
+export default function Login({ pubkey }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -32,7 +32,7 @@ export default function Login({ props }) {
 
   async function upload() {
     setErrorMessage(null);
-    const publicKey = base64ToArrayBuffer(props.pubkey);
+    const publicKey = base64ToArrayBuffer(pubkey);
 
     const encryptedPassword = await ecies.encrypt(
       utf8ToArray(JSON.stringify({ password, time: Date.now() })),
