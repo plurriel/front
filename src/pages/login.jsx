@@ -9,6 +9,7 @@ import { Logo } from '@/components/Logo';
 import { ArrowForward } from '@/components/icons/ArrowForward';
 
 import styles from '@/styles/login.module.css';
+import { getLogin } from './api/login';
 
 function base64ToArrayBuffer(base64) {
   const binaryString = atob(base64);
@@ -18,30 +19,12 @@ function base64ToArrayBuffer(base64) {
   }
   return bytes;
 }
-// function str2ab(str) {
-//   var buf = new ArrayBuffer(str.length);
-//   var bufView = new Uint8Array(buf);
-//   for (var i=0, strLen=str.length; i<strLen; i++) {
-//     bufView[i] = str.charCodeAt(i);
-//   }
-//   return bufView;
-// }
-
-// const convertToHexa = (str = '') => {
-//   const res = [];
-//   const { length: len } = str;
-//   for (let n = 0, l = len; n < l; n++) {
-//     const hex = Number(str.charCodeAt(n)).toString(16);
-//     res.push(hex);
-//   }
-//   return res.join('');
-// };
 
 function next() {
   return window.location.replace(new URLSearchParams(window.location.search).get('then') || '/');
 }
 
-export default function Login() {
+export default function Login({ props }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -49,7 +32,7 @@ export default function Login() {
 
   async function upload() {
     setErrorMessage(null);
-    const publicKey = base64ToArrayBuffer(process.env.NEXT_PUBLIC_USERS_TO_US_PUBLIC);
+    const publicKey = base64ToArrayBuffer(props.pubkey);
 
     const encryptedPassword = await ecies.encrypt(
       utf8ToArray(JSON.stringify({ password, time: Date.now() })),
@@ -99,8 +82,18 @@ export default function Login() {
   );
 }
 
-// export async function getServerSideProps({ req, res }) {
-//   if (!(await getLogin(req, res))) return {
-//     red
-//   }
-// }
+export async function getServerSideProps({ req, res }) {
+  if (await getLogin({ req, res })) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: req.query.then,
+      },
+    };
+  }
+  return {
+    props: {
+      pubkey: process.env.NEXT_PUBLIC_USERS_TO_US_PUBLIC,
+    },
+  };
+}
