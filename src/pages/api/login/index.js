@@ -41,7 +41,7 @@ export default async function handler(req, res) {
 
       if (!(await bcrypt.compare(actualPassword, user.passwordHash))) return res.status(400).send('User or password incorrect');
 
-      if (Date.now() - timeOfEncryption > 5 * 1000) return res.status(410).send('Too late (Login attempts are coupled with timestamps to prevent relay attacks)');
+      if (Date.now() - timeOfEncryption > 10 * 1000) return res.status(410).send('Too late (Login attempts are coupled with timestamps to prevent relay attacks)');
 
       // Create HMAC token
       const sessionData = JSON.stringify({
@@ -95,3 +95,7 @@ export async function getLogin({ req, res }) {
 
   return user;
 }
+
+export const config = {
+  runtime: 'edge',
+};
