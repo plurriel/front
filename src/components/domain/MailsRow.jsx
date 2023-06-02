@@ -116,7 +116,7 @@ function MailsList() {
       {
         currentFolder.convos.map((convoId) => convos[convoId] && (
         <ConvoPreview
-          interlocutors={convos[convoId].interlocutors}
+          interlocutors={JSON.parse(convos[convoId].interlocutors)}
           subject={convos[convoId].subject}
           sendDate={convos[convoId].latest}
           mailIdx={convoId}

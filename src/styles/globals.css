@@ -8,6 +8,7 @@
   --fg2: #cdd6f4;
   --fg3: #cdd6f4;
   --bgcta: #f38ba8;
+  --error: #f38ba8;
   --link: #89b4fa;
 }
 /* Nordic Light */
@@ -22,6 +23,7 @@
   --fgsel: #BF616A;
   --bgcta: #BF616A;
   --fgcta: #000000;
+  --error: #BF616A;
 } */
 /* Catppuccin Light */
 /* :root {
@@ -36,6 +38,7 @@
   --fgsel: #d20f39;
   --bgcta: #d20f39;
   --fgcta: #000000;
+  --error: #d20f39;
   --link: #1e66f5;
 } */
 /* Catpuccin Light (OLD) */
@@ -60,6 +63,7 @@
   --bgsel: #ECEFF4;
   --bgcta: #BF616A;
   --fgcta: #ECEFF4;
+  --error: #BF616A;
 } */
 /* Transparent for Light */
 /* :root {
@@ -73,6 +77,7 @@
   --fgsel: #434C5E;
   --bgcta: #BF616A;
   --fgcta: #ECEFF4;
+  --error: #BF616A;
 } */
 /* Transparent for Dark */
 /* :root {
@@ -84,6 +89,7 @@
   --fg3: #000000;
   --bgsel: #ffffffAA;
   --fgsel: #BF616A;
+  --bgcta: #BF616A;
   --bgcta: #BF616A;
   --fgcta: #000000;
 } */
