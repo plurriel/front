@@ -83,7 +83,7 @@ export default function Login({ pubkey }) {
 }
 
 export async function getServerSideProps({ req, res }) {
-  if (await getLogin({ req, res })) {
+  if (!(await getLogin({ req, res }) instanceof Error)) {
     return {
       redirect: {
         permanent: false,
