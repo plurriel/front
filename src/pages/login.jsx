@@ -82,12 +82,12 @@ export default function Login({ pubkey }) {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps({ req, res, query }) {
   if (!(await getLogin({ req, res }) instanceof Error)) {
     return {
       redirect: {
         permanent: false,
-        destination: req.query.then,
+        destination: query.then,
       },
     };
   }
