@@ -38,7 +38,7 @@ export default function Home({
   const selectedAddressState = useState(selectedAddress);
   const viewedAddressState = useState(selectedAddress);
   const selectedConvoState = useState(null);
-  const currentFirstPaneState = useState(1);
+  const currentFirstPaneState = useState(selectedAddress ? 1 : 0);
 
   useEffect(() => setCookie('selected', selectedAddressState[0]?.join(',')), [selectedAddressState]);
 
