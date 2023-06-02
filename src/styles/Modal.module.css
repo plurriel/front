@@ -16,6 +16,7 @@
 .modal {
   position: relative;
   width: 512px;
+  max-width: 100vw;
 }
 
 .close_modal {
