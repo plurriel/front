@@ -94,7 +94,8 @@ export default function Home({
 
 export async function getServerSideProps({ req, res, params }) {
   if (!params.domain.includes('.')) return { notFound: true };
-  if (!(await getLogin({ req, res }))) {
+  if (await getLogin({ req, res }) instanceof Error) {
+    console.log(await getLogin({ req, res }));
     return {
       redirect: {
         permanent: false,

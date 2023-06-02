@@ -16,7 +16,7 @@ const schema = object({
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const user = await getLogin({ req, res });
-    if (!user) return res.status(412).send('Precondition Failed - Must log in before continuing');
+    if (user instanceof Error) return res.status(412).send(`Precondition Failed - Must log in before continuing + ${user.message}`);
 
     try {
       schema.validate(user);

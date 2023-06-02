@@ -6,9 +6,10 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+
+  relationMode = "prisma"
 }
 
 // model Content {
@@ -21,7 +22,7 @@ model Mail {
   id              String          @id @default(cuid())
   inbound         Boolean
   from            String
-  to              String[]
+  to              String
   at              DateTime
   recvDelay       Int
   messageId       String?         @db.VarChar(995)
@@ -37,7 +38,7 @@ model Mail {
 model Convo {
   id              String          @id @default(cuid())
   subject         String?
-  interlocutors   String[]
+  interlocutors   String
   mails           Mail[]
 
   latest          DateTime

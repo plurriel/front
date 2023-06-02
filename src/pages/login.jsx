@@ -58,7 +58,6 @@ export default function Login({ pubkey }) {
           <h1>Login to</h1>
           <Logo />
         </Stack>
-        { errorMessage !== '' && <b>{errorMessage}</b> }
         <b>Username</b>
         <Container br>
           <TextInput w placeholder="johndoe" onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9\-_]/g, ''))} value={username} />
@@ -67,6 +66,7 @@ export default function Login({ pubkey }) {
         <Container br>
           <TextInput w type="password" placeholder="••••••••••" onChange={(e) => setPassword(e.target.value)} value={password} />
         </Container>
+        { errorMessage !== '' && <b className={styles.error}>{errorMessage}</b> }
         <Stack col ai="flex-end">
           <ClickableContainer surface cta disabled={!username || !password} onFire={upload}>
             <Stack>
@@ -82,12 +82,12 @@ export default function Login({ pubkey }) {
   );
 }
 
-export async function getServerSideProps({ req, res }) {
-  if (await getLogin({ req, res })) {
+export async function getServerSideProps({ req, res, query }) {
+  if (!(await getLogin({ req, res }) instanceof Error)) {
     return {
       redirect: {
         permanent: false,
-        destination: req.query.then,
+        destination: query.then,
       },
     };
   }

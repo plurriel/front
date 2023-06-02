@@ -130,6 +130,19 @@ function MailContents({ mailId }) {
     }
   });
 
+  const [dateSent, setDateSent] = useState(null);
+  const [isSameDate, setIsSameDate] = useState(false);
+
+  useEffect(() => {
+    setDateSent(new Date(mail.at));
+    setIsSameDate(new Date().toLocaleDateString() === new Date(mail.at).toLocaleDateString());
+  }, [mail.at]);
+
+  const dateFormat = {
+    timeStyle: 'short',
+  };
+  if (!isSameDate) dateFormat.dateStyle = 'short';
+
   return (
     <Stack related col br="0.5em">
       <Stack col pad="0" surface>
@@ -140,7 +153,16 @@ function MailContents({ mailId }) {
           </Stack>
           <Stack pad w="256px">
             <small>At:</small>
-            <Container summarize oneline>02:02 29/04/2023</Container>
+            <Container summarize oneline>
+              {
+                dateSent
+                  ? new Intl.DateTimeFormat(
+                    'en-GB',
+                    dateFormat,
+                  ).format(dateSent)
+                  : ''
+              }
+            </Container>
           </Stack>
           <Stack pad w="256px">
             <small>To:</small>
