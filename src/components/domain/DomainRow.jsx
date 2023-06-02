@@ -64,8 +64,12 @@ function CreateModal({ modalShown, setModalShown }) {
   const {
     domain,
     subdomains: [subdomains],
-    selectedAddress: [[selectedSubdomainId]],
+    selectedAddress: [selected],
   } = useAppContext();
+
+  let selectedSubdomainId;
+  if (selected) [selectedSubdomainId] = selected;
+  else [selectedSubdomainId] = domain.subdomains;
 
   useEffect(() => {
     if (!modalShown) {
