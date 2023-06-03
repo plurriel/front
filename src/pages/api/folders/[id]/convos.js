@@ -5,7 +5,6 @@ import { getLogin } from '@/lib/login';
 
 export default async function handler(req) {
   if (req.method === 'GET') {
-    console.log(req);
     const user = await getLogin(req);
     if (user instanceof Error) {
       return NextResponse.json({
