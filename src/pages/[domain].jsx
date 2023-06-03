@@ -40,7 +40,7 @@ export default function Home({
   const selectedConvoState = useState(null);
   const currentFirstPaneState = useState(selectedAddress ? 1 : 0);
 
-  useEffect(() => setCookie('selected', selectedAddressState[0]?.join(',')), [selectedAddressState]);
+  useEffect(() => setCookie('selected', selectedAddressState[0]?.join(','), { path: `/${domain.name}` }), [domain, selectedAddressState]);
 
   const providerData = useMemo(() => ({
     domain,
@@ -168,7 +168,7 @@ export async function getServerSideProps({ req, res, params }) {
         };
       });
     } else {
-      setCookie('selected', null, { req, res });
+      setCookie('selected', null, { req, res, path: `/${params.domain}` });
     }
   }
   return { props: result };
