@@ -1,11 +1,16 @@
+import { NextResponse } from 'next/server';
 import { hasPermissions } from '@/lib/authorisation';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   if (req.method === 'GET') {
-    const user = await getLogin({ req, res });
-    if (user instanceof Error) return res.status(412).send(`Precondition Failed - Must log in before continuing + ${user.message}`);
+    const user = await getLogin(req);
+    if (user instanceof Error) {
+      return NextResponse.json({
+        message: `Precondition Failed - Must log in before continuing + ${user.message}`,
+      }, { status: 412 });
+    }
 
     const folder = await prisma.folder.findUnique({
       where: {
@@ -17,12 +22,22 @@ export default async function handler(req, res) {
       },
     });
 
-    if (!(await hasPermissions(['address', folder.addressId], { view: true, consult: true }, user.id))) return res.status(401).send('Insufficient permissions - Must be able to view anc consult folder');
+    if (!(await hasPermissions(['address', folder.addressId], { view: true, consult: true }, user.id))) {
+      return NextResponse.json({
+        message: 'Insufficient permissions - Must be able to view and consult folder',
+      }, { status: 401 });
+    }
 
-    if (!folder) return res.status(404).send('No such folder');
-    return res.status(200).json(folder.convos);
+    if (!folder) {
+      return NextResponse.json({
+        message: 'No such folder',
+      }, { status: 404 });
+    }
+    return NextResponse.json(folder.convos);
   }
-  return res.status(405).send('Method not allowed');
+  return NextResponse.json({
+    message: 'Method not allowed',
+  }, { status: 405 });
 }
 
 export const config = {

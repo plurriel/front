@@ -13,7 +13,7 @@ const urlB64ToUint8Array = (base64String) => {
 self.addEventListener('activate', async () => {
   // This will be called only once when the service worker is activated.
   try {
-    const applicationServerKey = urlB64ToUint8Array(await fetch('/api/subscription/vapid').then((res) => res.text()));
+    const applicationServerKey = urlB64ToUint8Array(await fetch('/api/subscription/vapid').then((res) => res.json()).then((json) => json.vapid));
     const subscription = await self.registration.pushManager.subscribe({
       applicationServerKey,
       userVisibleOnly: true,
