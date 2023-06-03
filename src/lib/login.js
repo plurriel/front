@@ -1,6 +1,6 @@
 import { getCookie } from 'cookies-next';
 import nacl from 'tweetnacl';
-import { prisma } from '@/lib/prisma_edge';
+import { prisma } from '@/lib/prisma';
 
 export async function getLogin({ req, res }) {
   // Check if signature is correct

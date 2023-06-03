@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma_edge';
+import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 import { hasPermissions } from '@/lib/authorisation';
 
