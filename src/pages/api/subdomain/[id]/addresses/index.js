@@ -31,8 +31,16 @@ export default async function handler(req) {
       }, { status: 400 });
     }
 
-    const { subdomainId, name } = req.body;
-    console.log(req, req.body);
+    let body;
+    try {
+      body = await req.json();
+    } catch (err) {
+      return NextResponse.json({
+        message: 'Request body should be in json',
+      }, { status: 400 });
+    }
+
+    const { subdomainId, name } = body;
 
     if (!hasPermissions(['subdomain', subdomainId], { createMail: true }, user.id)) {
       return NextResponse.json({
