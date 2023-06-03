@@ -9,7 +9,7 @@ import { Logo } from '@/components/Logo';
 import { ArrowForward } from '@/components/icons/ArrowForward';
 
 import styles from '@/styles/login.module.css';
-import { getLogin } from '@/lib/login';
+import { getLogin } from '@/lib/login_not_edge';
 
 function base64ToArrayBuffer(base64) {
   const binaryString = atob(base64);
