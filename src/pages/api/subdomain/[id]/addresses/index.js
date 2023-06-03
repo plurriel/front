@@ -32,6 +32,7 @@ export default async function handler(req) {
     }
 
     const { subdomainId, name } = req.body;
+    console.log(req, req.body);
 
     if (!hasPermissions(['subdomain', subdomainId], { createMail: true }, user.id)) {
       return NextResponse.json({

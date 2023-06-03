@@ -18,10 +18,10 @@ import { hasPermissions } from '@/lib/authorisation';
 export async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
+      await window.Notification.requestPermission();
       await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
       });
-      await window.Notification.requestPermission();
       return true;
     } catch (error) {
       return false;
