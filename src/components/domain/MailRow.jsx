@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as DOMPurify from 'dompurify';
 import { Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
@@ -124,8 +124,10 @@ function MailContents({ mailId }) {
 
   const [frameHeight, setFrameHeight] = useState(100);
 
+  const id = useRef(Math.random());
+
   window.addEventListener('message', (event) => {
-    if (event.source.parent === window && event.data.type === 'resize') {
+    if (event.source.parent === window && event.data.type === 'resize' && event.data.id === id.current) {
       setFrameHeight(event.data.value);
     }
   });
@@ -184,7 +186,7 @@ function MailContents({ mailId }) {
 <style>body{background-color:white;font-family:'DM Sans',sans-serif;padding:1em;margin:0;overflow-y:hidden;}</style>
 <script>
 const resizeEl=document.querySelector('body')
-const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,a:console.log('HEY!!!')},"*");
+const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:${id.current}},"*");
 sendHeight()
 new ResizeObserver(()=>sendHeight()).observe(resizeEl)
 </script>`}
