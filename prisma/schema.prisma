@@ -84,12 +84,14 @@ model UsersOnAddressesLink {
   user            User            @relation(fields: [userId], references: [id])
   addressId       String
   address         Address         @relation(fields: [addressId], references: [id])
-  
-  consult         Boolean
-  view            Boolean
-  compose         Boolean
-  send            Boolean
-  delete          Boolean
+
+  consult         Boolean         @default(true)
+  view            Boolean         @default(true)
+  compose         Boolean         @default(true)
+  send            Boolean         @default(true)
+  delete          Boolean         @default(true)
+
+  mute            Boolean         @default(false)
 
   @@id([userId, addressId])
 }
@@ -111,14 +113,14 @@ model UsersOnSubdomainsLink {
   subdomainId     String
   subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
 
-  consult         Boolean
-  view            Boolean
-  compose         Boolean
-  createMail      Boolean
-  send            Boolean
-  delete          Boolean
+  consult         Boolean         @default(true)
+  view            Boolean         @default(true)
+  compose         Boolean         @default(true)
+  createMail      Boolean         @default(true)
+  send            Boolean         @default(true)
+  delete          Boolean         @default(true)
 
-  mute            Boolean
+  mute            Boolean         @default(false)
 
   @@id([userId, subdomainId])
 }
@@ -129,7 +131,6 @@ model Domain {
   privDkim        String
 
   usersLink       UsersOnDomainsLink[]
-  users           User[]
 
   subdomains      Subdomain[]
 }
@@ -140,14 +141,15 @@ model UsersOnDomainsLink {
   domainId        String
   domain          Domain          @relation(fields: [domainId], references: [id])
 
-  consult         Boolean
-  compose         Boolean
-  createMail      Boolean
-  createSub       Boolean
-  send            Boolean
-  delete          Boolean
+  consult         Boolean         @default(true)
+  view            Boolean         @default(true)
+  compose         Boolean         @default(true)
+  createMail      Boolean         @default(true)
+  createSub       Boolean         @default(true)
+  send            Boolean         @default(true)
+  delete          Boolean         @default(true)
 
-  mute            Boolean
+  mute            Boolean         @default(false)
 
   @@id([userId, domainId])
 }
@@ -155,11 +157,10 @@ model UsersOnDomainsLink {
 model User {
   id              String          @id @default(cuid())
   username        String          @db.VarChar(255) @unique
-  webPushSubData  String?
+  webPushSubData  String
   passwordHash    String
   lastPwChange    DateTime
 
-  domains         Domain[]
   domainsLink     UsersOnDomainsLink[]
   subdomainsLink  UsersOnSubdomainsLink[]
   addressesLink   UsersOnAddressesLink[]

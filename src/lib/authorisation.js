@@ -7,7 +7,7 @@ function applyMask(object, mask) {
 }
 
 function allValuesTruthy(object) {
-  return Object.value(object).every(Boolean);
+  return Object.values(object).every(Boolean);
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -68,20 +68,6 @@ export async function hasPermissions([scopeType, originalScopeId], requestedPerm
         perms = domainAuthorization;
         break;
       }
-      const domain = await prisma.domain.findUnique({
-        where: {
-          id: scopeId,
-        },
-        select: {
-          users: {
-            where: {
-              id: userId,
-            },
-          },
-        },
-      });
-      if (!domain) return false;
-      if (domain.users.length > 0) return true; // I'm gonna regret this
     default:
       return false;
   }

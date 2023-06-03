@@ -13,6 +13,23 @@ import { Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from './api/login';
+import { hasPermissions } from '@/lib/authorisation';
+
+export async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+      });
+      await window.Notification.requestPermission();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
 
 export default function Home({
   subdomains,
@@ -24,6 +41,9 @@ export default function Home({
   selectedAddress,
   domain,
 }) {
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
   const subdomainsState = useState(subdomains);
   const addressesState = useState(addresses);
   const foldersState = useState(folders);
@@ -94,8 +114,9 @@ export default function Home({
 
 export async function getServerSideProps({ req, res, params }) {
   if (!params.domain.includes('.')) return { notFound: true };
-  if (await getLogin({ req, res }) instanceof Error) {
-    console.log(await getLogin({ req, res }));
+  const user = await getLogin({ req, res });
+  if (user instanceof Error) {
+    console.log(user);
     return {
       redirect: {
         permanent: false,
@@ -131,6 +152,10 @@ export async function getServerSideProps({ req, res, params }) {
   });
 
   if (!domain) return { notFound: true };
+
+  if (!(await hasPermissions(['domain', domain.id], {}, user.id))) {
+    return { notFound: true };
+  }
 
   domain.subdomains = domain.subdomains.map((subdomain) => {
     subdomain.addresses = subdomain.addresses.map((address) => {
