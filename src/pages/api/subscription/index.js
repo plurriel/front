@@ -17,7 +17,7 @@ export default async function handler(req) {
 
       if (!Array.isArray(newSubscriptionArray)) newSubscriptionArray = [];
 
-      const subscriptionData = req.body;
+      const subscriptionData = await req.json();
 
       try {
         const subscriptionSchema = object({
@@ -27,7 +27,7 @@ export default async function handler(req) {
             p256dh: string().required(),
             auth: string().required(),
           }).required(),
-        });
+        }).required();
         subscriptionSchema.validate(subscriptionData);
       } catch (err) {
         return NextResponse.json({
