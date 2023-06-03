@@ -166,7 +166,7 @@ function MailContents({ mailId }) {
           </Stack>
           <Stack pad w="256px">
             <small>To:</small>
-            <Person name={mail.to.map(emailAddrUtils.extractDisplayName)} />
+            <Person name={JSON.parse(mail.to).map(emailAddrUtils.extractDisplayName)} />
           </Stack>
           <Container fill />
           <Container pad>
