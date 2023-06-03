@@ -1,6 +1,6 @@
 import { number, object, string } from 'yup';
 import { prisma } from '@/lib/prisma';
-import { getLogin } from '../login';
+import { getLogin } from '@/lib/login';
 
 export default async function handler(req, res) {
   switch (req.method) {
