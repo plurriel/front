@@ -6,12 +6,12 @@ export async function getLogin(req) {
   let sessionSign;
   let sessionData;
   try {
-    sessionSign = Buffer.from(req.cookies.session_sign, 'base64');
+    sessionSign = Buffer.from(req.cookies.session_sign.name, 'base64');
   } catch (err) {
     return new Error('"session_sign" is not a valid signature');
   }
   try {
-    sessionData = JSON.parse(req.cookies.session_data);
+    sessionData = JSON.parse(req.cookies.session_data.name);
   } catch (err) {
     return new Error('"session_data" is not a valid JSON');
   }
