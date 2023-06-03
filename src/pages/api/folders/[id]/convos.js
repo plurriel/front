@@ -15,7 +15,7 @@ export default async function handler(req) {
 
     const folder = await prisma.folder.findUnique({
       where: {
-        id: req.query.id,
+        id: req.nextUrl.searchParams.get('id'),
       },
       select: {
         convos: true,
