@@ -157,7 +157,7 @@ model UsersOnDomainsLink {
 model User {
   id              String          @id @default(cuid())
   username        String          @db.VarChar(255) @unique
-  webPushSubData  String
+  webPushSubData  String          @db.LongText
   passwordHash    String
   lastPwChange    DateTime
 
