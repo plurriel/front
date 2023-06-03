@@ -1,4 +1,3 @@
-import { isCuid } from '@paralleldrive/cuid2';
 import { getCookie } from 'cookies-next';
 import nacl from 'tweetnacl';
 import { prisma } from './prisma';
@@ -21,7 +20,7 @@ export async function getLogin({ req, res }) {
   const { userId } = sessionData;
   if (!userId
     || typeof userId !== 'string'
-    || !isCuid(userId)) return new Error('"session_data".userId is not a valid cuid');
+    || !userId.match(/^c[a-z0-9]{24}$/)) return new Error('"session_data".userId is not a valid cuid');
 
   const date = sessionData.genTime;
   if (!date || typeof date !== 'number') return new Error('"session_data".genTime is not a valid timestamp');
