@@ -6,3 +6,8 @@ export default function handler(req, res) {
       return res.status(405).send('Method not allowed');
   }
 }
+
+export const config = {
+  runtime: 'edge',
+  regions: 'fra1',
+};
