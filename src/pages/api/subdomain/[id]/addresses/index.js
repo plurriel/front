@@ -1,7 +1,7 @@
 import { object, string } from 'yup';
 import { hasPermissions } from '@/lib/authorisation';
 import { prisma } from '@/lib/prisma.js';
-import { getLogin } from '@/pages/api/login';
+import { getLogin } from '@/lib/login';
 
 const schema = object({
   name: string()

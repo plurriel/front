@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { getLogin } from '../../login';
+import { getLogin } from '@/lib/login';
 import { hasPermissions } from '@/lib/authorisation';
 
 export default async function handler(req, res) {
