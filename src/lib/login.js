@@ -1,18 +1,17 @@
-import { getCookie } from 'cookies-next';
 import nacl from 'tweetnacl';
 import { prisma } from '@/lib/prisma';
 
-export async function getLogin({ req, res }) {
+export async function getLogin(req) {
   // Check if signature is correct
   let sessionSign;
   let sessionData;
   try {
-    sessionSign = Buffer.from(getCookie('session_sign', { req, res }), 'base64');
+    sessionSign = Buffer.from(req.cookies.session_sign, 'base64');
   } catch (err) {
     return new Error('"session_sign" is not a valid signature');
   }
   try {
-    sessionData = JSON.parse(getCookie('session_data', { req, res }));
+    sessionData = JSON.parse(req.cookies.session_data);
   } catch (err) {
     return new Error('"session_data" is not a valid JSON');
   }

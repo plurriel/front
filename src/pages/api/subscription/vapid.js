@@ -1,9 +1,15 @@
-export default function handler(req, res) {
+import { NextResponse } from 'next/server';
+
+export default function handler(req) {
   switch (req.method) {
     case 'GET':
-      return res.status(200).send(process.env.VAPID_PUBLIC);
+      return NextResponse.json({
+        vapid: process.env.VAPID_PUBLIC,
+      });
     default:
-      return res.status(405).send('Method not allowed');
+      return NextResponse.json({
+        message: 'Method not allowed',
+      }, { status: 405 });
   }
 }
 

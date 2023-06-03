@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import { object, string } from 'yup';
 import { hasPermissions } from '@/lib/authorisation';
 import { prisma } from '@/lib/prisma';
@@ -13,21 +14,29 @@ const schema = object({
     .matches(/^c[0-9a-z]{24}$/),
 });
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   if (req.method === 'POST') {
-    const user = await getLogin({ req, res });
-    if (user instanceof Error) return res.status(412).send(`Precondition Failed - Must log in before continuing + ${user.message}`);
+    const user = await getLogin(req);
+    if (user instanceof Error) {
+      return NextResponse.json({
+        message: `Precondition Failed - Must log in before continuing + ${user.message}`,
+      }, { status: 412 });
+    }
 
     try {
       schema.validate(user);
     } catch (err) {
-      return res.status(400).send(err.message);
+      return NextResponse.json({
+        message: err.message,
+      }, { status: 400 });
     }
 
     const { subdomainId, name } = req.body;
 
     if (!hasPermissions(['subdomain', subdomainId], { createMail: true }, user.id)) {
-      return res.status(401).send('You are not authorised to make this change on this subdomain');
+      return NextResponse.json({
+        message: 'You are not authorised to make this change on this subdomain',
+      }, { status: 401 });
     }
 
     await prisma.address.create({
@@ -50,9 +59,13 @@ export default async function handler(req, res) {
         },
       },
     });
-    return res.status(200).send('Address created');
+    return NextResponse.json({
+      message: 'Address created',
+    }, { status: 201 });
   }
-  return res.status(405).send('Method not allowed');
+  return NextResponse.json({
+    message: 'Method not allowed',
+  }, { status: 405 });
 }
 
 export const config = {
