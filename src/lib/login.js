@@ -6,12 +6,14 @@ export async function getLogin(req) {
   let sessionSign;
   let sessionData;
   try {
-    sessionSign = Buffer.from(req.cookies.session_sign.value, 'base64');
+    // eslint-disable-next-line dot-notation
+    sessionSign = Buffer.from(req.cookies['session_sign'], 'base64');
   } catch (err) {
     return new Error('"session_sign" is not a valid signature');
   }
   try {
-    sessionData = JSON.parse(req.cookies.session_data.value);
+    // eslint-disable-next-line dot-notation
+    sessionData = JSON.parse(req.cookies['session_data']);
   } catch (err) {
     return new Error('"session_data" is not a valid JSON');
   }
