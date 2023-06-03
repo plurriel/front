@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 
-export default async function handler(req, res) {
+export default async function handler(req) {
   switch (req.method) {
     case 'PUT':
-      const user = await getLogin({ req, res });
+      const user = await getLogin(req);
       if (user instanceof Error) {
         return NextResponse.json({
           message: 'Precondition failed - Must be logged in',
