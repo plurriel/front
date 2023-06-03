@@ -12,7 +12,7 @@ import { AppContext } from '@/components/domain/AppContext';
 import { Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
 import { prisma } from '@/lib/prisma';
-import { getLogin } from '@/lib/login';
+import { getLogin } from '@/lib/login_not_edge';
 import { hasPermissions } from '@/lib/authorisation';
 
 export async function registerServiceWorker() {
