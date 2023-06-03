@@ -7,6 +7,7 @@ export default async function handler(req) {
   if (req.method === 'GET') {
     const user = await getLogin(req);
     if (user instanceof Error) {
+      console.log(user);
       return NextResponse.json({
         message: `Precondition Failed - Must log in before continuing + ${user.message}`,
       }, { status: 412 });
