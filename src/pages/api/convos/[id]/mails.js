@@ -14,7 +14,7 @@ export default async function handler(req) {
 
     const convo = await prisma.convo.findUnique({
       where: {
-        id: req.query.id,
+        id: req.nextUrl.searchParams.get('id'),
       },
       select: {
         mails: true,
