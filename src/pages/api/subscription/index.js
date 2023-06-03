@@ -1,4 +1,5 @@
 import { number, object, string } from 'yup';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 
@@ -6,7 +7,11 @@ export default async function handler(req, res) {
   switch (req.method) {
     case 'PUT':
       const user = await getLogin({ req, res });
-      if (user instanceof Error) return res.status(412).send('Precondition failed - Must be logged in');
+      if (user instanceof Error) {
+        return NextResponse.json({
+          message: 'Precondition failed - Must be logged in',
+        }, { status: 412 });
+      }
 
       let newSubscriptionArray = JSON.parse(user.webPushSubData);
 
@@ -25,7 +30,9 @@ export default async function handler(req, res) {
         });
         subscriptionSchema.validate(subscriptionData);
       } catch (err) {
-        return res.status(400).send(err.message);
+        return NextResponse.json({
+          message: err.message,
+        }, { status: 400 });
       }
 
       newSubscriptionArray.push(subscriptionData);
@@ -38,8 +45,17 @@ export default async function handler(req, res) {
           webPushSubData: JSON.stringify(newSubscriptionArray),
         },
       });
-      return res.status(200).send('Subscription data successfully added!');
+      return NextResponse.json({
+        message: 'Subscription data successfully added!',
+      }, { status: 201 });
     default:
-      return res.status(405).send('Method not allowed');
+      return NextResponse.json({
+        message: 'Method not allowed',
+      }, { status: 405 });
   }
 }
+
+export const config = {
+  runtime: 'edge',
+  regions: 'fra1',
+};
