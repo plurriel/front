@@ -145,7 +145,7 @@ export async function getServerSideProps({ req, res, params }) {
           },
         },
         orderBy: {
-          name: 'asc',
+          name: 'desc',
         },
       },
     },
