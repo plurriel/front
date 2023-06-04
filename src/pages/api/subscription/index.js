@@ -13,10 +13,6 @@ export default async function handler(req) {
         }, { status: 412 });
       }
 
-      let newSubscriptionArray = JSON.parse(user.webPushSubData);
-
-      if (!Array.isArray(newSubscriptionArray)) newSubscriptionArray = [];
-
       const subscriptionData = await req.json();
 
       try {
@@ -34,6 +30,15 @@ export default async function handler(req) {
           message: err.message,
         }, { status: 400 });
       }
+
+      let newSubscriptionArray = JSON.parse(user.webPushSubData);
+
+      if (!Array.isArray(newSubscriptionArray)) newSubscriptionArray = [];
+
+      const seenEndpoints = new Set([subscriptionData.endpoint]);
+      newSubscriptionArray = newSubscriptionArray.filter((v) => (seenEndpoints.has(v.endpoint)
+        ? false
+        : (seenEndpoints.add(v.endpoint), true)));
 
       newSubscriptionArray.push(subscriptionData);
 

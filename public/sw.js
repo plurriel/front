@@ -28,14 +28,15 @@ self.addEventListener('activate', async () => {
   }
 });
 
-self.addEventListener('push', (event) => {
+self.addEventListener('push', async (event) => {
   if (event.data) {
     const eventData = JSON.parse(event.data.text());
     switch (eventData.type) {
       case 'new_mail':
-        self.registration.showNotification(eventData.subject, {
-          body: `From: ${eventData.from}
-To: ${eventData.addr}`,
+        const mailData = await fetch(`/api/mails/${eventData.id}`).then((res) => res.json());
+        self.registration.showNotification(mailData.subject, {
+          body: `From: ${mailData.from}
+To: ${mailData.convo.folder.address.name}`,
         });
         break;
       default:
@@ -45,3 +46,5 @@ To: ${eventData.addr}`,
     console.log('Push event but no data');
   }
 });
+
+self.addEventListener('install', () => self.skipWaiting());
