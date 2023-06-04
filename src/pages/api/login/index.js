@@ -48,8 +48,8 @@ export default async function handler(req, res) {
         userId: user.id,
       });
       const sessionSign = nacl.sign(utf8ToArray(sessionData), Buffer.from(process.env.AUTH_PRIVATE, 'base64'));
-      setCookie('session_data', sessionData, { req, res });
-      setCookie('session_sign', Buffer.from(sessionSign).toString('base64'), { req, res });
+      setCookie('session_data', sessionData, { req, res, maxAge: 60 * 24 * 60 * 60 });
+      setCookie('session_sign', Buffer.from(sessionSign).toString('base64'), { req, res }, { req, res, maxAge: 60 * 24 * 60 * 60 });
       return res.status(200).send('Check cookies');
     default:
       return res.status(405).send('Method not allowed');
