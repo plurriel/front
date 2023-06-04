@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as DOMPurify from 'dompurify';
+import cuid2 from '@paralleldrive/cuid2';
+
 import { Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
 import { Archive } from '../icons/Archive';
@@ -74,8 +76,8 @@ export function MailRow({ ...props }) {
               <Container scroll fill>
                 <Stack col gap>
                   {
-                  convo.mails.map((mailId) => <MailContents mailId={mailId} key={mailId} />)
-                }
+                    convo.mails.map((mailId) => <MailContents mailId={mailId} key={mailId} />)
+                  }
                 </Stack>
               </Container>
             )
@@ -116,6 +118,8 @@ function ActionRow({ ...props }) {
 }
 
 function MailContents({ mailId }) {
+  const idRef = useRef(cuid2.createId());
+
   const {
     mails: [mails],
   } = useAppContext();
@@ -124,10 +128,8 @@ function MailContents({ mailId }) {
 
   const [frameHeight, setFrameHeight] = useState(100);
 
-  const id = useRef(Math.random());
-
   window.addEventListener('message', (event) => {
-    if (event.source.parent === window && event.data.type === 'resize' && event.data.id === id.current) {
+    if (event.source.parent === window && event.data.type === 'resize' && event.data.id === idRef.current) {
       setFrameHeight(event.data.value);
     }
   });
@@ -186,11 +188,12 @@ function MailContents({ mailId }) {
 <style>body{background-color:white;font-family:'DM Sans',sans-serif;padding:1em;margin:0;overflow-y:hidden;}</style>
 <script>
 const resizeEl=document.querySelector('body')
-const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:${id.current}},"*");
+const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:"${idRef.current}"},"*");
 sendHeight()
 new ResizeObserver(()=>sendHeight()).observe(resizeEl)
+document.querySelectorAll('a').forEach(a=>a.target="_blank");
 </script>`}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-popups"
         className={styles.message_content}
       />
     </Stack>

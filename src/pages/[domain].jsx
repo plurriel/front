@@ -178,16 +178,21 @@ export async function getServerSideProps({ req, res, params }) {
         id: selFolder,
       },
       select: {
-        convos: true,
+        convos: {
+          orderBy: {
+            latest: 'desc',
+          },
+        },
       },
     });
     if (folderContents) {
-      folderContents.convos.forEach((convo) => {
+      result.folders[selFolder].convos = folderContents.convos.map((convo) => {
         // Dirty hack....
         result.convos[convo.id] = {
           ...convo,
-          latest: convo.latest.getDate(),
+          latest: convo.latest.getTime(),
         };
+        return convo.id;
       });
     } else {
       setCookie('selected', null, { req, res, path: `/${params.domain}` });

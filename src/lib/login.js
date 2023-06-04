@@ -1,6 +1,15 @@
 import nacl from 'tweetnacl';
 import { prisma } from '@/lib/prisma';
 
+function toArrayBuffer(buffer) {
+  const arrayBuffer = new ArrayBuffer(buffer.length);
+  const view = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < buffer.length; i += 1) {
+    view[i] = buffer[i];
+  }
+  return view;
+}
+
 export async function getLogin(req) {
   // Check if signature is correct
   let sessionSign;
@@ -26,7 +35,7 @@ export async function getLogin(req) {
   const date = sessionData.genTime;
   if (!date || typeof date !== 'number') return new Error('"session_data".genTime is not a valid timestamp');
 
-  const isValid = nacl.sign.open(sessionSign, Buffer.from(process.env.AUTH_PUBLIC, 'base64'));
+  const isValid = nacl.sign.open(toArrayBuffer(sessionSign), toArrayBuffer(Buffer.from(process.env.AUTH_PUBLIC, 'base64')));
   if (!isValid) return new Error('The signature is invalid');
 
   const user = await prisma.user.findUnique({

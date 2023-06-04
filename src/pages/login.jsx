@@ -30,6 +30,8 @@ export default function Login({ pubkey }) {
 
   const [errorMessage, setErrorMessage] = useState(null);
 
+  const [disabled, setDisabled] = useState(false);
+
   async function upload() {
     setErrorMessage(null);
     const publicKey = base64ToArrayBuffer(pubkey);
@@ -38,6 +40,8 @@ export default function Login({ pubkey }) {
       utf8ToArray(JSON.stringify({ password, time: Date.now() })),
       publicKey,
     );
+
+    setDisabled(true);
 
     const login = await fetch('/api/login', {
       method: 'POST',
@@ -48,6 +52,7 @@ export default function Login({ pubkey }) {
       }),
     });
     if (login.status === 200) return next();
+    setDisabled(false);
     return setErrorMessage(await login.text());
   }
 
@@ -68,7 +73,12 @@ export default function Login({ pubkey }) {
         </Container>
         { errorMessage !== '' && <b className={styles.error}>{errorMessage}</b> }
         <Stack col ai="flex-end">
-          <ClickableContainer surface cta disabled={!username || !password} onFire={upload}>
+          <ClickableContainer
+            surface
+            cta
+            disabled={!username || !password || disabled}
+            onFire={upload}
+          >
             <Stack>
               Login
               {' '}
