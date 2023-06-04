@@ -30,7 +30,17 @@ self.addEventListener('activate', async () => {
 
 self.addEventListener('push', (event) => {
   if (event.data) {
-    console.log('Push event!! ', event.data.text());
+    const eventData = JSON.parse(event.data.text());
+    switch (eventData.type) {
+      case 'new_mail':
+        self.registration.showNotification(eventData.subject, {
+          body: `From: ${eventData.from}
+To: ${eventData.addr}`,
+        });
+        break;
+      default:
+        break;
+    }
   } else {
     console.log('Push event but no data');
   }
