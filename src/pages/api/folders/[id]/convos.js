@@ -17,7 +17,11 @@ export default async function handler(req) {
         id: req.nextUrl.searchParams.get('id'),
       },
       select: {
-        convos: true,
+        convos: {
+          orderBy: {
+            latest: 'desc',
+          },
+        },
         addressId: true,
       },
     });
