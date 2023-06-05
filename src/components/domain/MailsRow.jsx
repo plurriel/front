@@ -157,36 +157,38 @@ function ConvoPreview({
   return (
     <ClickableContainer
       col
+      surface
+      highlight={isSelected}
       onFire={() => {
         setSelectedConvo(mailIdx);
         setCurrentFirstPane(2);
       }}
+      gap="0"
+      {...props}
     >
-      <Stack col surface highlight={isSelected} gap="0" {...props}>
-        <Stack center>
-          <Stack fill>
-            <small>
-              {interlocutors.map(emailAddrUtils.extractDisplayName).join(', ')}
-            </small>
-
-          </Stack>
+      <Stack center>
+        <Stack fill>
           <small>
-            {dateSent
-              ? new Intl.DateTimeFormat(
-                'en-GB',
-                dateFormat,
-              ).format(dateSent)
-              : ''}
-
+            {interlocutors.map(emailAddrUtils.extractDisplayName).join(', ')}
           </small>
+
         </Stack>
-        <Container
-          oneline
-          customClasses={[!isSelected && styles.preview_subject]}
-        >
-          {subject}
-        </Container>
+        <small>
+          {dateSent
+            ? new Intl.DateTimeFormat(
+              'en-GB',
+              dateFormat,
+            ).format(dateSent)
+            : ''}
+
+        </small>
       </Stack>
+      <Container
+        oneline
+        customClasses={[!isSelected && styles.preview_subject]}
+      >
+        {subject}
+      </Container>
     </ClickableContainer>
   );
 }

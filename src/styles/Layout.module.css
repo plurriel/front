@@ -151,6 +151,14 @@
 
 .clickable {
   cursor: pointer;
+  position: relative;
+}
+
+.clickable:not(.highlight):not(.cta) {
+  background: var(--bg);
+}
+.clickable:not(.highlight):not(.cta):hover {
+  background: var(--ns);
 }
 
 .disabled {
