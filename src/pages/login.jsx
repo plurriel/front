@@ -97,7 +97,7 @@ export async function getServerSideProps({ req, res, query }) {
     return {
       redirect: {
         permanent: false,
-        destination: query.then,
+        destination: query.then || '/',
       },
     };
   }

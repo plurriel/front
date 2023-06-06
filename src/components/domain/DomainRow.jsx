@@ -174,7 +174,7 @@ function CreateModal({ modalShown, setModalShown }) {
                     val: target.value
                       .toLowerCase()
                       .replace(/ /g, '-')
-                      .replace(/[^A-z0-9!#$%&'*+\-/=?^_`{|}~.]|(?<=\.)\./g, ''),
+                      .replace(/[^A-z0-9!#$%&'*+\-/=?^_`{|}~.]|\.(?=\.)/g, ''),
                   }])}
                   value={step[1].val || ''}
                   maxLength={64}

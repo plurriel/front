@@ -1,8 +1,8 @@
 export const emailAddrUtils = {
   extractDisplayName(v) {
     return (
-      v.match(/^([^ <]+ )*[^ <]+(?= ?<[^>]+>$)/g)
-      || v.match(/(?<=^<)[^>]+(?=>$)/g)
-      || [v])[0];
+      v.match(/^(([^ <]+ )*[^ <]+) ?<[^>]+>$/)
+      || v.match(/^<([^>]+)>$/)
+      || [null, v])[1];
   },
 };
