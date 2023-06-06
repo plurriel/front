@@ -16,7 +16,7 @@ export function MailsRow({ ...props }) {
     addresses: [addresses],
     folders: [folders],
     selectedAddress: [selectedAddress],
-    currentFirstPane: [currentFirstPane, setCurrentFirstPane],
+    currentFirstPane: [, setCurrentFirstPane],
   } = useAppContext();
 
   if (!selectedAddress) {
@@ -34,18 +34,13 @@ export function MailsRow({ ...props }) {
   return (
     <Stack col surface {...props}>
       <Stack center surface>
-        {
-          currentFirstPane !== 0
-          && (
-          <IconButton
-            onFire={() => {
-              setCurrentFirstPane(0);
-            }}
-            customClasses={[pageStyles.second_pane_back]}
-            icon={Back}
-          />
-          )
-        }
+        <IconButton
+          onFire={() => {
+            setCurrentFirstPane(0);
+          }}
+          customClasses={[pageStyles.second_pane_back]}
+          icon={Back}
+        />
         <Stack fill col gap={0}>
           <small>
             {currentAddress.name}

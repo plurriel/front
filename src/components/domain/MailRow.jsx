@@ -4,30 +4,32 @@ import cuid2 from '@paralleldrive/cuid2';
 
 import { Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
-import { Archive } from '../icons/Archive';
 import { ChevronDown } from '../icons/ChevronDown';
-import { Delete } from '../icons/Delete';
-import { Forward } from '../icons/Forward';
-import { MarkUnread } from '../icons/MarkUnread';
-import { MoveTo } from '../icons/MoveTo';
 import { Reply } from '../icons/Reply';
-import { ReportSpam } from '../icons/ReportSpam';
-import { Schedule } from '../icons/Schedule';
 import { Send } from '../icons/Send';
 import { useAppContext } from './AppContext';
 
 import { emailAddrUtils } from '@/lib/utils';
 
+import pageStyles from '@/styles/domain.module.css';
 import styles from '@/styles/domain/MailRow.module.css';
+import { Back } from '../icons/Back';
+import { IconButton } from '../IconButton';
+import { Options } from '../icons/Options';
 
 export function MailRow({ ...props }) {
   const {
     selectedConvo: [selectedConvo],
+    selectedAddress: [selectedAddress],
+    addresses: [addresses],
     mails: [, setMails],
     convos: [convos, setConvos],
+    currentFirstPane: [, setCurrentFirstPane],
   } = useAppContext();
 
   const convo = convos[selectedConvo];
+
+  const address = addresses[selectedAddress[1]];
 
   useEffect(() => {
     (async () => {
@@ -61,9 +63,23 @@ export function MailRow({ ...props }) {
 
   return (
     <Stack surface col {...props}>
-      <Stack col surface pad="0" br="1em 1em 0.5em 0.5em">
-        <ActionRow />
-        <Stack pad>
+      <Stack col surface pad="0" br="1em 1em 0.5em 0.5em" gap="0">
+        <Stack related uncollapsable jc="space-between">
+          <Stack pad gap>
+            <IconButton
+              onFire={() => {
+                setCurrentFirstPane(0);
+              }}
+              customClasses={[pageStyles.second_pane_back]}
+              icon={Back}
+            />
+            {[JSON.parse(convo.interlocutors), address.name].join(', ')}
+          </Stack>
+          <Container pad>
+            <IconButton icon={Options} />
+          </Container>
+        </Stack>
+        <Stack pad col>
           <Container fill>
             <b>{convo.subject}</b>
           </Container>
@@ -87,34 +103,34 @@ export function MailRow({ ...props }) {
   );
 }
 
-function ActionRow({ ...props }) {
-  return (
-    <Stack related {...props} uncollapsable>
-      <Container pad>
-        <Forward block />
-      </Container>
-      <Container fill />
-      <Container pad>
-        <Archive block />
-      </Container>
-      <Container pad>
-        <MoveTo block />
-      </Container>
-      <Container pad>
-        <Schedule block />
-      </Container>
-      <Container pad>
-        <MarkUnread block />
-      </Container>
-      <Container pad>
-        <Delete block />
-      </Container>
-      <Container pad>
-        <ReportSpam block />
-      </Container>
-    </Stack>
-  );
-}
+// function ActionRow({ ...props }) {
+//   return (
+//     <Stack related {...props} uncollapsable>
+//       <Container pad>
+//         <Forward block />
+//       </Container>
+//       <Container fill />
+//       <Container pad>
+//         <Archive block />
+//       </Container>
+//       <Container pad>
+//         <MoveTo block />
+//       </Container>
+//       <Container pad>
+//         <Schedule block />
+//       </Container>
+//       <Container pad>
+//         <MarkUnread block />
+//       </Container>
+//       <Container pad>
+//         <Delete block />
+//       </Container>
+//       <Container pad>
+//         <ReportSpam block />
+//       </Container>
+//     </Stack>
+//   );
+// }
 
 function MailContents({ mailId }) {
   const idRef = useRef(cuid2.createId());

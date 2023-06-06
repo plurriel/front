@@ -48,6 +48,9 @@
 }
 
 @media screen and (min-width: 766px) { /* 256px + min(max(33vw, 256px), 384px) + 7em */
+  .require_first .second_pane_back {
+    display: none;
+  }
   .require_first .address {
     display: flex;
     width: calc(2em + 256px);
@@ -81,6 +84,9 @@
     border-bottom-right-radius: 1em;
   }
   .require_second .second_pane_back {
+    display: none;
+  }
+  .require_second .third_pane_back {
     display: none;
   }
   .require_third .address {
@@ -159,7 +165,7 @@
     display: flex;
     flex: 1;
   }
-  .second_pane_back {
+  .second_pane_back, .third_pane_back {
     display: none !important;
   }
 }
