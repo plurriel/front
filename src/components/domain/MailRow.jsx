@@ -30,10 +30,9 @@ export function MailRow({ ...props }) {
   const convo = convos[selectedConvo];
 
   useEffect(() => {
-    const controller = new AbortController();
     (async () => {
       if (convo && !convo.mails) {
-        const mailsInConvo = await fetch(`/api/convos/${selectedConvo}/mails`, { signal: controller.signal })
+        const mailsInConvo = await fetch(`/api/convos/${selectedConvo}/mails`)
           .then((res) => res.json());
         setMails((mails) => {
           const newMails = { ...mails };
