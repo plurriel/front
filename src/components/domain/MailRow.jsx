@@ -29,8 +29,6 @@ export function MailRow({ ...props }) {
 
   const convo = convos[selectedConvo];
 
-  const address = addresses[selectedAddress[1]];
-
   useEffect(() => {
     (async () => {
       if (convo && !convo.mails) {
@@ -61,11 +59,13 @@ export function MailRow({ ...props }) {
     );
   }
 
+  const address = addresses[selectedAddress[1]];
+
   return (
     <Stack surface col {...props}>
       <Stack col surface pad="0" br="1em 1em 0.5em 0.5em" gap="0">
         <Stack related uncollapsable jc="space-between">
-          <Stack pad gap>
+          <Stack pad>
             <IconButton
               onFire={() => {
                 setCurrentFirstPane(0);
@@ -73,7 +73,7 @@ export function MailRow({ ...props }) {
               customClasses={[pageStyles.second_pane_back]}
               icon={Back}
             />
-            {[JSON.parse(convo.interlocutors), address.name].join(', ')}
+            <Container oneline fill>{[JSON.parse(convo.interlocutors), address.name].join(', ')}</Container>
           </Stack>
           <Container pad>
             <IconButton icon={Options} />
