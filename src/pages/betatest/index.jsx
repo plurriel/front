@@ -45,7 +45,7 @@ export default function BetaTest({ pubkey }) {
               const publicKey = base64ToArrayBuffer(pubkey);
 
               const encryptedPassword = await ecies.encrypt(
-                utf8ToArray(JSON.stringify({ password, time: Date.now() })),
+                utf8ToArray(JSON.stringify({ password })),
                 publicKey,
               );
 
