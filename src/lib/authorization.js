@@ -75,6 +75,6 @@ export async function hasPermissions([scopeType, originalScopeId], requestedPerm
         if (requestedPerms.size === 0) return true;
       }
     default:
-      return true;
+      return false;
   }
 }
