@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import bcrypt from 'bcrypt';
 import { setCookie } from 'cookies-next';
 import nacl from 'tweetnacl';

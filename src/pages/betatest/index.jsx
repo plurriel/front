@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import TwinBcrypt from 'twin-bcrypt';
+import * as ecies from 'ecies-25519';
+import { utf8ToArray } from 'enc-utils';
 import { ClickableContainer, Container, Stack } from '@/components/Layout';
 import { TextInput } from '@/components/Input';
 
 import styles from '@/styles/betatest.module.css';
 
-export default function BetaTest() {
+function base64ToArrayBuffer(base64) {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i += 1) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+export default function BetaTest({ pubkey }) {
   const [password, setPassword] = useState('');
   const [passwordHash, setPasswordHash] = useState(false);
 
@@ -31,8 +41,23 @@ export default function BetaTest() {
           <ClickableContainer
             cta
             surface
-            onFire={() => {
-              TwinBcrypt.hash(password, (hash) => setPasswordHash(hash));
+            onFire={async () => {
+              const publicKey = base64ToArrayBuffer(pubkey);
+
+              const encryptedPassword = await ecies.encrypt(
+                utf8ToArray(JSON.stringify({ password, time: Date.now() })),
+                publicKey,
+              );
+
+              const passwordHashRes = await fetch('/api/betatest/hash', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  password: btoa(String.fromCharCode(...encryptedPassword)),
+                }),
+              }).then((res) => res.json());
+
+              setPasswordHash(passwordHashRes.hash);
             }}
           >
             Generate hash
@@ -50,4 +75,12 @@ export default function BetaTest() {
       </Stack>
     </Stack>
   );
+}
+
+export async function getServerSideProps() {
+  return {
+    props: {
+      pubkey: process.env.NEXT_PUBLIC_USERS_TO_US_PUBLIC,
+    },
+  };
 }
