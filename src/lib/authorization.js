@@ -1,19 +1,10 @@
 /* eslint-disable no-fallthrough */
 import { prisma } from './prisma';
 
-function applyMask(object, mask) {
-  return Object.entries(mask)
-    .reduce((result, [key, value]) => (value ? { ...result, [key]: object[key] } : result), {});
-}
-
-function allValuesTruthy(object) {
-  return Object.values(object).every(Boolean);
-}
-
 // eslint-disable-next-line import/prefer-default-export
 export async function hasPermissions([scopeType, originalScopeId], requestedPerms, userId) {
+  requestedPerms = new Set(requestedPerms);
   let scopeId = originalScopeId;
-  let perms;
   switch (scopeType) {
     case 'address':
       const addressAuthorization = await prisma.usersOnAddressesLink.findUnique({
@@ -25,8 +16,13 @@ export async function hasPermissions([scopeType, originalScopeId], requestedPerm
         },
       });
       if (addressAuthorization) {
-        perms = addressAuthorization;
-        break;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const requestedPerm of requestedPerms) {
+          const addressAuthorizationValue = addressAuthorization[requestedPerm];
+          if (addressAuthorizationValue === false) return false;
+          if (addressAuthorizationValue === true) requestedPerms.delete(requestedPerm);
+        }
+        if (requestedPerms.size === 0) return true;
       }
       const address = await prisma.address.findUnique({
         where: {
@@ -45,8 +41,13 @@ export async function hasPermissions([scopeType, originalScopeId], requestedPerm
         },
       });
       if (subdomainAuthorization) {
-        perms = subdomainAuthorization;
-        break;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const requestedPerm of requestedPerms) {
+          const subdomainAuthorizationValue = subdomainAuthorization[requestedPerm];
+          if (subdomainAuthorizationValue === false) return false;
+          if (subdomainAuthorizationValue === true) requestedPerms.delete(requestedPerm);
+        }
+        if (requestedPerms.size === 0) return true;
       }
       const subdomain = await prisma.subdomain.findUnique({
         where: {
@@ -65,11 +66,15 @@ export async function hasPermissions([scopeType, originalScopeId], requestedPerm
         },
       });
       if (domainAuthorization) {
-        perms = domainAuthorization;
-        break;
+        // eslint-disable-next-line no-restricted-syntax
+        for (const requestedPerm of requestedPerms) {
+          const domainAuthorizationValue = domainAuthorization[requestedPerm];
+          if (domainAuthorizationValue === false) return false;
+          if (domainAuthorizationValue === true) requestedPerms.delete(requestedPerm);
+        }
+        if (requestedPerms.size === 0) return true;
       }
     default:
-      return false;
+      return true;
   }
-  return allValuesTruthy(applyMask(perms, requestedPerms));
 }

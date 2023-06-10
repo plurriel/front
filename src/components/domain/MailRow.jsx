@@ -68,7 +68,7 @@ export function MailRow({ ...props }) {
           <Stack pad>
             <IconButton
               onFire={() => {
-                setCurrentFirstPane(0);
+                setCurrentFirstPane(1);
               }}
               customClasses={[pageStyles.second_pane_back]}
               icon={Back}

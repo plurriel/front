@@ -79,15 +79,29 @@ function CreateModal({ modalShown, setModalShown }) {
   useEffect(() => {
     (async () => {
       if (step[0] === 2) {
-        if (step[1].type === 'email') {
-          await fetch(`/api/subdomain/${step[1].subdomainId}/addresses`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              subdomainId: step[1].subdomainId,
-              name: step[1].val,
-            }),
-          });
+        switch (step[1].type) {
+          case 'email':
+            await fetch(`/api/subdomains/${step[1].subdomainId}/addresses`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                subdomainId: step[1].subdomainId,
+                name: step[1].val,
+              }),
+            });
+            break;
+          case 'subdomain':
+            await fetch(`/api/domains/${step[1].domainId}/subdomains`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                domainId: step[1].domainId,
+                name: step[1].val,
+              }),
+            });
+            break;
+          default:
+            console.log('wtf');
         }
       }
     })();
@@ -180,29 +194,28 @@ function CreateModal({ modalShown, setModalShown }) {
                   maxLength={64}
                 />
               </Container>
-              <Stack surface ai>
-                {' '}
-                {/* I hate myself for doing this */}
-                <Container
-                  oneline
-                  customTag={SelectTag}
-                  onChange={(e) => setStep((step_) => [step_[0], {
-                    ...step_[1],
-                    subdomainId: e.target.value,
-                  }])}
-                  defaultValue={selectedSubdomainId}
-                >
-                  {
-                    domain.subdomains.map((subdomainId) => (
-                      <option value={subdomainId}>
-                        @
-                        {subdomains[subdomainId].name}
-                      </option>
-                    ))
-                  }
-                </Container>
-                <ChevronDown block />
-              </Stack>
+              {/* I hate myself for doing this */}
+              <Container
+                surface
+                ai
+                oneline
+                customTag={SelectTag}
+                onChange={(e) => setStep((step_) => [step_[0], {
+                  ...step_[1],
+                  subdomainId: e.target.value,
+                }])}
+                defaultValue={selectedSubdomainId}
+              >
+                {
+                  domain.subdomains.map((subdomainId) => (
+                    <option value={subdomainId}>
+                      @
+                      {subdomains[subdomainId].name}
+                    </option>
+                  ))
+                }
+              </Container>
+              <ChevronDown block customClasses={[styles.subdomain_sel_chevron]} />
             </Stack>
             <Stack jc="flex-end">
               <ClickableContainer
@@ -221,8 +234,58 @@ function CreateModal({ modalShown, setModalShown }) {
           </>
         );
       }
-      return <b>To be done!</b>;
-
+      if (step[1].type === 'subdomain') {
+        if (!step[1].domainId) {
+          setStep([
+            step[0],
+            { ...step[1], domainId: domain.id },
+          ]);
+        }
+        return (
+          <>
+            <span>Subdomain</span>
+            <Stack related>
+              <Container fill>
+                <TextInput
+                  w
+                  onChange={({ target }) => setStep((step_) => [step_[0], {
+                    ...step_[1],
+                    val: target.value
+                      .toLowerCase()
+                      .replace(/ /g, '-')
+                      .replace(/[^a-z0-9-]/g, ''),
+                  }])}
+                  onBlur={() => setStep((step_) => [step_[0], {
+                    ...step_[1],
+                    val: step_[1].val?.replace(/^-|-$/g, ''),
+                  }])}
+                  value={step[1].val || ''}
+                  maxLength={64}
+                />
+              </Container>
+              <Container surface>
+                .
+                {domain.name}
+              </Container>
+            </Stack>
+            <Stack jc="flex-end">
+              <ClickableContainer
+                disabled={!step[1].val}
+                surface
+                cta
+                onFire={() => setStep((step_) => [step_[0] + 1, step_[1]])}
+              >
+                <Stack>
+                  Create
+                  {' '}
+                  <ArrowForward block />
+                </Stack>
+              </ClickableContainer>
+            </Stack>
+          </>
+        );
+      }
+      return <b>wtf</b>;
     default:
       requestAnimationFrame(() => setModalShown(false));
       return false;
@@ -335,6 +398,7 @@ function EmailAddress({
         customClasses={[styles.actualemail]}
         br="0.5em"
         unclickable={!isShown}
+        highlight={isSelected && !isExpanded}
       >
         <Person name={`${address.name}`} img={address.imgSrc} />
       </ClickableContainer>
@@ -359,7 +423,6 @@ function EmailAddress({
                   unclickable={!isExpanded}
                 >
                   <RelevantIcon type={folders[folderId].type} />
-                  {' '}
                   {folders[folderId].type !== 'Other' ? folders[folderId].type : folders[folderId].name}
                 </ClickableContainer>
               ))

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { object, string } from 'yup';
-import { hasPermissions } from '@/lib/authorisation';
+import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 
@@ -9,10 +9,12 @@ const schema = object({
     .lowercase()
     .min(1)
     .max(64)
-    .matches(/^([0-9a-z!#$%&'*+\-/=?^_`{|}~]+\.)*[0-9a-z!#$%&'*+\-/=?^_`{|}~]+$/),
+    .matches(/^([0-9a-z!#$%&'*+\-/=?^_`{|}~]+\.)*[0-9a-z!#$%&'*+\-/=?^_`{|}~]+$/)
+    .required(),
   subdomainId: string()
-    .matches(/^c[0-9a-z]{24}$/),
-});
+    .matches(/^c[0-9a-z]{24}$/)
+    .required(),
+}).required();
 
 export default async function handler(req) {
   if (req.method === 'POST') {
@@ -21,14 +23,6 @@ export default async function handler(req) {
       return NextResponse.json({
         message: `Precondition Failed - Must log in before continuing + ${user.message}`,
       }, { status: 412 });
-    }
-
-    try {
-      schema.validate(user);
-    } catch (err) {
-      return NextResponse.json({
-        message: err.message,
-      }, { status: 400 });
     }
 
     let body;
@@ -40,9 +34,29 @@ export default async function handler(req) {
       }, { status: 400 });
     }
 
+    try {
+      schema.validate(body);
+    } catch (err) {
+      return NextResponse.json({
+        message: err.message,
+      }, { status: 400 });
+    }
+
     const { subdomainId, name } = body;
 
-    if (!hasPermissions(['subdomain', subdomainId], { createMail: true }, user.id)) {
+    const subdomain = await prisma.subdomain.findUnique({
+      where: {
+        id: subdomainId,
+      },
+    });
+
+    if (!subdomain) {
+      return NextResponse.json({
+        message: 'No such subdomain',
+      }, { status: 404 });
+    }
+
+    if (!(await hasPermissions(['subdomain', subdomainId], ['createMail'], user.id))) {
       return NextResponse.json({
         message: 'You are not authorised to make this change on this subdomain',
       }, { status: 401 });
@@ -50,11 +64,7 @@ export default async function handler(req) {
 
     await prisma.address.create({
       data: {
-        name: `${name}@${await prisma.subdomain.findUnique({
-          where: {
-            id: subdomainId,
-          },
-        }).then((subdomain) => subdomain.name)}`,
+        name: `${name}@${subdomain.name}`,
         catchAll: false,
         subdomainId,
         folders: {

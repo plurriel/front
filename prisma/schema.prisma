@@ -27,7 +27,7 @@ model Mail {
   recvDelay       Int
   messageId       String?         @db.VarChar(995)
   subject         String?
-  html            String?
+  html            String?         @db.LongText
 
   inReplyTo       String?         @db.VarChar(995)
 
@@ -85,13 +85,13 @@ model UsersOnAddressesLink {
   addressId       String
   address         Address         @relation(fields: [addressId], references: [id])
 
-  consult         Boolean         @default(true)
-  view            Boolean         @default(true)
-  compose         Boolean         @default(true)
-  send            Boolean         @default(true)
-  delete          Boolean         @default(true)
+  consult         Boolean?
+  view            Boolean?
+  compose         Boolean?
+  send            Boolean?
+  delete          Boolean?
 
-  mute            Boolean         @default(false)
+  mute            Boolean?
 
   @@id([userId, addressId])
 }
@@ -113,14 +113,14 @@ model UsersOnSubdomainsLink {
   subdomainId     String
   subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
 
-  consult         Boolean         @default(true)
-  view            Boolean         @default(true)
-  compose         Boolean         @default(true)
-  createMail      Boolean         @default(true)
-  send            Boolean         @default(true)
-  delete          Boolean         @default(true)
+  consult         Boolean?
+  view            Boolean?
+  compose         Boolean?
+  createMail      Boolean?
+  send            Boolean?
+  delete          Boolean?
 
-  mute            Boolean         @default(false)
+  mute            Boolean?
 
   @@id([userId, subdomainId])
 }
@@ -141,15 +141,15 @@ model UsersOnDomainsLink {
   domainId        String
   domain          Domain          @relation(fields: [domainId], references: [id])
 
-  consult         Boolean         @default(true)
-  view            Boolean         @default(true)
-  compose         Boolean         @default(true)
-  createMail      Boolean         @default(true)
-  createSub       Boolean         @default(true)
-  send            Boolean         @default(true)
-  delete          Boolean         @default(true)
+  consult         Boolean?
+  view            Boolean?
+  compose         Boolean?
+  createMail      Boolean?
+  createSub       Boolean?
+  send            Boolean?
+  delete          Boolean?
 
-  mute            Boolean         @default(false)
+  mute            Boolean?
 
   @@id([userId, domainId])
 }

@@ -33,3 +33,10 @@
     flex: unset;
   }
 }
+
+.subdomain_sel_chevron {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
+  pointer-events: none;
+}

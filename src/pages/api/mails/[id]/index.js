@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
-import { hasPermissions } from '@/lib/authorisation';
+import { hasPermissions } from '@/lib/authorization';
 
 export default async function handler(req) {
   if (req.method === 'GET') {
@@ -34,7 +34,7 @@ export default async function handler(req) {
       },
     });
 
-    if (!(await hasPermissions(['address', mail.convo.folder.address.id], { view: true, consult: true }, user.id))) {
+    if (!(await hasPermissions(['address', mail.convo.folder.address.id], ['view', 'consult'], user.id))) {
       return NextResponse.json({
         message: 'Insufficient permissions - Must be able to view and consult mailbox',
       }, { status: 401 });

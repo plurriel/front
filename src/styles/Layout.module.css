@@ -67,6 +67,7 @@
 .related {
   border-radius: 1em;
   gap: 0.5em;
+  position: relative;
 }
 .surface .related.surface {
   padding: 0;

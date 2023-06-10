@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { hasPermissions } from '@/lib/authorisation';
+import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 
@@ -26,7 +26,7 @@ export default async function handler(req) {
       },
     });
 
-    if (!(await hasPermissions(['address', folder.addressId], { view: true, consult: true }, user.id))) {
+    if (!(await hasPermissions(['address', folder.addressId], ['view', 'consult'], user.id))) {
       return NextResponse.json({
         message: 'Insufficient permissions - Must be able to view and consult folder',
       }, { status: 401 });

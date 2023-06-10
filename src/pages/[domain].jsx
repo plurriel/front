@@ -13,7 +13,7 @@ import { Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login_not_edge';
-import { hasPermissions } from '@/lib/authorisation';
+import { hasPermissions } from '@/lib/authorization';
 
 export async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -60,7 +60,13 @@ export default function Home({
   const selectedConvoState = useState(null);
   const currentFirstPaneState = useState(selectedAddress ? 1 : 0);
 
-  useEffect(() => setCookie('selected', selectedAddressState[0]?.join(','), { path: `/${domain.name}` }), [domain, selectedAddressState]);
+  useEffect(() => {
+    setCookie('selected', selectedAddressState[0]?.join(','), { path: `/${domain.name}` });
+  }, [domain, selectedAddressState]);
+
+  useEffect(() => {
+    setCookie('last_toggled', [...toggledSubdomainsState[0]]?.join(','), { path: `/${domain.name}` });
+  }, [domain, toggledSubdomainsState]);
 
   const providerData = useMemo(() => ({
     domain,
@@ -150,7 +156,7 @@ export async function getServerSideProps({ req, res, params }) {
 
   if (!domain) return { notFound: true };
 
-  if (!(await hasPermissions(['domain', domain.id], {}, user.id))) {
+  if (!(await hasPermissions(['domain', domain.id], [], user.id))) {
     return { notFound: true };
   }
 
@@ -167,7 +173,7 @@ export async function getServerSideProps({ req, res, params }) {
     return subdomain.id;
   });
 
-  result.lastToggled = getCookie('last_toggled', { req, res }) || domain.subdomains;
+  result.lastToggled = getCookie('last_toggled', { req, res })?.split(',').filter((v) => domain.subdomains.includes(v)) || domain.subdomains;
   result.domain = domain;
   const selected = getCookie('selected', { req, res })?.split(',');
   if (selected && selected.length === 3) {
