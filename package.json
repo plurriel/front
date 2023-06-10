@@ -25,6 +25,7 @@
     "react-animate-height": "^3.1.1",
     "react-dom": "18.2.0",
     "tweetnacl": "^1.0.3",
+    "twin-bcrypt": "^2.1.1",
     "yup": "^1.2.0"
   },
   "devDependencies": {
