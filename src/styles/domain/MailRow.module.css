@@ -2,3 +2,9 @@
   border: none;
   background-color: var(--ns);
 }
+
+.replyinput:empty::after {
+  content: 'Reply...';
+  opacity: 0.75;
+  width: 100%;
+}

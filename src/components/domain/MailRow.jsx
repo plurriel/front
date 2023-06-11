@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as DOMPurify from 'dompurify';
 import cuid2 from '@paralleldrive/cuid2';
 
-import { Container, Stack } from '../Layout';
+import { ClickableContainer, Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
 import { ChevronDown } from '../icons/ChevronDown';
 import { Reply } from '../icons/Reply';
@@ -64,20 +64,16 @@ export function MailRow({ ...props }) {
   return (
     <Stack surface col {...props}>
       <Stack col surface pad="0" br="1em 1em 0.5em 0.5em" gap="0">
-        <Stack related uncollapsable jc="space-between">
-          <Stack pad>
-            <IconButton
-              onFire={() => {
-                setCurrentFirstPane(1);
-              }}
-              customClasses={[pageStyles.second_pane_back]}
-              icon={Back}
-            />
-            <Container oneline fill>{[JSON.parse(convo.interlocutors), address.name].join(', ')}</Container>
-          </Stack>
-          <Container pad>
-            <IconButton icon={Options} />
-          </Container>
+        <Stack related uncollapsable pad>
+          <IconButton
+            onFire={() => {
+              setCurrentFirstPane(1);
+            }}
+            customClasses={[pageStyles.second_pane_back]}
+            icon={Back}
+          />
+          <Container oneline fill>{[JSON.parse(convo.interlocutors), address.name].join(', ')}</Container>
+          <IconButton icon={Options} />
         </Stack>
         <Stack pad col>
           <Container fill>
@@ -216,16 +212,27 @@ document.querySelectorAll('a').forEach(a=>a.target="_blank");
 }
 
 function ReplyBar({ ...props }) {
+  // const [replyContents, setReplyContents] = useState('');
+
   return (
     <Stack related {...props} uncollapsable>
       <Stack surface>
         <Reply block />
         <ChevronDown block />
       </Stack>
-      <Container surface fill>Reply...</Container>
-      <Container surface>
-        <Send block />
+      <Container fill>
+        <Container surface pad={0} w>
+          <Container
+            pad
+            customClasses={[styles.replyinput]}
+            // onDOMSubtreeModified={(event) => setReplyContents(event.target.innerText)}
+            contentEditable
+          />
+        </Container>
       </Container>
+      <ClickableContainer pad surface>
+        <Send />
+      </ClickableContainer>
     </Stack>
   );
 }

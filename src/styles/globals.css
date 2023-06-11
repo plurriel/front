@@ -164,6 +164,15 @@ input {
   height: 3em;
 }
 
+textarea {
+  appearance: none;
+  resize: none;
+  font: inherit;
+  padding: unset;
+  border: none;
+  height: fit-content;
+}
+
 select {
   appearance: none;
   border: none;
