@@ -6,9 +6,9 @@ export class SomeTrueTree {
   }
 
   get value() {
-    if (this.hidden___value) return true;
+    if (this.hidden___value === true) return true;
     // eslint-disable-next-line no-restricted-syntax
-    for (const child of this.children) {
+    for (const child of Object.values(this.children)) {
       if (child.value) return true;
     }
     return false;
@@ -28,10 +28,10 @@ export class SomeTrueTree {
   }
 
   toJSON() {
-    return JSON.stringify({
+    return {
       value: this.value,
       innerValue: this.hidden___value,
       children: this.children,
-    });
+    };
   }
 }

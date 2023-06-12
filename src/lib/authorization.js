@@ -10,7 +10,8 @@ function hasPermissionsLocal(localPerms, oldRequestedPerms) {
     if (localAuthorizationValue === false) return false;
     if (localAuthorizationValue === true) requestedPerms.delete(requestedPerm);
   }
-  if (requestedPerms.size === 0) return true;
+  // OMG MY EYES ARE BLEEDING OUT PLEASE CHANGE THIS
+  if (requestedPerms.size === 0 && !localPerms.inexistant) return true;
   return requestedPerms;
 }
 
@@ -91,84 +92,82 @@ export async function hasPermissionsWithin([scopeType, originalScopeId], request
   const addresses = {};
   switch (scopeType) {
     case 'domain':
-      const domainAuthorization = await prisma.usersOnDomainsLink.findUnique({
+      const {
+        id,
+        usersLink: [domainAuthorization],
+      } = await prisma.domain.findUnique({
         where: {
-          userId_domainId: {
-            userId,
-            domainId: scopeId,
+          id: scopeId,
+        },
+        select: {
+          id: true,
+          usersLink: {
+            where: {
+              userId,
+            },
           },
         },
       });
-      domains[domainAuthorization.domainId] = domainAuthorization;
+      domains[id] = domainAuthorization || { inexistant: true };
       nextQuery = {
-        subdomain: {
-          domainId: scopeId,
-        },
+        domainId: scopeId,
       };
       mapHigherUp = true;
     case 'subdomain':
       if (!nextQuery) {
         nextQuery = {
-          subdomainId: scopeId,
+          id: scopeId,
         };
       }
-      const subdomainAuthorizations = await prisma.usersOnSubdomainsLink.findMany({
-        where: {
-          userId,
-          ...nextQuery,
-        },
-        include: {
-          subdomain: {
-            select: {
-              domainId: mapHigherUp,
+      const subdomainAuthorizations = await prisma.subdomain.findMany({
+        where: nextQuery,
+        select: {
+          id: true,
+          usersLink: {
+            where: {
+              userId,
             },
           },
+          domainId: mapHigherUp,
         },
       });
-      console.log(subdomainAuthorizations, {
-        where: {
-          userId,
-          ...nextQuery,
-        },
-      });
-      subdomainAuthorizations.forEach((subdomainAuthorization) => {
-        subdomains[subdomainAuthorization.subdomainId] = subdomainAuthorization;
-        const domainId = subdomainAuthorization.subdomain?.domainId;
-        console.log(domainId);
+      subdomainAuthorizations.forEach((subdomainAuthorizationObj) => {
+        const subdomainAuthorization = subdomainAuthorizationObj.usersLink[0];
+        subdomains[subdomainAuthorizationObj.id] = subdomainAuthorization || { inexistant: true };
+        const { domainId } = subdomainAuthorizationObj;
         if (domainId && domainId in domains) {
-          subdomains[domainId].next ??= [];
-          subdomains[domainId].next.push(['subdomain', subdomainAuthorization.addressId]);
+          domains[domainId].next ??= [];
+          domains[domainId].next.push(['subdomain', subdomainAuthorizationObj.id]);
         }
       });
       nextQuery = {
-        address: nextQuery,
+        subdomain: nextQuery,
       };
     case 'address':
       if (!nextQuery) {
         nextQuery = {
-          subdomainId: scopeId,
+          id: scopeId,
         };
       }
-      const addressAuthorizations = await prisma.usersOnAddressesLink.findMany({
-        where: {
-          userId,
-          ...nextQuery,
-        },
-        include: {
-          address: {
-            select: {
-              subdomainId: mapHigherUp,
+      const addressAuthorizations = await prisma.address.findMany({
+        where: nextQuery,
+        select: {
+          id: true,
+          usersLink: {
+            where: {
+              userId,
             },
           },
+          subdomainId: mapHigherUp,
         },
       });
-      addressAuthorizations.forEach((addressAuthorization) => {
-        if (!hasPermissionsLocal(addressAuthorization, requestedPerms)) return;
-        addresses[addressAuthorization.addressId] = addressAuthorization;
-        const subdomainId = addressAuthorization.address?.subdomainId;
+      addressAuthorizations.forEach((addressAuthorizationObj) => {
+        const addressAuthorization = addressAuthorizationObj.usersLink[0];
+        addresses[addressAuthorizationObj.id] = addressAuthorization || { inexistant: true };
+        const { subdomainId } = addressAuthorizationObj;
         if (subdomainId && subdomainId in subdomains) {
           subdomains[subdomainId].next ??= [];
-          subdomains[subdomainId].next.push(['address', addressAuthorization.addressId]);
+          subdomains[subdomainId].next.push(['address', addressAuthorizationObj.id]);
         }
       });
       break;
@@ -176,11 +175,15 @@ export async function hasPermissionsWithin([scopeType, originalScopeId], request
       throw new Error(`Unknown scope type: ${scopeType}`);
   }
   const result = new SomeTrueTree([scopeType, scopeId]);
-  const nextScope = {
-    domain: 'subdomain',
-    subdomain: 'address',
-  };
-  function recursiveTreeTraversal(currentNode, [traversalScopeType, traversalScopeId]) {
+  // const nextScope = {
+  //   domain: 'subdomain',
+  //   subdomain: 'address',
+  // };
+  function recursiveTreeTraversal(
+    currentNode,
+    [traversalScopeType, traversalScopeId],
+    permissionsLocalLatest = false,
+  ) {
     const scopes = {
       address: addresses,
       subdomain: subdomains,
@@ -189,18 +192,41 @@ export async function hasPermissionsWithin([scopeType, originalScopeId], request
 
     const { next, ...currentObject } = scopes[traversalScopeType][traversalScopeId];
 
-    currentNode.value = hasPermissionsLocal(currentObject, requestedPerms) === true;
+    const hasPermissionsResult = hasPermissionsLocal(currentObject, requestedPerms);
+    currentNode.value = hasPermissionsResult instanceof Set
+      ? permissionsLocalLatest
+      : hasPermissionsResult;
 
-    const override = next?.some((oneOfNext) => {
-      const label = [nextScope[traversalScopeType], oneOfNext.id];
+    const override = next?.map(([type, id]) => {
+      const label = [type, id];
       const newCurrentNode = currentNode.set(
-        oneOfNext.id,
+        id,
         new SomeTrueTree(label),
       );
-      return recursiveTreeTraversal(newCurrentNode, label);
-    });
+      const traversal = recursiveTreeTraversal(
+        newCurrentNode,
+        label,
+        hasPermissionsResult instanceof Set
+          ? permissionsLocalLatest
+          : hasPermissionsResult,
+      );
+      // console.log(
+      //   `TRAVERSING NODE ${id}`,
+      //   hasPermissionsResult,
+      //   newCurrentNode,
+      //   label,
+      //   scopes[type][id],
+      //   hasPermissionsResult instanceof Set
+      //     ? permissionsLocalLatest
+      //     : hasPermissionsResult,
+      //   traversal,
+      // );
+      return traversal;
+    }).some(Boolean) || permissionsLocalLatest;
 
-    return currentNode.value || override;
+    return hasPermissionsResult instanceof Set
+      ? override
+      : hasPermissionsResult;
   }
   recursiveTreeTraversal(result, [scopeType, scopeId]);
   return result;

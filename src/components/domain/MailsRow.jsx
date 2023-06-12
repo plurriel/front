@@ -76,6 +76,7 @@ function MailsList() {
       if (!currentFolder.convos) {
         const convosInFolder = await fetch(`/api/folders/${currentFolder.id}/convos`, { signal: controller.signal })
           .then((res) => res.json());
+        if (!convosInFolder) throw new Error('Access is missing');
         setConvos((convos_) => {
           const newConvos = { ...convos_ };
           setFolders((folders_) => {

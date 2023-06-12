@@ -157,25 +157,30 @@ export async function getServerSideProps({ req, res, params }) {
 
   if (!domain) return { notFound: true };
 
-  const permissionsWithinTree = await hasPermissionsWithin(['domain', domain.id], [], user.id);
+  const permissionsWithinTree = await hasPermissionsWithin(['domain', domain.id], ['view'], user.id);
   if (!permissionsWithinTree.value) {
     return { notFound: true };
   }
 
-  console.log(JSON.stringify(permissionsWithinTree));
+  console.log(JSON.stringify(permissionsWithinTree, null, '\t'));
 
-  domain.subdomains = domain.subdomains.map((subdomain) => {
-    subdomain.addresses = subdomain.addresses.map((address) => {
-      address.folders = address.folders.map((folder) => {
-        result.folders[folder.id] = folder;
-        return folder.id;
-      });
-      result.addresses[address.id] = address;
-      return address.id;
+  domain.subdomains = domain.subdomains
+    .filter((subdomain) => permissionsWithinTree.get(subdomain.id).value)
+    .map((subdomain) => {
+      const permissionSubdomainTree = permissionsWithinTree.get(subdomain.id);
+      subdomain.addresses = subdomain.addresses
+        .filter((address) => permissionSubdomainTree.get(address.id).value)
+        .map((address) => {
+          address.folders = address.folders.map((folder) => {
+            result.folders[folder.id] = folder;
+            return folder.id;
+          });
+          result.addresses[address.id] = address;
+          return address.id;
+        });
+      result.subdomains[subdomain.id] = subdomain;
+      return subdomain.id;
     });
-    result.subdomains[subdomain.id] = subdomain;
-    return subdomain.id;
-  });
 
   result.lastToggled = getCookie('last_toggled', { req, res })?.split(',').filter((v) => domain.subdomains.includes(v)) || domain.subdomains;
   result.domain = domain;
