@@ -217,7 +217,7 @@ function ReplyBar({ ...props }) {
   const [replyInputPosition, setReplyInputPosition] = useState(false);
   const replyInput = useRef();
 
-  const [showReplyBarTools, setShowReplyBarTools] = useState(false);
+  // const [showReplyBarTools, setShowReplyBarTools] = useState(false);
 
   useEffect(() => {
     if (replyInput.current) {
@@ -233,7 +233,7 @@ function ReplyBar({ ...props }) {
     }
   }, [replyInput]);
 
-  if (showReplyBarTools) requestAnimationFrame(() => replyInput.current?.focus());
+  // if (showReplyBarTools) requestAnimationFrame(() => replyInput.current?.focus());
 
   return (
     <Stack related {...props} uncollapsable>
