@@ -13,7 +13,7 @@ import { Container, Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login_not_edge';
-import { hasPermissions } from '@/lib/authorization';
+import { hasPermissionsWithin } from '@/lib/authorization';
 
 export async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -157,9 +157,12 @@ export async function getServerSideProps({ req, res, params }) {
 
   if (!domain) return { notFound: true };
 
-  if (!(await hasPermissions(['domain', domain.id], [], user.id))) {
+  const permissionsWithinTree = await hasPermissionsWithin(['domain', domain.id], [], user.id);
+  if (!permissionsWithinTree.value) {
     return { notFound: true };
   }
+
+  console.log(JSON.stringify(permissionsWithinTree));
 
   domain.subdomains = domain.subdomains.map((subdomain) => {
     subdomain.addresses = subdomain.addresses.map((address) => {
