@@ -41,11 +41,8 @@ export function MailsRow({ ...props }) {
           customClasses={[pageStyles.second_pane_back]}
           icon={Back}
         />
-        <Stack fill col gap={0}>
-          <small>
-            {currentAddress.name}
-            &apos;s
-          </small>
+        <Stack fill col gap={0} customClasses={[styles.folder_name]}>
+          <small>{currentAddress.name}</small>
           {currentFolder.type !== 'Other' ? currentFolder.type : currentFolder.name}
         </Stack>
         <IconButton icon={Settings} />

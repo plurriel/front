@@ -169,3 +169,21 @@
     display: none !important;
   }
 }
+
+#reply_bar_tools {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 9;
+  padding: 0;
+  background-color: unset;
+}
+
+#reply_bar_tools > * {
+  position: absolute;
+  pointer-events: all;
+  box-shadow: 0 0 10px var(--bg0);
+}

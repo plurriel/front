@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as DOMPurify from 'dompurify';
 import cuid2 from '@paralleldrive/cuid2';
+import { createPortal } from 'react-dom';
 
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
@@ -16,6 +17,7 @@ import styles from '@/styles/domain/MailRow.module.css';
 import { Back } from '../icons/Back';
 import { IconButton } from '../IconButton';
 import { Options } from '../icons/Options';
+import { Editor, ToolBar } from '../Editor';
 
 export function MailRow({ ...props }) {
   const {
@@ -212,7 +214,26 @@ document.querySelectorAll('a').forEach(a=>a.target="_blank");
 }
 
 function ReplyBar({ ...props }) {
-  // const [replyContents, setReplyContents] = useState('');
+  const [replyInputPosition, setReplyInputPosition] = useState(false);
+  const replyInput = useRef();
+
+  const [showReplyBarTools, setShowReplyBarTools] = useState(false);
+
+  useEffect(() => {
+    if (replyInput.current) {
+      let rect = replyInput.current.getBoundingClientRect();
+      setReplyInputPosition([rect.top, rect.left]);
+
+      const obs = new MutationObserver(() => {
+        console.log('aaaaa');
+        rect = replyInput.current.getBoundingClientRect();
+        setReplyInputPosition([rect.top, rect.left]);
+      });
+      obs.observe(replyInput.current, { attributes: true, childList: true, subtree: true });
+    }
+  }, [replyInput]);
+
+  if (showReplyBarTools) requestAnimationFrame(() => replyInput.current?.focus());
 
   return (
     <Stack related {...props} uncollapsable>
@@ -220,16 +241,38 @@ function ReplyBar({ ...props }) {
         <Reply block />
         <ChevronDown block />
       </Stack>
-      <Container fill>
-        <Container surface pad={0} w>
-          <Container
-            pad
-            customClasses={[styles.replyinput]}
-            // onDOMSubtreeModified={(event) => setReplyContents(event.target.innerText)}
-            contentEditable
-          />
-        </Container>
-      </Container>
+      <Stack fill>
+        <Editor>
+          {
+            createPortal(
+              (
+                <Container
+                  surface
+                  style={{
+                    bottom: `calc(100vh - ${replyInputPosition[0]}px + 0.5em)`,
+                    left: replyInputPosition[1],
+                    // display: showReplyBarTools ? 'block' : 'none',
+                  }}
+                  pad="0.5em"
+                >
+                  <ToolBar />
+                </Container>
+              ),
+              document.getElementById(pageStyles.reply_bar_tools),
+            )
+          }
+          <Container surface pad={0} w>
+            <Container
+              pad
+              customClasses={[styles.replyinput]}
+              ref={replyInput}
+              contentEditable
+              // onFocus={() => setShowReplyBarTools(true)}
+              // onBlur={() => setShowReplyBarTools(false)}
+            />
+          </Container>
+        </Editor>
+      </Stack>
       <ClickableContainer pad surface>
         <Send />
       </ClickableContainer>

@@ -6,6 +6,7 @@ export function IconButton({
   children,
   icon,
   customClasses,
+  revpad,
   ...props
 }) {
   const Icon = icon;
@@ -13,6 +14,9 @@ export function IconButton({
     <ClickableContainer
       {...props}
       customClasses={[styles.iconbtn, customClasses]}
+      style={{
+        '--revpad': revpad || '1em',
+      }}
     >
       <Icon block />
     </ClickableContainer>

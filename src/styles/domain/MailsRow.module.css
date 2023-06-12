@@ -2,3 +2,7 @@
   height: 1em;
   text-overflow: ellipsis;
 }
+
+.folder_name {
+  margin: -1em 0;
+}

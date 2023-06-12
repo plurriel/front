@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import cls from 'clsx';
 import styles from '@/styles/Layout.module.css';
 
-export function Container({
+export const Container = forwardRef(({
   w,
   h,
   pad,
@@ -27,8 +27,10 @@ export function Container({
   related,
   customTag,
   ...props
-}) {
-  const Tag = useMemo(() => customTag || ((a) => <div {...a} />), [customTag]);
+}, ref) => {
+  const Tag = useMemo(() => (customTag
+    ? ((propsInner) => customTag({ ...propsInner, ref }))
+    : ((a) => <div {...a} ref={ref} />)), [customTag, ref]);
   return (
     <Tag
       {...props}
@@ -66,7 +68,7 @@ export function Container({
       {children}
     </Tag>
   );
-}
+});
 
 export function Stack({
   center,
@@ -98,7 +100,6 @@ export function Stack({
       ]}
     >
       {children}
-
     </Container>
   );
 }

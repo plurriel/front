@@ -9,7 +9,7 @@ import { DomainRow } from '@/components/domain/DomainRow';
 import { MailsRow } from '@/components/domain/MailsRow';
 import { MailRow } from '@/components/domain/MailRow';
 import { AppContext } from '@/components/domain/AppContext';
-import { Stack } from '@/components/Layout';
+import { Container, Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login_not_edge';
@@ -96,6 +96,7 @@ export default function Home({
 
   return (
     <AppContext.Provider value={providerData}>
+      <Container id={styles.reply_bar_tools} surface />
       <Stack col customClasses={[styles.page]}>
         <TopBar customClasses={[styles.topbar]} />
         <Stack
