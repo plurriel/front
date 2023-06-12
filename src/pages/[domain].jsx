@@ -210,7 +210,8 @@ export async function getServerSideProps({ req, res, params }) {
         return convo.id;
       });
     } else {
-      setCookie('selected', null, { req, res, path: `/${params.domain}` });
+      setCookie('selected', '', { req, res, path: `/${params.domain}` });
+      result.selectedAddress = null;
     }
   }
   return { props: result };
