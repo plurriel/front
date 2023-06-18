@@ -34,16 +34,16 @@ export default async function handler(req) {
       },
     });
 
-    if (!(await hasPermissions(['address', mail.convo.folder.address.id], ['view', 'consult'], user.id))) {
-      return NextResponse.json({
-        message: 'Insufficient permissions - Must be able to view and consult mailbox',
-      }, { status: 401 });
-    }
-
     if (!mail) {
       return NextResponse.json({
         message: 'No such mail',
       }, { status: 404 });
+    }
+
+    if (!(await hasPermissions(['address', mail.convo.folder.address.id], ['view', 'consult'], user.id))) {
+      return NextResponse.json({
+        message: 'Insufficient permissions - Must be able to view and consult address',
+      }, { status: 401 });
     }
     return NextResponse.json(mail);
   }

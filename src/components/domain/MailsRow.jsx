@@ -9,7 +9,7 @@ import styles from '../../styles/domain/MailsRow.module.css';
 import pageStyles from '@/styles/domain.module.css';
 import { Back } from '../icons/Back';
 import { IconButton } from '../IconButton';
-import { emailAddrUtils } from '@/lib/utils';
+import { emailAddrUtils, getFolderName } from '@/lib/utils';
 
 export function MailsRow({ ...props }) {
   const {
@@ -43,7 +43,7 @@ export function MailsRow({ ...props }) {
         />
         <Stack fill col gap={0} customClasses={[styles.folder_name]}>
           <small>{currentAddress.name}</small>
-          {currentFolder.type !== 'Other' ? currentFolder.type : currentFolder.name}
+          {getFolderName(currentFolder)}
         </Stack>
         <IconButton icon={Settings} />
       </Stack>
@@ -97,7 +97,7 @@ function MailsList() {
   if (!currentFolder.convos.length) {
     return (
       <Stack col h center>
-        <Image width="96" height="144" src="./no_mails.svg" alt="Empty address" />
+        <Image width="96" height="144" src="/no_mails.svg" alt="Empty address" />
         <br />
         No E-Mails yet
       </Stack>
@@ -130,6 +130,9 @@ function ConvoPreview({
 }) {
   const {
     selectedConvo: [selectedConvo, setSelectedConvo],
+    selectedAddress: [selectedAddress],
+    addresses: [addresses],
+    folders: [folders],
     currentFirstPane: [, setCurrentFirstPane],
   } = useAppContext();
   const isSelected = selectedConvo === mailIdx;
@@ -154,6 +157,7 @@ function ConvoPreview({
       highlight={isSelected}
       onFire={() => {
         setSelectedConvo(mailIdx);
+        window.history.pushState({}, '', `/${addresses[selectedAddress[1]].name}/${getFolderName(folders[selectedAddress[2]])}/${mailIdx}`);
         setCurrentFirstPane(2);
       }}
       gap="0"

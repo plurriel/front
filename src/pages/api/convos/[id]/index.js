@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
+import { hasPermissions } from '@/lib/authorization';
 
 export default async function handler(req) {
   if (req.method === 'GET') {
@@ -12,33 +12,28 @@ export default async function handler(req) {
       }, { status: 412 });
     }
 
-    const folder = await prisma.folder.findUnique({
+    const convo = await prisma.convo.findUnique({
       where: {
         id: req.nextUrl.searchParams.get('id'),
       },
-      select: {
-        convos: {
-          orderBy: {
-            latest: 'desc',
-          },
-        },
-        addressId: true,
+      include: {
+        folder: { select: { addressId: true } },
       },
     });
 
-    if (!folder) {
+    if (!convo) {
       return NextResponse.json({
-        message: 'No such folder',
+        message: 'No such convo',
       }, { status: 404 });
     }
 
-    if (!(await hasPermissions(['address', folder.addressId], ['view', 'consult'], user.id))) {
+    if (!(await hasPermissions(['address', convo.folder.addressId], ['view', 'consult'], user.id))) {
       return NextResponse.json({
-        message: 'Insufficient permissions - Must be able to view and consult folder',
+        message: 'Insufficient permissions - Must be able to view and consult address',
       }, { status: 401 });
     }
 
-    return NextResponse.json(folder.convos);
+    return NextResponse.json(convo);
   }
   return NextResponse.json({
     message: 'Method not allowed',

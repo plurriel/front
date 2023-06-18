@@ -94,9 +94,19 @@
   --fgcta: #000000;
 } */
 
+
+:root {
+  --em: 16;
+}
+
+@import "./tinymce.css";
+
 * {
   fill: inherit;
   box-sizing: border-box;
+  --fg: var(--fgnext);
+  --bg: var(--bgnext);
+  --ns: var(--nsnext);
 }
 
 body, html {
@@ -104,7 +114,7 @@ body, html {
   height: 100%;
   margin: 0;
   line-height: 1em;
-  font-size: 16px;
+  font-size: calc(var(--em) * 1px);
 }
 
 #__next {
@@ -113,9 +123,9 @@ body, html {
 }
 
 main {
-  --bg: var(--bg0);
-  --fg: var(--fg0);
-  --ns: var(--bg1);
+  --bgnext: var(--bg0);
+  --fgnext: var(--fg0);
+  --nsnext: var(--bg1);
   /* --fgs: var(--bg); */
   width: 100%;
   height: 100%;
@@ -130,7 +140,7 @@ small {
   width: 1em;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color);
+  background-color: var(--scroll-color);
   border-radius: 0.5em;
   border: calc(1em / 3) solid transparent;
   background-clip: padding-box;
@@ -141,7 +151,7 @@ small {
 
 :focus-visible {
   outline: solid var(--fg) 2px;
-  outline-offset: -3px;
+  outline-offset: -4px;
 }
 
 #modal_portal {
@@ -157,6 +167,7 @@ small {
 a {
   text-decoration: none;
   color: var(--link);
+  fill: var(--link);
 }
 
 input {

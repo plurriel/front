@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
+import { hasPermissions } from '@/lib/authorization';
 
 export default async function handler(req) {
   if (req.method === 'GET') {
@@ -16,14 +16,6 @@ export default async function handler(req) {
       where: {
         id: req.nextUrl.searchParams.get('id'),
       },
-      select: {
-        convos: {
-          orderBy: {
-            latest: 'desc',
-          },
-        },
-        addressId: true,
-      },
     });
 
     if (!folder) {
@@ -34,11 +26,11 @@ export default async function handler(req) {
 
     if (!(await hasPermissions(['address', folder.addressId], ['view', 'consult'], user.id))) {
       return NextResponse.json({
-        message: 'Insufficient permissions - Must be able to view and consult folder',
+        message: 'Insufficient permissions - Must be able to view and consult address',
       }, { status: 401 });
     }
 
-    return NextResponse.json(folder.convos);
+    return NextResponse.json(folder);
   }
   return NextResponse.json({
     message: 'Method not allowed',

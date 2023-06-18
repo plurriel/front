@@ -16,7 +16,7 @@ export default async function handler(req) {
       where: {
         id: req.nextUrl.searchParams.get('id'),
       },
-      select: {
+      include: {
         mails: true,
         folder: { select: { addressId: true } },
       },
@@ -24,7 +24,7 @@ export default async function handler(req) {
 
     if (!(await hasPermissions(['address', convo.folder.addressId], ['view', 'consult'], user.id))) {
       return NextResponse.json({
-        message: 'Insufficient permissions - Must be able to view and consult mailbox',
+        message: 'Insufficient permissions - Must be able to view and consult address',
       }, { status: 401 });
     }
 

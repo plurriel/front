@@ -1,13 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as DOMPurify from 'dompurify';
-import cuid2 from '@paralleldrive/cuid2';
-import { createPortal } from 'react-dom';
+import { sanitize } from 'isomorphic-dompurify';
 
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
 import { ChevronDown } from '../icons/ChevronDown';
 import { Reply } from '../icons/Reply';
-import { Send } from '../icons/Send';
 import { useAppContext } from './AppContext';
 
 import { emailAddrUtils } from '@/lib/utils';
@@ -17,7 +14,9 @@ import styles from '@/styles/domain/MailRow.module.css';
 import { Back } from '../icons/Back';
 import { IconButton } from '../IconButton';
 import { Options } from '../icons/Options';
-import { Editor, ToolBar } from '../Editor';
+import { Send } from '../icons/Send';
+
+import editorStyles from '../content_style';
 
 export function MailRow({ ...props }) {
   const {
@@ -27,6 +26,9 @@ export function MailRow({ ...props }) {
     mails: [, setMails],
     convos: [convos, setConvos],
     currentFirstPane: [, setCurrentFirstPane],
+    subdomains: [subdomains],
+    composing: [composing],
+    BundledEditor,
   } = useAppContext();
 
   const convo = convos[selectedConvo];
@@ -53,10 +55,46 @@ export function MailRow({ ...props }) {
     })();
   }, [convo, setConvos, setMails, selectedConvo]);
 
+  // const editorRef = useRef(null);
+
+  if (composing) {
+    return BundledEditor && (
+      <Stack surface {...props}>
+        <BundledEditor
+          // onInit={(evt, editor) => { editorRef.current = editor; }}
+          initialValue={`<p></p><p>Sent from <a href="https://plurriel.email">Plurriel</a> over <a href="${subdomains[selectedAddress[0]].name}">${subdomains[selectedAddress[0]].name}</a></p>`}
+          init={{
+            height: 500,
+            menubar: false,
+            plugins: [
+              'advlist', 'anchor', 'autolink', 'image', 'link', 'lists',
+              'searchreplace', 'table', 'wordcount', 'autoresize',
+            ],
+            // eslint-disable-next-line quotes
+            toolbar: `undo redo | blocks | \
+bold italic forecolor | alignleft aligncenter \
+alignright alignjustify | bullist numlist outdent indent | \
+removeformat`,
+            statusbar: false,
+            setup: (editor) => {
+              editor.ui.registry.addButton('myCustomToolbarButton', {
+                text: 'My Custom Button',
+                onAction: () => alert('Button clicked!'),
+              });
+            },
+            content_style: editorStyles,
+            autoresize_bottom_margin: 0,
+          }}
+        />
+      </Stack>
+    );
+  }
+
   if (!convo) {
     return (
-      <Stack surface center {...props}>
-        No selected mail
+      <Stack surface col center {...props}>
+        <b>No selected mails</b>
+        <span>Please select a pane using the pane on the left</span>
       </Stack>
     );
   }
@@ -131,21 +169,40 @@ export function MailRow({ ...props }) {
 // }
 
 function MailContents({ mailId }) {
-  const idRef = useRef(cuid2.createId());
-
   const {
     mails: [mails],
+    requestedMail: [requestedMail],
   } = useAppContext();
 
   const mail = mails[mailId];
 
   const [frameHeight, setFrameHeight] = useState(100);
+  const iframeEl = useRef();
 
-  window.addEventListener('message', (event) => {
-    if (event.source.parent === window && event.data.type === 'resize' && event.data.id === idRef.current) {
-      setFrameHeight(event.data.value);
-    }
-  });
+  useEffect(() => {
+    const listener = (event) => {
+      if (event.source.parent === window && event.data.id === mailId) {
+        switch (event.data.type) {
+          case 'resize':
+            setFrameHeight(event.data.value);
+            break;
+          case 'loaded':
+            // if (requestedMail === mailId) {
+            //   console.log(mailId, requestedMail);
+            //   iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
+            //   setRequestedMail(null);
+            // }
+            break;
+          default:
+            console.error(`Unrecognised event type "${event.data.type}"`, event);
+        }
+      }
+    };
+    window.addEventListener('message', listener);
+    return () => window.removeEventListener('message', listener);
+  }, [setFrameHeight]);
+
+  const mailEl = useRef();
 
   const [dateSent, setDateSent] = useState(null);
   const [isSameDate, setIsSameDate] = useState(false);
@@ -161,121 +218,123 @@ function MailContents({ mailId }) {
   if (!isSameDate) dateFormat.dateStyle = 'short';
 
   return (
-    <Stack related col br="0.5em">
-      <Stack col pad="0" surface>
-        <Stack uncollapsable>
-          <Stack pad w="256px">
-            <small>From:</small>
-            <Person name={emailAddrUtils.extractDisplayName(mail.from)} />
-          </Stack>
-          <Stack pad w="256px">
-            <small>At:</small>
-            <Container summarize oneline>
-              {
-                dateSent
-                  ? new Intl.DateTimeFormat(
-                    'en-GB',
-                    dateFormat,
-                  ).format(dateSent)
-                  : ''
-              }
+    <div ref={mailEl}>
+      <Stack
+        related
+        col
+        br="0.5em"
+        onLoad={(event) => {
+          if (requestedMail === mailId) event.target.scrollIntoView({ behavior: 'smooth' });
+        }}
+      >
+        <Stack col pad="0" surface>
+          <Stack uncollapsable>
+            <Stack pad w="256px">
+              <small>From:</small>
+              <Person name={emailAddrUtils.extractDisplayName(mail.from)} />
+            </Stack>
+            <Stack pad w="256px">
+              <small>At:</small>
+              <Container summarize oneline>
+                {
+                  dateSent
+                    ? new Intl.DateTimeFormat(
+                      'en-GB',
+                      dateFormat,
+                    ).format(dateSent)
+                    : ''
+                }
+              </Container>
+            </Stack>
+            <Stack pad w="256px">
+              <small>To:</small>
+              <Person name={JSON.parse(mail.to).map(emailAddrUtils.extractDisplayName)} />
+            </Stack>
+            <Container fill />
+            <Container pad>
+              <ChevronDown block />
             </Container>
           </Stack>
-          <Stack pad w="256px">
-            <small>To:</small>
-            <Person name={JSON.parse(mail.to).map(emailAddrUtils.extractDisplayName)} />
-          </Stack>
-          <Container fill />
-          <Container pad>
-            <ChevronDown block />
-          </Container>
         </Stack>
-      </Stack>
-      <iframe
-        style={{ height: frameHeight }}
-        title={mail.subject}
-        srcDoc={`<link rel="preconnect" href="https://fonts.googleapis.com">
+        <iframe
+          style={{ height: frameHeight }}
+          title={mail.subject}
+          srcDoc={`<script>
+// window.addEventListener('load', ()=>parent.postMessage({type:'loaded',id:"${mailId}"},"*"));
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<body>${DOMPurify.sanitize(mail.html)}</body>
+<body>${sanitize(mail.html)}</body>
 <style>body{background-color:white;font-family:'DM Sans',sans-serif;padding:1em;margin:0;overflow-y:hidden;}</style>
 <script>
 const resizeEl=document.querySelector('body')
-const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:"${idRef.current}"},"*");
-sendHeight()
-new ResizeObserver(()=>sendHeight()).observe(resizeEl)
+const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:"${mailId}"},"*");
+sendHeight();
+new ResizeObserver(()=>sendHeight()).observe(resizeEl);
 document.querySelectorAll('a').forEach(a=>a.target="_blank");
+document.querySelectorAll('form').forEach(a=>a.target="_blank");
 </script>`}
-        sandbox="allow-scripts allow-popups"
-        className={styles.message_content}
-      />
-    </Stack>
+          sandbox="allow-scripts allow-popups"
+          className={styles.message_content}
+          ref={iframeEl}
+        />
+      </Stack>
+    </div>
   );
 }
 
 function ReplyBar({ ...props }) {
-  const [replyInputPosition, setReplyInputPosition] = useState(false);
-  const replyInput = useRef();
+  const {
+    BundledEditor,
+  } = useAppContext();
 
-  // const [showReplyBarTools, setShowReplyBarTools] = useState(false);
-
-  useEffect(() => {
-    if (replyInput.current) {
-      let rect = replyInput.current.getBoundingClientRect();
-      setReplyInputPosition([rect.top, rect.left]);
-
-      const obs = new MutationObserver(() => {
-        console.log('aaaaa');
-        rect = replyInput.current.getBoundingClientRect();
-        setReplyInputPosition([rect.top, rect.left]);
-      });
-      obs.observe(replyInput.current, { attributes: true, childList: true, subtree: true });
-    }
-  }, [replyInput]);
-
-  // if (showReplyBarTools) requestAnimationFrame(() => replyInput.current?.focus());
+  const [showDefaultStyles, setShowDefaultStyles] = useState(false);
 
   return (
     <Stack related {...props} uncollapsable>
-      <Stack surface>
-        <Reply block />
-        <ChevronDown block />
+      <Stack col>
+        <Stack surface>
+          <Reply block />
+          <ChevronDown block />
+        </Stack>
       </Stack>
-      <Stack fill>
-        <Editor>
-          {
-            createPortal(
-              (
-                <Container
-                  surface
-                  style={{
-                    bottom: `calc(100vh - ${replyInputPosition[0]}px + 0.5em)`,
-                    left: replyInputPosition[1],
-                    // display: showReplyBarTools ? 'block' : 'none',
-                  }}
-                  pad="0.5em"
-                >
-                  <ToolBar />
-                </Container>
-              ),
-              document.getElementById(pageStyles.reply_bar_tools),
-            )
-          }
-          <Container surface pad={0} w>
-            <Container
-              pad
-              customClasses={[styles.replyinput]}
-              ref={replyInput}
-              contentEditable
-              // onFocus={() => setShowReplyBarTools(true)}
-              // onBlur={() => setShowReplyBarTools(false)}
-            />
-          </Container>
-        </Editor>
+      <Stack
+        fill
+        surface
+        pad={0}
+        customClasses={[styles.inline_editor, showDefaultStyles && styles.inline_editor_focused]}
+      >
+        <BundledEditor
+          // onInit={(evt, editor) => {
+          //   editor.addEventListener('focus', () => {})
+          // }}
+          onFocus={() => setShowDefaultStyles(true)}
+          onBlur={() => setShowDefaultStyles(false)}
+          initialValue="<p></p>"
+          init={{
+            menubar: false,
+            plugins: [
+              'advlist', 'anchor', 'autolink', 'image', 'link', 'lists',
+              'searchreplace', 'table', 'wordcount', 'autoresize',
+            ],
+            // eslint-disable-next-line quotes
+            toolbar: `undo redo | blocks | \
+bold italic forecolor | alignleft aligncenter \
+alignright alignjustify | bullist numlist outdent indent | \
+removeformat`,
+            statusbar: false,
+            autoresize_bottom_margin: 0,
+            autoresize: true,
+            inline: true,
+          }}
+        />
       </Stack>
-      <ClickableContainer pad surface>
-        <Send />
-      </ClickableContainer>
+      <Stack jc="flex-end" col>
+        <ClickableContainer surface>
+          <Send />
+        </ClickableContainer>
+      </Stack>
     </Stack>
   );
 }

@@ -6,3 +6,5 @@ export const emailAddrUtils = {
       || [null, v])[1];
   },
 };
+
+export const getFolderName = (folder) => (folder.type !== 'Other' ? folder.type : folder.name);

@@ -40,3 +40,8 @@
   right: 1em;
   pointer-events: none;
 }
+
+.fullheight_last_subdomain:last-child {
+  min-height: calc(100svh - 10em);
+  height: calc(100vh - 10em);
+}
