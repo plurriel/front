@@ -1,6 +1,7 @@
 .iconbtn {
   margin: calc(var(--revpad) * -1) 0;
   padding: var(--revpad);
+  border-radius: 0.5em;
   transition: background-color 100ms ease-out;
 }
 

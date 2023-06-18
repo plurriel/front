@@ -37,6 +37,7 @@ self.addEventListener('push', async (event) => {
         self.registration.showNotification(mailData.subject, {
           body: `From: ${mailData.from}
 To: ${mailData.convo.folder.address.name}`,
+          tag: `MAILRECEPTION-${eventData.id}-${mailData.convo.folder.address.name}`,
         });
         break;
       default:
@@ -44,6 +45,24 @@ To: ${mailData.convo.folder.address.name}`,
     }
   } else {
     console.log('Push event but no data');
+  }
+});
+
+const getFolderName = (folder) => (folder.type !== 'Other' ? folder.type : folder.name);
+
+self.addEventListener('notificationclick', async (event) => {
+  const [notifType, ...notifData] = event.notification.tag.split('-');
+  switch (notifType) {
+    case 'MAILRECEPTION':
+      event.waitUntil((async () => {
+        const mailData = await fetch(`/api/mails/${notifData[0]}`).then((res) => res.json());
+        const convo = await fetch(`/api/convos/${mailData.convoId}`).then((res) => res.json());
+        const folder = await fetch(`/api/folders/${convo.folderId}`).then((res) => res.json());
+        self.clients.openWindow(`/${notifData[1]}/${getFolderName(folder)}/${notifData[0]}`);
+      })());
+      break;
+    default:
+      console.error('No such notification type:', notifType);
   }
 });
 

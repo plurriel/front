@@ -12,3 +12,35 @@
 .replyinput {
   position: relative;
 }
+
+.inline_editor > div {
+  border-radius: 0.5em;
+  padding: 0 1em;
+  width: 100%;
+  --nsnext: var(--bg3);
+  --fgnext: var(--fg2);
+  --bgnext: var(--bg2);
+}
+
+/* .inline_editor:not(.inline_editor_focused) > div > p:only-child:empty:before {
+  content: 'Reply...';
+  font: inherit;
+  color: var(--ns);
+} */
+
+.inline_editor_focused > div {
+  --scroll-color: black;
+  background-color: white;
+  width: 100%;
+}
+.inline_editor_focused > div:focus-visible {
+  outline-color: black;
+}
+
+.inline_editor_focused > div * {
+  color: initial;
+}
+
+.inline_editor_focused > div a {
+  color: blue;
+}

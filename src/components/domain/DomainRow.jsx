@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { Add } from '@/components/icons/Add';
 import { Person } from '@/components/PersonCard';
@@ -17,6 +17,7 @@ import { Rainbow } from '../Skeleton';
 import { TextInput } from '../Input';
 import { ArrowForward } from '../icons/ArrowForward';
 import { Folder } from '../icons/Folder';
+import { getFolderName } from '@/lib/utils';
 
 export function DomainRow({ ...props }) {
   const {
@@ -40,12 +41,9 @@ export function DomainRow({ ...props }) {
         </Stack>
       </Stack>
       <Stack jc="flex-end">
-        <ClickableContainer toggleState={setShowCreateModal}>
-          <Stack surface center w="fit-content" cta>
-            <Add />
-            {' '}
-            Create
-          </Stack>
+        <ClickableContainer toggleState={setShowCreateModal} surface cta>
+          <Add />
+          Create
         </ClickableContainer>
         <Modal surface shown={showCreateModal} setShown={setShowCreateModal}>
           <CreateModal modalShown={showCreateModal} setModalShown={setShowCreateModal} />
@@ -161,7 +159,6 @@ function CreateModal({ modalShown, setModalShown }) {
             >
               <Stack>
                 Next
-                {' '}
                 <ArrowForward block />
               </Stack>
             </ClickableContainer>
@@ -226,7 +223,6 @@ function CreateModal({ modalShown, setModalShown }) {
               >
                 <Stack>
                   Create
-                  {' '}
                   <ArrowForward block />
                 </Stack>
               </ClickableContainer>
@@ -277,7 +273,6 @@ function CreateModal({ modalShown, setModalShown }) {
               >
                 <Stack>
                   Create
-                  {' '}
                   <ArrowForward block />
                 </Stack>
               </ClickableContainer>
@@ -297,39 +292,52 @@ function SubdomainStack({ subdomainId }) {
     subdomains: [subdomains],
     toggledSubdomains: [toggledSubdomains, setToggledSubdomains],
     selectedAddress: [selectedAddress],
+    requestedSubdomain: [requestedSubdomain, setRequestedSubdomain],
   } = useAppContext();
+  const subdomainCat = useRef();
+
+  useEffect(() => {
+    if (requestedSubdomain === subdomainId) {
+      subdomainCat.current?.scrollIntoView({ behavior: 'smooth' });
+      setRequestedSubdomain(null);
+    }
+  }, [subdomainCat, requestedSubdomain]);
 
   const subdomain = subdomains[subdomainId];
 
   const isExpanded = toggledSubdomains.has(subdomainId);
   return (
-    <Stack col>
-      <ClickableContainer
-        onFire={() => {
-          setToggledSubdomains((toggledSubdomains_) => {
-            const newToggledSubdomains = new Set(toggledSubdomains_);
-            if (toggledSubdomains_.has(subdomainId)) {
-              newToggledSubdomains.delete(subdomainId);
-            } else {
-              newToggledSubdomains.add(subdomainId);
-            }
-            return newToggledSubdomains;
-          });
-        }}
-        customClasses={[styles.cat, isExpanded && styles.expanded_cat]}
-        highlight={!isExpanded && subdomainId === selectedAddress?.[0]}
-      >
-        <ChevronDown customClasses={[styles.chevron]} />
-        <Container fill>
-          {subdomain.name}
+    <Container customClasses={[styles.fullheight_last_subdomain]}>
+      <Stack col>
+        <div ref={subdomainCat}>
+          <ClickableContainer
+            onFire={() => {
+              setToggledSubdomains((toggledSubdomains_) => {
+                const newToggledSubdomains = new Set(toggledSubdomains_);
+                if (toggledSubdomains_.has(subdomainId)) {
+                  newToggledSubdomains.delete(subdomainId);
+                } else {
+                  newToggledSubdomains.add(subdomainId);
+                }
+                return newToggledSubdomains;
+              });
+            }}
+            customClasses={[styles.cat, isExpanded && styles.expanded_cat]}
+            highlight={!isExpanded && subdomainId === selectedAddress?.[0]}
+          >
+            <ChevronDown customClasses={[styles.chevron]} />
+            <Container fill>
+              {subdomain.name}
+            </Container>
+          </ClickableContainer>
+        </div>
+        <Container expandable expanded={isExpanded}>
+          <Container>
+            <AddressesStack subdomainId={subdomainId} tabbable={isExpanded} isShown={isExpanded} />
+          </Container>
         </Container>
-      </ClickableContainer>
-      <Container expandable expanded={isExpanded}>
-        <Container>
-          <AddressesStack subdomainId={subdomainId} tabbable={isExpanded} isShown={isExpanded} />
-        </Container>
-      </Container>
-    </Stack>
+      </Stack>
+    </Container>
   );
 }
 
@@ -416,6 +424,7 @@ function EmailAddress({
                   onFire={() => {
                     if (!isSelected || selectedAddress[2] !== folderId) {
                       setSelectedAddress([subdomainId, addressId, folderId]);
+                      window.history.pushState({}, '', `/${addresses[addressId].name}/${getFolderName(folders[folderId])}`);
                       setSelectedConvo(null);
                     }
                     if (currentFirstPane === 0) setCurrentFirstPane(1);
@@ -423,7 +432,7 @@ function EmailAddress({
                   unclickable={!isExpanded}
                 >
                   <RelevantIcon type={folders[folderId].type} />
-                  {folders[folderId].type !== 'Other' ? folders[folderId].type : folders[folderId].name}
+                  {getFolderName(folders[folderId])}
                 </ClickableContainer>
               ))
             }

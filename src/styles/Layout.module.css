@@ -26,9 +26,9 @@
 }
 
 .surface {
-  --bg: var(--bg1);
-  --fg: var(--fg1);
-  --ns: var(--bg2);
+  --bgnext: var(--bg1);
+  --fgnext: var(--fg1);
+  --nsnext: var(--bg2);
   /* --fgs: var(--bg); */
   background-color: var(--bg);
   color: var(--fg);
@@ -46,16 +46,16 @@
   gap: 0.5em;
 }
 .surface .surface {
-  --bg: var(--bg2);
-  --fg: var(--fg2);
-  --ns: var(--bg3);
+  --bgnext: var(--bg2);
+  --fgnext: var(--fg2);
+  --nsnext: var(--bg3);
   /* --fgs: var(--bg); */
   border-radius: 0.5em;
 }
 .surface .surface .surface {
-  --bg: var(--bg3, var(--bg2));
-  --fg: var(--fg3, var(--bg2));
-  --ns: var(--bg4, var(--bg3));
+  --bgnext: var(--bg3, var(--bg2));
+  --fgnext: var(--fg3, var(--bg2));
+  --nsnext: var(--bg4, var(--bg3));
   /* --fgs: var(--bg); */
 }
 
@@ -88,11 +88,11 @@
   scrollbar-gutter: stable;
   min-height: min-content;
   display: block;
-  --color: var(--ns);
+  --scroll-color: var(--ns);
 }
 
 .scroll:hover {
-  --color: var(--fg);
+  --scroll-color: var(--fg);
 }
 
 @-moz-document url-prefix() {
@@ -119,6 +119,8 @@
 }
 
 .cta {
+  --bgnext: var(--bgcta, var(--fg));
+  --fgnext: var(--fgcta, var(--bg));
   background-color: var(--bgcta, var(--fg));
   color: var(--fgcta, var(--bg));
   fill: var(--fgcta, var(--bg));

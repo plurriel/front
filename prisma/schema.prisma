@@ -58,13 +58,15 @@ enum FolderTypes {
 
 model Folder {
   id              String          @id @default(cuid())
-  name            String?
+  name            String
   type            FolderTypes
 
   addressId       String
   address         Address         @relation(fields: [addressId], references: [id])
 
   convos          Convo[]
+
+  @@unique([name, type, addressId])
 }
 
 model Address {

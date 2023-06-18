@@ -1,0 +1,584 @@
+.tox-tinymce {
+  border: none;
+  border-radius: none;
+  visibility: inherit !important;
+  box-shadow: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  flex: 1;
+}
+
+.tox :not(svg):not(rect) {
+  margin: 0;
+}
+
+.tox .tox-statusbar {
+  background-color: var(--bg2);
+  --nsnext: var(--bg3);
+  --bgnext: var(--bg2);
+  --fgnext: var(--fg2);
+  border-radius: 0.5em;
+  overflow: hidden;
+}
+
+.tox .tox-editor-container {
+  display: flex;
+  gap: 0.5em;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tox-toolbar__primary {
+  display: flex;
+  gap: 0.5em;
+  border-radius: 0.5em;
+  overflow: auto;
+}
+
+.tox-toolbar__group {
+  background-color: var(--bg2);
+  --nsnext: var(--bg3);
+  --bgnext: var(--bg2);
+  --fgnext: var(--fg2);
+  color: var(--fg);
+  fill: var(--fg);
+  display: flex;
+  flex-shrink: 0;
+  border-radius: 0.5em;
+  overflow: auto;
+}
+
+.tox .tox-split-button {
+  border: 0;
+  box-sizing: border-box;
+  display: flex;
+  overflow: hidden;
+}
+
+.tox .tox-split-button .tox-icon.tox-tbtn__icon-wrap:hover {
+  background-color: transparent;
+}
+
+.tox .tox-split-button:hover {
+  background-color: var(--ns);
+  border-radius: 0.5em;
+}
+
+.tox .tox-split-button .tox-tbtn {
+  margin: 0;
+}
+
+.tox .tox-tbtn {
+  align-items: center;
+  background: 0 0;
+  border: 0;
+  box-shadow: none;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  outline: 0;
+  overflow: hidden;
+  padding: 0;
+  text-transform: none;
+  width: fit-content !important;
+}
+
+.tox .tox-tbtn.tox-split-button__chevron,
+.tox .tox-tbtn__select-chevron {
+  padding-right: 0.5em;
+  border-radius: 0.5em;
+  overflow: hidden;
+}
+
+.tox .tox-tbtn--bespoke {
+  display: flex;
+  flex: 1;
+  padding: 0.5em;
+  height: 3em;
+}
+
+.tox .tox-tbtn--bespoke .tox-tbtn__select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 7em;
+  flex: 1;
+}
+
+.tox .tox-edit-area__iframe {
+  background-color: #fff;
+  border: 0;
+  box-sizing: border-box;
+  flex: 1 1;
+  height: fit-content;
+  width: 100%;
+}
+
+.tox .tox-sidebar-wrap {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  min-height: 0;
+}
+
+.tox-icon.tox-tbtn__icon-wrap {
+  padding: 0.5em;
+  border-radius: 0.5em;
+}
+
+.tox-icon.tox-tbtn__icon-wrap:hover {
+  background-color: var(--ns);
+}
+
+.tox-toolbar__primary svg[width="24"] {
+  transform: scale(calc(var(--em) / 24), calc(var(--em) / 24));
+}
+
+.tox-collection__item-icon {
+  transform: scale(calc(var(--em) / 24), calc(var(--em) / 24));
+}
+
+.tox-menu, .tox-dialog__popups {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5em;
+  border-radius: 0.5em;
+  background-color: var(--bg1);
+  overflow: hidden;
+  gap: 0.25em;
+}
+
+.tox-toolbar__primary svg[width="10"] {
+  transform: scale(calc(var(--em) / 24), calc(var(--em) / 24));
+}
+
+.tox [aria-label="Powered by Tiny"] {
+  height: 1em;
+  display: flex;
+  gap: 0.5em;
+  flex: 0;
+}
+
+.tox .tox-statusbar {
+  display: flex;
+}
+
+.tox .tox-statusbar__text-container {
+  display: flex;
+  flex: 1;
+}
+
+.tox .tox-statusbar__path {
+  flex: 1;
+  display: flex;
+  gap: 0.25em;
+}
+
+.tox .tox-statusbar__text-container > * {
+  padding: 1em;
+}
+
+.tox .tox-statusbar__resize-handle {
+  display: flex;
+  align-items: flex-end;
+}
+
+.tox [aria-label="Powered by Tiny"]::before {
+  content: "Powered by";
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1em;
+  font-family: var(--fam);
+  height: 1em;
+}
+
+.tox .tox-edit-area {
+  display: flex;
+  flex: 1 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tox .tox-split-button__chevron {
+  width: 16px;
+}
+
+.tox button {
+  color: var(--fg);
+  font: inherit;
+  appearance: none;
+  background: none;
+  border: none;
+}
+
+.tox iframe {
+  border-radius: 0.5em;
+  user-select: none;
+}
+
+.tox .tox-menu {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  z-index: 1150;
+}
+
+.tox .tox-collection--list .tox-collection__group {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0.5em;
+  background-color: var(--bg1);
+  gap: 0.25em;
+  overflow: hidden;
+}
+
+.tox .tox-collection__item {
+  align-items: center;
+  border-radius: calc(0.25px * var(--em));
+  color: var(--fg2);
+  fill: var(--fg2);
+  background-color: var(--bg2);
+  display: flex;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  padding: calc(0.5px * var(--em));
+}
+
+.tox .tox-collection__item-label {
+  color: currentColor;
+  display: inline-block;
+  flex: 1 1;
+  font: inherit;
+  text-transform: none;
+  word-break: break-all;
+}
+
+.tox .tox-collection__item-checkmark, .tox .tox-collection__item-icon {
+  align-items: center;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+
+.tox .tox-collection--list .tox-collection__item:not(.tox-collection__item--enabled) .tox-collection__item-checkmark svg {
+  display: none;
+}
+
+.tox .tox-toolbar__overflow {
+  display: flex;
+  gap: 0.5em;
+  color: var(--fg);
+  fill: var(--fg);
+  margin-top: 0.5em;
+}
+
+.tox .tox-swatches {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg2);
+  color: var(--fg2);
+  fill: var(--fg2);
+}
+
+.tox .tox-swatches__row {
+  display: flex;
+}
+
+.tox .tox-dialog-wrap {
+  align-items: center;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1100;
+}
+
+.tox .tox-dialog-wrap__backdrop {
+  background-color: #00000077;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.tox .tox-dialog {
+  background-color: var(--bg1);
+  --fgnext: var(--fg1);
+  --bgnext: var(--bg1);
+  --nsnext: var(--bg2);
+  color: var(--fg);
+  fill: var(--fg);
+  border-radius: 1em;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  position: relative;
+  width: 95vw;
+  z-index: 2;
+}
+
+.tox .tox-dialog__header {
+  align-items: center;
+  border-bottom: none;
+  display: flex;
+  font-size: 16px;
+  justify-content: space-between;
+  padding: 1em;
+  padding-bottom: 0;
+  position: relative;
+}
+
+.tox .tox-dialog__content-js {
+  display: flex;
+  flex: 1 1;
+}
+
+.tox .tox-dialog__footer {
+  align-items: center;
+  border-top: none;
+  display: flex;
+  gap: 1em;
+  justify-content: space-between;
+  padding: 1em;
+  padding-top: 0;
+}
+
+.tox .tox-dialog__footer-end, .tox .tox-dialog__footer-start {
+  display: flex;
+}
+
+.tox .tox-form {
+  display: flex;
+  flex: 1 1;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.tox .tox-dialog__body-content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1;
+  width: 100%;
+  flex-direction: column;
+  max-height: min(650px,calc(100vh - 110px));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 16px;
+}
+.tox .tox-control-wrap:not(.tox-control-wrap--status-invalid) .tox-control-wrap__status-icon-invalid, .tox .tox-control-wrap:not(.tox-control-wrap--status-unknown) .tox-control-wrap__status-icon-unknown, .tox .tox-control-wrap:not(.tox-control-wrap--status-valid) .tox-control-wrap__status-icon-valid {
+  display: none;
+}
+.tox-form__group {
+  display: flex;
+  flex-direction: column;
+}
+.tox-textfield {
+  appearance: none;
+  border: none;
+  line-height: 1em;
+  padding: 1em;
+  border-radius: 1em;
+  font: inherit;
+  background-color: var(--ns);
+  color: var(--fg);
+}
+
+.tox-dialog__body ,
+.tox-form__controls-h-stack,
+.tox-control-wrap {
+  display: flex;
+  flex: 1;
+  width: 100%;
+}
+
+.tox-control-wrap > .tox-textfield {
+  flex: 1;
+}
+
+.tox .tox-listboxfield {
+  display: flex;
+  flex: 1;
+}
+
+.tox-listbox__select-label {
+  flex: 1;
+  text-align: start;
+}
+
+.tox-listbox.tox-listbox--select {
+  flex: 1;
+  display: flex;
+  background-color: var(--ns);
+  padding: 1em;
+  border-radius: 1em;
+}
+
+.tox-button[title="Cancel"] {
+  display: none;
+}
+
+.tox-button[title="Close"] {
+  padding: 0.5em;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.tox-button {
+  background-color: var(--ns);
+  color: var(--fg);
+  padding: 1em;
+  border-radius: 1em;
+}
+
+.tox-dialog__footer .tox-button:last-of-type {
+  background-color: var(--bgcta);
+  color: var(--fgcta, var(--bg));
+  font-weight: bold;
+}
+
+.tox div.tox-swatch:not(.tox-swatch--remove) svg {
+  display: none;
+  fill: #222f3e;
+  height: 24px;
+  margin: calc((30px - 24px)/ 2) calc((30px - 24px)/ 2);
+  width: 24px;
+}
+
+.tox .tox-swatch {
+  height: 30px;
+  transition: transform .15s,box-shadow .15s;
+  width: 30px;
+}
+
+.tox div.tox-swatch:not(.tox-swatch--remove).tox-collection__item--enabled svg {
+  display: block;
+}
+
+.tox div.tox-swatch:not(.tox-swatch--remove) svg path {
+  fill: var(--fg2);
+  paint-order: stroke;
+  stroke:  var(--bg2);
+  stroke-width: 2px;
+}
+
+.tox .tox-sv-palette, .tox .tox-sv-palette-spectrum {
+  width: 225px;
+}
+
+.tox-form,
+.tox-form > div {
+  width: 100%;
+}
+
+.tox .tox-color-picker-container {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  height: 225px;
+  margin: 0;
+  width: 100%;
+}
+
+.tox .tox-hue-slider, .tox .tox-hue-slider-spectrum {
+  width: 20px;
+}
+
+.tox .tox-hue-slider-spectrum {
+  background: linear-gradient(to bottom,red,#ff0080,#f0f,#8000ff,#00f,#0080ff,#0ff,#00ff80,#0f0,#80ff00,#ff0,#ff8000,red);
+  height: 100%;
+  width: 100%;
+}
+
+.tox .tox-sv-palette {
+  box-sizing: border-box;
+  display: flex;
+  height: 100%;
+}
+
+.tox .tox-sv-palette-thumb {
+  background: 0 0;
+  border: 0.25em solid var(--fg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  box-sizing: content-box;
+  height: 12px;
+  position: absolute;
+  width: 12px;
+}
+
+.tox-rgb-form {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+
+.tox-rgba-preview {
+  height: 1em;
+  width: 100%;
+}
+
+.tox-rgb-form [role=presentation] {
+  display: flex;
+  gap: 0.5em;
+}
+
+.tox-rgb-form .tox-textfield {
+  flex: 1;
+  width: 100%;
+}
+
+.tox-rgb-form label {
+  display: flex;
+  align-items: center;
+}
+
+.tox .tox-hue-slider-thumb {
+  border: 0.25em solid var(--fg);
+  border-radius: 0.25em;
+  box-sizing: content-box;
+  height: 4px;
+  width: 100%;
+  margin-left: -0.25em;
+}
+
+.tox .tox-collection__item-accessory {
+  opacity: 0.75;
+  display: inline-block;
+  text-transform: none;
+  font: inherit;
+  margin-left: 16px;
+  text-align: right;
+}
+
+.tox-tinymce-inline {
+  margin-top: -0.5em;
+}
+
+.tox-tinymce.tox-tinymce-inline.tox-platform-touch .tox-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  border-radius: 0.5em;
+  overflow: hidden;
+  background-color: var(--bg1);
+}

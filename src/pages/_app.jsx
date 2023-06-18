@@ -15,12 +15,18 @@ export default function App({ Component, pageProps }) {
     <>
       <style jsx global>
         {`
+          @font-face {
+            font-family: "DM Sans";
+            src: local(monospace);
+          }
+          :root {
+            --fam: ${DMSans.style.fontFamily};
+          }
           html {
             font-family: ${DMSans.style.fontFamily};
           }
         `}
       </style>
-      <title>SolidStart - Bare</title>
       <meta charSet="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <Component {...pageProps} />
