@@ -23,6 +23,8 @@ model Mail {
   inbound         Boolean
   from            String
   to              String
+  cc              String
+  bcc             String
   at              DateTime
   recvDelay       Int
   messageId       String?         @db.VarChar(995)
@@ -33,6 +35,8 @@ model Mail {
 
   convoId         String
   convo           Convo           @relation(fields: [convoId], references: [id])
+
+  @@index([convoId])
 }
 
 model Convo {
@@ -45,6 +49,8 @@ model Convo {
 
   folderId        String 
   folder          Folder          @relation(fields: [folderId], references: [id])
+
+  @@index([folderId])
 }
 
 enum FolderTypes {
@@ -67,6 +73,7 @@ model Folder {
   convos          Convo[]
 
   @@unique([name, type, addressId])
+  @@index([addressId])
 }
 
 model Address {
@@ -79,6 +86,8 @@ model Address {
   subdomainId     String
   subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
   usersLink       UsersOnAddressesLink[]
+
+  @@index([subdomainId])
 }
 
 model UsersOnAddressesLink {
@@ -96,6 +105,8 @@ model UsersOnAddressesLink {
   mute            Boolean?
 
   @@id([userId, addressId])
+  @@index([userId])
+  @@index([addressId])
 }
 
 model Subdomain {
@@ -107,6 +118,8 @@ model Subdomain {
   usersLink       UsersOnSubdomainsLink[]
 
   addresses       Address[]
+
+  @@index([domainId])
 }
 
 model UsersOnSubdomainsLink {
@@ -125,6 +138,8 @@ model UsersOnSubdomainsLink {
   mute            Boolean?
 
   @@id([userId, subdomainId])
+  @@index([userId])
+  @@index([subdomainId])
 }
 
 model Domain {
@@ -154,6 +169,8 @@ model UsersOnDomainsLink {
   mute            Boolean?
 
   @@id([userId, domainId])
+  @@index([userId])
+  @@index([domainId])
 }
 
 model User {
