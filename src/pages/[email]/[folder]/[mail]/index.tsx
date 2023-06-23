@@ -12,7 +12,7 @@ import { MailRow } from '@/components/domain/MailRow';
 import { AppContext, StoredAs } from '@/components/domain/AppContext';
 import { Container, Stack } from '@/components/Layout';
 import { TopBar } from '@/components/domain/TopBar';
-import { getLogin } from '@/lib/login_not_edge';
+import { getLogin } from '@/lib/login';
 import { hasPermissions, hasPermissionsWithin } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { crackOpen, getFolderName } from '@/lib/utils';
@@ -445,7 +445,10 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
         result.mails[convoMail.id] = convoMail;
         return convoMail.id;
       });
-      result.convos[convo.id] = convo;
+      result.convos[convo.id] = {
+        ...convo,
+        latest: convo.latest.getTime(),
+      };
     }
   } else {
     if (params.folder) {

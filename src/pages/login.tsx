@@ -11,7 +11,7 @@ import { Logo } from '@/components/Logo';
 import { ArrowForward } from '@/components/icons/ArrowForward';
 
 import styles from '@/styles/login.module.css';
-import { getLogin } from '@/lib/login_not_edge';
+import { getLogin } from '@/lib/login';
 
 function base64ToArrayBuffer(base64: string) {
   const binaryString = atob(base64);
