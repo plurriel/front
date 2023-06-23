@@ -145,7 +145,7 @@ model UsersOnSubdomainsLink {
 model Domain {
   id              String          @id @default(cuid())
   name            String          @db.VarChar(253) @unique
-  privDkim        String
+  privDkim        Bytes?          @db.ByteA
 
   usersLink       UsersOnDomainsLink[]
 
