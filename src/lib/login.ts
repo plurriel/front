@@ -1,30 +1,20 @@
 import nacl from 'tweetnacl';
+import { getCookie } from 'cookies-next';
 import { prisma } from '@/lib/prisma';
-import { NextRequest } from 'next/server';
+import { NextApiRequest } from 'next';
 
-function toArrayBuffer(buffer: Buffer): Uint8Array {
-  const arrayBuffer = new ArrayBuffer(buffer.length);
-  const view = new Uint8Array(arrayBuffer);
-  for (let i = 0; i < buffer.length; i += 1) {
-    view[i] = buffer[i];
-  }
-  return view;
-}
-
-export async function getLogin(req: NextRequest) {
+export async function getLogin(req: NextApiRequest) {
   const now = Date.now();
   // Check if signature is correct
   let sessionSign;
   let sessionData;
   try {
-    // eslint-disable-next-line dot-notation
-    sessionSign = Buffer.from(req.cookies.get('session_sign')?.value, 'base64');
+    sessionSign = Buffer.from(getCookie('session_sign', { req }) as string, 'base64');
   } catch (err) {
     return new Error('"session_sign" is not a valid signature');
   }
   try {
-    // eslint-disable-next-line dot-notation
-    sessionData = JSON.parse(req.cookies.get('session_data')?.value);
+    sessionData = JSON.parse(getCookie('session_data', { req }) as string);
   } catch (err) {
     return new Error('"session_data" is not a valid JSON');
   }
@@ -37,8 +27,8 @@ export async function getLogin(req: NextRequest) {
   const date = sessionData.genTime;
   if (!date || typeof date !== 'number') return new Error('"session_data".genTime is not a valid timestamp');
 
-  const isValid = nacl.sign.open(toArrayBuffer(sessionSign), toArrayBuffer(Buffer.from(process.env.AUTH_PUBLIC, 'base64')));
-  console.log('getLogin', Date.now() - now);
+  const isValid = nacl.sign.open(sessionSign, Buffer.from(process.env.AUTH_PUBLIC, 'base64'));
+  console.log('getLogin', 0, Date.now() - now);
   if (!isValid) return new Error('The signature is invalid');
 
   const user = await prisma.user.findUnique({
@@ -46,6 +36,7 @@ export async function getLogin(req: NextRequest) {
       id: userId,
     },
   });
+  console.log('getLogin', 1, Date.now() - now);
 
   if (!user) return new Error('This user does not exist');
 

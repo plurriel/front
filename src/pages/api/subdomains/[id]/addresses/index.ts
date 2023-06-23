@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { object, string } from 'yup';
 import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const schema = object({
   name: string()
@@ -16,33 +16,24 @@ const schema = object({
     .required(),
 }).required();
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const user = await getLogin(req);
     if (user instanceof Error) {
-      return NextResponse.json({
+      return res.status(412).json({
         message: `Precondition Failed - Must log in before continuing + ${user.message}`,
-      }, { status: 412 });
-    }
-
-    let body;
-    try {
-      body = await req.json();
-    } catch (err) {
-      return NextResponse.json({
-        message: 'Request body should be in json',
-      }, { status: 400 });
+      });
     }
 
     try {
-      schema.validate(body);
+      schema.validate(req.body);
     } catch (err) {
-      return NextResponse.json({
+      return res.status(400).json({
         message: err.message,
-      }, { status: 400 });
+      });
     }
 
-    const { subdomainId, name } = body;
+    const { subdomainId, name } = req.body;
 
     const subdomain = await prisma.subdomain.findUnique({
       where: {
@@ -51,15 +42,15 @@ export default async function handler(req: NextRequest) {
     });
 
     if (!subdomain) {
-      return NextResponse.json({
+      return res.status(404).json({
         message: 'No such subdomain',
-      }, { status: 404 });
+      });
     }
 
     if (!(await hasPermissions(['subdomain', subdomainId], ['createMail'], user.id))) {
-      return NextResponse.json({
+      return res.status(401).json({
         message: 'You are not authorised to make this change on this subdomain',
-      }, { status: 401 });
+      });
     }
 
     await prisma.address.create({
@@ -78,16 +69,11 @@ export default async function handler(req: NextRequest) {
         },
       },
     });
-    return NextResponse.json({
+    return res.status(201).json({
       message: 'Address created',
-    }, { status: 201 });
+    });
   }
-  return NextResponse.json({
+  return res.status(405).json({
     message: 'Method not allowed',
-  }, { status: 405 });
+  });
 }
-
-export const config = {
-  runtime: 'edge',
-  regions: 'fra1',
-};

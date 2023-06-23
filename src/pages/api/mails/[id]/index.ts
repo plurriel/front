@@ -1,21 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 import { hasPermissions } from '@/lib/authorization';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { crackOpen } from '@/lib/utils';
 
-export default async function handler(req: NextRequest) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
       const user = await getLogin(req);
       if (user instanceof Error) {
-        return NextResponse.json({
+        return res.status(412).json({
           message: `Precondition Failed - Must log in before continuing + ${user.message}`,
-        }, { status: 412 });
+        });
       }
 
       const mail = await prisma.mail.findUnique({
         where: {
-          id: req.nextUrl.searchParams.get('id'),
+          id: crackOpen(req.query.id),
         },
         include: {
           convo: {
@@ -25,25 +26,20 @@ export default async function handler(req: NextRequest) {
       });
 
       if (!mail) {
-        return NextResponse.json({
+        return res.status(404).json({
           message: 'No such mail',
-        }, { status: 404 });
+        });
       }
 
       if (!(await hasPermissions(['address', mail.convo.folder.address.id], ['view', 'consult'], user.id))) {
-        return NextResponse.json({
+        return res.status(401).json({
           message: 'Insufficient permissions - Must be able to view and consult address',
-        }, { status: 401 });
+        });
       }
-      return NextResponse.json(mail);
+      return res.status(200).json(mail);
     default:
-      return NextResponse.json({
+      return res.status(405).json({
         message: 'Method not allowed',
-      }, { status: 405 });
+      });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-  regions: 'fra1',
-};

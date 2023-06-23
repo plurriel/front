@@ -1,19 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export default function handler(req: NextRequest) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'GET':
-      return NextResponse.json({
+      return res.status(200).json({
         vapid: process.env.VAPID_PUBLIC,
       });
     default:
-      return NextResponse.json({
+      return res.status(405).json({
         message: 'Method not allowed',
-      }, { status: 405 });
+      });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-  regions: 'fra1',
-};
