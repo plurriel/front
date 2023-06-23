@@ -3,13 +3,13 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-
-  relationMode = "prisma"
+  provider = "postgres"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // model Content {
@@ -22,14 +22,14 @@ model Mail {
   id              String          @id @default(cuid())
   inbound         Boolean
   from            String
-  to              String
-  cc              String
-  bcc             String
+  to              String[]
+  cc              String[]
+  bcc             String[]
   at              DateTime
   recvDelay       Int
   messageId       String?         @db.VarChar(995)
   subject         String?
-  html            String?         @db.LongText
+  html            String?
 
   inReplyTo       String?         @db.VarChar(995)
 
@@ -42,7 +42,7 @@ model Mail {
 model Convo {
   id              String          @id @default(cuid())
   subject         String?
-  interlocutors   String
+  interlocutors   String[]
   mails           Mail[]
 
   latest          DateTime
@@ -176,7 +176,7 @@ model UsersOnDomainsLink {
 model User {
   id              String          @id @default(cuid())
   username        String          @db.VarChar(255) @unique
-  webPushSubData  String          @db.LongText
+  webPushSubData  String[]
   passwordHash    String
   lastPwChange    DateTime
 

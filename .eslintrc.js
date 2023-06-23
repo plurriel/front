@@ -28,5 +28,9 @@ module.exports = {
     'react/no-unknown-property': 'off',
     'react/jsx-props-no-spreading': 'off',
     'no-param-reassign': 'off',
+    'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
+    'react/require-default-props': 'off',
+    'no-unused-vars': 'off',
+    'no-use-before-define': 'off',
   },
 };

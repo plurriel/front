@@ -83,9 +83,8 @@
 }
 
 .scroll {
-  overflow: auto;
+  overflow-y: scroll;
   margin-right: -1em;
-  scrollbar-gutter: stable;
   min-height: min-content;
   display: block;
   --scroll-color: var(--ns);
