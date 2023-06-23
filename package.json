@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "npx prisma generate --data-proxy && next build",
     "start": "next start",
-    "lint": "next lint",
-    "postinstall": "node ./postinstall.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.0",
