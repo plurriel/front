@@ -1,0 +1,9 @@
+const toCheck = [
+  'AUTH_PUBLIC',
+  'AUTH_PRIVATE',
+
+  'NEXT_PUBLIC_USERS_TO_US_PUBLIC',
+  'USERS_TO_US_PRIVATE',
+
+  'VAPID_PUBLIC',
+];

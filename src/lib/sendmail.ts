@@ -1,32 +1,29 @@
 import cuid2 from '@paralleldrive/cuid2';
-import dnsPromises from 'dns/promises';
-import dns from 'dns';
 import nodemailer from 'nodemailer';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
+import { query } from 'dns-query';
+import { parseDomain, ParseResultType } from 'parse-domain';
+import { createPrivateKey } from 'crypto';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { MxAnswer, MxData } from '@leichtgewicht/dns-packet';
+import { Domain, Folder, Mail } from '@prisma/client';
 import { prisma } from './prisma';
+import { emailAddrUtils } from './utils';
 
 const nhm = new NodeHtmlMarkdown();
 
 interface Args {
   from: {
     name: string;
-    sentFolder: {
-      id: string;
-    };
-    domain: {
-      name: string;
-      privDkim: string;
-    };
+    sentFolder: Folder;
+    domain: Domain;
   };
   to: string[];
   cc: string[];
   bcc: string[];
   subject: string;
   contents: string;
-  inReplyTo: {
-    id: string;
-    messageId: string;
-  };
+  inReplyTo?: Mail;
 }
 
 /* eslint-disable no-restricted-syntax */
@@ -41,11 +38,11 @@ export async function sendMail({
 }: Args) {
   const now = new Date();
   const mailId = `c${cuid2.createId()}`;
-  const messageId = `<${mailId}@${from.name}>`;
+  const messageId = `<${mailId}@${from.name.split('@')[1]}>`;
   const mappedToDomain: Record<string, Record<'to' | 'cc' | 'bcc', string[]>> = {};
   const domainsSet: Set<string> = new Set();
   const iterate = (type: 'to' | 'cc' | 'bcc') => (addr: string) => {
-    const domain = addr.split('@')[1];
+    const domain = emailAddrUtils.extractAddress(addr).split('@')[1];
     mappedToDomain[domain] ??= {
       to: [],
       cc: [],
@@ -58,39 +55,67 @@ export async function sendMail({
   cc.forEach(iterate('cc'));
   bcc.forEach(iterate('bcc'));
   const domains = [...domainsSet];
-  const domainssMxesRankedByPriority: [string, dns.MxRecord[]][] = [];
+  const domainssMxesRankedByPriority: [string, MxData[]][] = [];
   await Promise.all(domains.map(async (domain) => {
     let allMxes;
     try {
-      allMxes = await dnsPromises.resolveMx(domain);
+      const parseResult = parseDomain(domain);
+      console.log(parseResult);
+      if (parseResult.type !== ParseResultType.Listed) return false;
+      const { answers } = await query(
+        { question: { type: 'MX', name: domain } },
+        { endpoints: ['1.1.1.1'] },
+      );
+      console.log(answers);
+      if (answers && answers.length) {
+        allMxes = answers.map((answer) => (answer as MxAnswer).data);
+      } else if (parseResult.subDomains.length) {
+        console.log(domain.replace(/^[^.]+(?=\.)/g, '*'));
+        const { answers: answersWildcard } = await query(
+          { question: { type: 'MX', name: domain.replace(/^[^.]+(?=\.)/g, '*') } },
+          { endpoints: ['1.1.1.1'] },
+        );
+        if (answersWildcard && answersWildcard.length) {
+          console.log(answersWildcard);
+          allMxes = answersWildcard.map((answer) => (answer as MxAnswer).data);
+        } else return false;
+      } else return false;
     } catch (err) {
+      console.error('mx fetch unsuccessful', err, domain);
       return false;
     }
-    const mxesRankedByPriority = allMxes.sort((a, b) => a.priority - b.priority);
+    const mxesRankedByPriority = allMxes.sort((a, b) => (a.preference || 0) - (b.preference || 0));
+    console.log(allMxes, mxesRankedByPriority);
     domainssMxesRankedByPriority.push([domain, mxesRankedByPriority]);
     return true;
   }));
 
-  let convo;
+  console.log(mappedToDomain, domainssMxesRankedByPriority);
+
+  let convoId;
   if (inReplyTo) {
-    convo = inReplyTo;
+    convoId = inReplyTo.convoId;
     await prisma.convo.update({
       where: {
-        id: convo.id,
+        id: convoId,
       },
       data: {
         latest: now,
       },
     });
   } else {
-    convo = await prisma.convo.create({
+    const interlocutors = new Set(
+      [...to, ...cc, ...bcc]
+        .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== from.name),
+    );
+    convoId = (await prisma.convo.create({
       data: {
         subject,
-        interlocutors: JSON.stringify([from.name, to, cc, bcc]),
+        interlocutors: [...interlocutors],
         folderId: from.sentFolder.id,
         latest: now,
       },
-    });
+    })).id;
   }
 
   const mailInDb = await prisma.mail.create({
@@ -105,9 +130,16 @@ export async function sendMail({
       messageId,
       html: contents,
       inReplyTo: inReplyTo?.id,
-      convoId: convo.id,
+      convoId,
     },
   });
+
+  const privateKey = createPrivateKey({
+    key: from.domain.privDkim,
+    format: 'der',
+    type: 'pkcs8',
+  });
+
   const successes = await Promise.all(domainssMxesRankedByPriority.map(async ([domain, mxes]) => {
     for (const mx of mxes) {
       try {
@@ -124,7 +156,7 @@ export async function sendMail({
           cc: cc.join(','),
           subject,
           text: nhm.translate(contents),
-          inReplyTo: inReplyTo.messageId,
+          inReplyTo: inReplyTo?.messageId ?? undefined,
           html: contents,
           envelope: {
             from: from.name,
@@ -133,7 +165,7 @@ export async function sendMail({
           dkim: {
             domainName: from.domain.name,
             keySelector: 'plurriel',
-            privateKey: from.domain.privDkim,
+            privateKey: privateKey.export({ type: 'pkcs8', format: 'pem' }) as string,
           },
         });
         return [[domain, mxes], true, mx];

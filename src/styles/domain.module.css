@@ -89,6 +89,9 @@
   .require_second .third_pane_back {
     display: none;
   }
+  .require_third .third_pane_back {
+    display: none;
+  }
   .require_third .address {
     display: none;
   }

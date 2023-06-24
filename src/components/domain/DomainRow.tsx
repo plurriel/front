@@ -46,7 +46,7 @@ export function DomainRow({ ...props }) {
           Create
         </ClickableContainer>
         <Modal surface shown={showCreateModal} setShown={setShowCreateModal}>
-          <CreateModal modalShown={showCreateModal} />
+          <CreateModal modalShown={showCreateModal} setModalShown={setShowCreateModal} />
         </Modal>
       </Stack>
     </Stack>
@@ -57,7 +57,15 @@ function SelectTag(p: React.HTMLProps<HTMLSelectElement>) {
   return <select {...p} />;
 }
 
-function CreateModal({ modalShown }: { modalShown: boolean }) {
+function CreateModal(
+  {
+    modalShown,
+    setModalShown,
+  }: {
+    modalShown: boolean,
+    setModalShown: React.Dispatch<React.SetStateAction<boolean>>,
+  },
+) {
   interface SubdomainStepData {
     type: 'subdomain';
     domainId: string;
@@ -208,7 +216,7 @@ function CreateModal({ modalShown }: { modalShown: boolean }) {
               <Container
                 surface
                 oneline
-                customTag={SelectTag}
+                customTag={SelectTag as unknown as HTMLSelectElement}
                 onChange={({ target }) => setStep((step_) => [step_[0], {
                   ...step_[1],
                   subdomainId: (target as HTMLInputElement).value,
@@ -294,7 +302,7 @@ function CreateModal({ modalShown }: { modalShown: boolean }) {
       }
       return <b>wtf</b>;
     default:
-      // requestAnimationFrame(() => setModalShown(false));
+      requestAnimationFrame(() => setModalShown(false));
       return null;
   }
 }
@@ -416,7 +424,7 @@ function EmailAddress({
       {...props}
       surface
       customClasses={[styles.emailaddr, isSelected && styles.selected]}
-      highlight={isSelected && !isExpanded}
+      highlight={(isSelected && !isExpanded) ?? undefined}
     >
       <ClickableContainer
         onFire={() => {
@@ -429,11 +437,11 @@ function EmailAddress({
         customClasses={[styles.actualemail]}
         br="0.5em"
         unclickable={!isShown}
-        highlight={isSelected && !isExpanded}
+        highlight={(isSelected && !isExpanded) ?? undefined}
       >
         <Person name={`${address.name}`} />
       </ClickableContainer>
-      <Container expandable expanded={isExpanded}>
+      <Container expandable expanded={isExpanded ?? undefined}>
         <Container>
           <Stack related col pad="0.5em 0 0 0">
             {
@@ -442,8 +450,8 @@ function EmailAddress({
                   pad
                   key={folderId}
                   highlight={isExpanded
-                    ? (isSelected && folderId === selectedFolder?.[2])
-                    : isSelected}
+                    ? (isSelected && folderId === selectedFolder?.[2]) ?? undefined
+                    : isSelected ?? undefined}
                   onFire={() => {
                     if (!isSelected || selectedFolder[2] !== folderId) {
                       setSelectedFolder([subdomainId, addressId, folderId]);

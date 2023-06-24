@@ -170,7 +170,7 @@ export default function Home({
             .folders
             .find((folderId) => getFolderName(foldersState[0][folderId]) === 'Inbox');
         }
-        selectedFolderState[1]([pathSubdomain.id, pathAddressId, pathFolderId]);
+        selectedFolderState[1]([pathSubdomain.id, pathAddressId, pathFolderId as string]);
 
         if (pathMailId) {
           // Either convo or mail
@@ -259,7 +259,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
   const now = Date.now();
   console.log(0);
   const emailRegex = /^(?:((?:[A-z!#$%&'*+\-/=?^_`{|}~]+\.)*[A-z!#$%&'*+\-/=?^_`{|}~]+)@)?((?:[A-z0-9-]+\.)+[A-z0-9-]+)$/;
-  const matchResults = crackOpen(params.email).match(emailRegex);
+  const matchResults = crackOpen(params?.email as string | string[]).match(emailRegex);
 
   if (!matchResults) return { notFound: true };
 
@@ -272,7 +272,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
     return {
       redirect: {
         permanent: false,
-        destination: `/login?then=${encodeURIComponent(req.url)}`,
+        destination: `/login?then=${encodeURIComponent(req.url || '/')}`,
       },
     };
   }
@@ -283,7 +283,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
     select: {
       id: true,
       domain: {
-        include: {
+        select: {
           subdomains: {
             include: {
               addresses: {
@@ -293,6 +293,8 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
               },
             },
           },
+          id: true,
+          name: true,
         },
       },
     },
@@ -364,7 +366,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
 
     let folderType = 'Inbox';
     let folderName = '';
-    if (params.folder) {
+    if (params?.folder) {
       const isFolderType = ['Inbox', 'Sent', 'Drafts', 'Spam', 'Deleted'].includes(crackOpen(params.folder));
       folderType = isFolderType ? crackOpen(params.folder) : 'Other';
       folderName = isFolderType ? '' : crackOpen(params.folder);
@@ -391,7 +393,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
       return {
         redirect: {
           permanent: false,
-          destination: params.mail ? `/${urlSelectedAddress}/Inbox/${crackOpen(params.mail)}` : `/${urlSelectedAddress}`,
+          destination: params?.mail ? `/${urlSelectedAddress}/Inbox/${crackOpen(params.mail)}` : `/${urlSelectedAddress}`,
         },
       };
     }
@@ -406,12 +408,12 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
       return convo.id;
     });
 
-    if (params.mail) {
+    if (params?.mail) {
       if (!crackOpen(params.mail).match(/c[a-z0-9]{24}/g)) {
         return {
           redirect: {
             permanent: false,
-            destination: `/${urlSelectedLocal}/${crackOpen(params.folder)}`,
+            destination: `/${urlSelectedLocal}/${crackOpen(params?.folder as string | string[])}`,
           },
         };
       }
@@ -434,7 +436,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
           return {
             redirect: {
               permanent: false,
-              destination: `/${urlSelectedLocal}/${crackOpen(params.folder)}`,
+              destination: `/${urlSelectedLocal}/${crackOpen(params?.folder as string[] | string)}`,
             },
           };
         }
@@ -451,7 +453,7 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
       };
     }
   } else {
-    if (params.folder) {
+    if (params?.folder) {
       return {
         redirect: {
           permanent: false,
@@ -487,7 +489,8 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
           return convo.id;
         });
       } else {
-        setCookie('selected', '', { req, res, path: `/${params.domain}` });
+        // TODO Find a fix that is domain-wide
+        setCookie('selected', '', { req, res, path: `/${crackOpen(params?.email as string | string[])}` });
         result.selectedFolder = null;
       }
     }

@@ -4,12 +4,12 @@ import clsx from 'clsx';
 import styles from '@/styles/Modal.module.css';
 import { Close } from '@/components/icons/Close';
 
-import { Stack, StackOptions } from './Layout';
+import { CCOptions, Stack, StackOptions } from './Layout';
 import { IconButton, IconButtonProps } from './IconButton';
 
 interface Props {
-  shown?: boolean;
-  setShown?: React.Dispatch<React.SetStateAction<boolean>>;
+  shown: boolean;
+  setShown: React.Dispatch<React.SetStateAction<boolean>>;
   hideClose?: boolean;
 }
 
@@ -38,17 +38,23 @@ export function Modal({
           </Stack>
         </div>
       ),
-      document.getElementById('modal_portal'),
+      document.getElementById('modal_portal') as Element,
     )
     : null;
 }
 
-export function CloseModal({ customClasses, ...props }: IconButtonProps) {
+interface CloseModalProps extends CCOptions {
+  children?: React.ReactNode;
+  customClasses?: string[];
+  revpad?: string;
+}
+
+export function CloseModal({ customClasses, ...props }: CloseModalProps) {
   return (
     <IconButton
+      {...props}
       icon={Close}
       customClasses={[styles.close_modal, ...(customClasses || [])]}
-      {...props}
     />
   );
 }

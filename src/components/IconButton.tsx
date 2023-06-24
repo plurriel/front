@@ -5,7 +5,7 @@ import { IconProps } from './icons/Icon';
 
 export interface IconButtonProps extends CCOptions {
   children?: React.ReactNode;
-  icon?: React.FC<IconProps>;
+  icon: React.FC<IconProps>;
   customClasses?: string[];
   revpad?: string;
 }
@@ -15,6 +15,7 @@ export function IconButton({
   icon,
   customClasses,
   revpad,
+  style,
   ...props
 }: IconButtonProps) {
   const Icon = icon;
@@ -24,6 +25,7 @@ export function IconButton({
       customClasses={[styles.iconbtn, ...(customClasses || [])]}
       style={{
         '--revpad': revpad || '1em',
+        ...style,
       } as React.CSSProperties}
     >
       <Icon block />

@@ -6,6 +6,12 @@ export const emailAddrUtils = {
       || v.match(/^<([^>]+)>$/)
       || [null, v])[1];
   },
+  extractAddress(v: string) {
+    const matchEmailAnyhow = /^([A-z0-9!#$%&'*+\-/=?^_`{|}~.]+\.)*[A-z0-9!#$%&'*+\-/=?^_`{|}~.]+@([A-z0-9-.]+\.)+[A-z0-9-.]+$|(?<=<)([A-z0-9!#$%&'*+\-/=?^_`{|}~.]+\.)*[A-z0-9!#$%&'*+\-/=?^_`{|}~.]+@([A-z0-9-.]+\.)+[A-z0-9-.]+(?=>)/g;
+    const matchResults = v.match(matchEmailAnyhow);
+    if (!matchResults) throw new Error();
+    return matchResults[0];
+  },
 };
 
 export function crackOpen(param: string | string[]): string {

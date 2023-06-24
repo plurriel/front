@@ -1,4 +1,4 @@
-import { object, string } from 'yup';
+import { ValidationError, object, string } from 'yup';
 import { hasPermissions } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
@@ -26,10 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      schema.validate(req.body);
+      await schema.validate(req.body);
     } catch (err) {
       return res.status(400).json({
-        message: err.message,
+        message: (err as ValidationError).message,
       });
     }
 

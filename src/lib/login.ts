@@ -27,7 +27,7 @@ export async function getLogin(req: NextApiRequest) {
   const date = sessionData.genTime;
   if (!date || typeof date !== 'number') return new Error('"session_data".genTime is not a valid timestamp');
 
-  const isValid = nacl.sign.open(sessionSign, Buffer.from(process.env.AUTH_PUBLIC, 'base64'));
+  const isValid = nacl.sign.open(sessionSign, Buffer.from(process.env.AUTH_PUBLIC as string, 'base64'));
   console.log('getLogin', 0, Date.now() - now);
   if (!isValid) return new Error('The signature is invalid');
 

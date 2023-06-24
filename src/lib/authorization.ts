@@ -31,10 +31,7 @@ export async function hasPermissions(
   let scopeId = originalScopeId;
   switch (scopeType) {
     case 'address':
-      const {
-        usersLink: [addressAuthorization],
-        ...address
-      } = await prisma.address.findUnique({
+      const addressQuery = await prisma.address.findUnique({
         where: {
           id: scopeId,
         },
@@ -46,6 +43,11 @@ export async function hasPermissions(
           },
         },
       });
+      if (!addressQuery) throw new Error(`No such entity: ${scopeType}:${scopeId}`);
+      const {
+        usersLink: [addressAuthorization],
+        ...address
+      } = addressQuery;
       console.log('authorization', -2, Date.now() - now);
       if (addressAuthorization) {
         const currScopePermCheck = hasPermissionsLocal(addressAuthorization, requestedPermsSet);
@@ -54,11 +56,9 @@ export async function hasPermissions(
       }
       if (!address) return false;
       scopeId = address.subdomainId;
+      scopeType = 'subdomain';
     case 'subdomain':
-      const {
-        usersLink: [subdomainAuthorization],
-        ...subdomain
-      } = await prisma.subdomain.findUnique({
+      const subdomainQuery = await prisma.subdomain.findUnique({
         where: {
           id: scopeId,
         },
@@ -70,6 +70,11 @@ export async function hasPermissions(
           },
         },
       });
+      if (!subdomainQuery) throw new Error(`No such entity: ${scopeType}:${scopeId}`);
+      const {
+        usersLink: [subdomainAuthorization],
+        ...subdomain
+      } = subdomainQuery;
       console.log('authorization', -1, Date.now() - now);
       if (subdomainAuthorization) {
         const currScopePermCheck = hasPermissionsLocal(subdomainAuthorization, requestedPermsSet);
@@ -78,10 +83,9 @@ export async function hasPermissions(
       }
       if (!subdomain) return false;
       scopeId = subdomain.domainId;
+      scopeType = 'domain';
     case 'domain':
-      const {
-        usersLink: [domainAuthorization],
-      } = await prisma.domain.findUnique({
+      const domainQuery = await prisma.domain.findUnique({
         where: {
           id: scopeId,
         },
@@ -93,6 +97,11 @@ export async function hasPermissions(
           },
         },
       });
+      if (!domainQuery) throw new Error(`No such entity: ${scopeType}:${scopeId}`);
+      const {
+        usersLink: [domainAuthorization],
+        ...domain
+      } = domainQuery;
       console.log('authorization', 0, Date.now() - now);
       if (domainAuthorization) {
         const currScopePermCheck = hasPermissionsLocal(domainAuthorization, requestedPermsSet);
@@ -125,10 +134,7 @@ export async function hasPermissionsWithin(
   const addresses: Record<string, HasNext> = {};
   switch (scopeType) {
     case 'domain':
-      const {
-        id,
-        usersLink: [domainAuthorization],
-      } = await prisma.domain.findUnique({
+      const domainQuery = await prisma.domain.findUnique({
         where: {
           id: scopeId,
         },
@@ -141,6 +147,12 @@ export async function hasPermissionsWithin(
           },
         },
       });
+
+      if (!domainQuery) throw new Error(`No such entity: ${scopeType}:${scopeId}`);
+      const {
+        id,
+        usersLink: [domainAuthorization],
+      } = domainQuery;
       domains[id] = domainAuthorization || { inexistant: true };
       nextQuery = {
         domainId: scopeId,
@@ -170,7 +182,7 @@ export async function hasPermissionsWithin(
         const { domainId } = subdomainAuthorizationObj;
         if (domainId && domainId in domains) {
           domains[domainId].next ??= [];
-          domains[domainId].next.push(['subdomain', subdomainAuthorizationObj.id]);
+          domains[domainId].next?.push(['subdomain', subdomainAuthorizationObj.id]);
         }
       });
       nextQuery = {
@@ -200,7 +212,7 @@ export async function hasPermissionsWithin(
         const { subdomainId } = addressAuthorizationObj;
         if (subdomainId && subdomainId in subdomains) {
           subdomains[subdomainId].next ??= [];
-          subdomains[subdomainId].next.push(['address', addressAuthorizationObj.id]);
+          subdomains[subdomainId].next?.push(['address', addressAuthorizationObj.id]);
         }
       });
       break;

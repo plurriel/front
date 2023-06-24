@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         const passwordData = JSON.parse(arrayToUtf8(await ecies.decrypt(
           Buffer.from(req.body.password, 'base64'),
-          Buffer.from(process.env.USERS_TO_US_PRIVATE, 'base64'),
+          Buffer.from(process.env.USERS_TO_US_PRIVATE as string, 'base64'),
         )));
         actualPassword = passwordData.password;
         timeOfEncryption = passwordData.time;
@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         genTime: Date.now(),
         userId: user.id,
       });
-      const sessionSign = nacl.sign(utf8ToArray(sessionData), Buffer.from(process.env.AUTH_PRIVATE, 'base64'));
+      const sessionSign = nacl.sign(utf8ToArray(sessionData), Buffer.from(process.env.AUTH_PRIVATE as string, 'base64'));
       setCookie('session_data', sessionData, { req, res, maxAge: 60 * 24 * 60 * 60 });
       setCookie('session_sign', Buffer.from(sessionSign).toString('base64'), { req, res, maxAge: 60 * 24 * 60 * 60 });
       return res.status(200).send('Check cookies');

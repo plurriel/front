@@ -32,7 +32,7 @@ interface AppContextValue {
   folders: State<Record<string, StoredAs<Folder, 'convos'>>>;
   convos: State<Record<string, StoredAs<Convo, 'mails'>>>;
   mails: State<Record<string, Mail>>;
-  selectedFolder: State<[string, string, string]>;
+  selectedFolder: State<[string, string, string] | null>;
   selectedConvo: State<string | null>;
   currentFirstPane: State<number>;
   viewedAddress: State<[string, string] | null>;
@@ -43,7 +43,7 @@ interface AppContextValue {
   BundledEditor: typeof BundledEditor | (() => null);
 }
 
-export const AppContext = createContext<AppContextValue | undefined>(undefined);
+export const AppContext = createContext<AppContextValue>(undefined as unknown as AppContextValue);
 
 export function useAppContext() {
   return useContext(AppContext);

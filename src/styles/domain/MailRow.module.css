@@ -3,6 +3,22 @@
   background-color: var(--ns);
 }
 
+.contentless {
+  padding: 1em;
+  background-color: var(--ns);
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+.contentless::before, .contentless::after {
+  content: '';
+  display: inline-block;
+  height: 1pt;
+  background: var(--fg);
+  opacity: 0.5;
+  flex: 1;
+}
+
 .replyinput:empty::after {
   content: 'Reply...';
   opacity: 0.75;

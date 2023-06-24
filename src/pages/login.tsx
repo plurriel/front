@@ -40,7 +40,7 @@ export default function Login({ pubkey }: { pubkey: string }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [disabled, setDisabled] = useState(false);
 

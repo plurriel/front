@@ -6,3 +6,7 @@
 .folder_name {
   margin: -1em 0;
 }
+
+.subjectless {
+  opacity: 0.75;
+}

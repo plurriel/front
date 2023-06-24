@@ -30,11 +30,11 @@ export function MailRow({ ...props }) {
     composing: [composing, setComposing],
   } = useAppContext();
 
-  const convo = convos[selectedConvo];
+  const convo = selectedConvo ? convos[selectedConvo] : null;
 
   useEffect(() => {
     (async () => {
-      if (convo && !('mails' in convo)) {
+      if (selectedConvo && convo && !('mails' in convo)) {
         const mailsInConvo = await fetch(`/api/convos/${selectedConvo}/mails`)
           .then((res) => res.json());
         setMails((mails) => {
@@ -58,14 +58,14 @@ export function MailRow({ ...props }) {
     if (composing) setSelectedConvo(null);
   }, [composing, setSelectedConvo]);
   useEffect(() => {
-    if (selectedConvo) setComposing(null);
+    if (selectedConvo) setComposing(false);
   }, [selectedConvo, setComposing]);
 
   // const editorRef = useRef(null);
 
   if (composing) return <CompositionRow {...props} />;
 
-  if (!convo) {
+  if (!convo || !selectedFolder) {
     return (
       <Stack surface col center {...props}>
         <b>No selected mails</b>
@@ -83,18 +83,18 @@ export function MailRow({ ...props }) {
           <IconButton
             onFire={() => {
               setCurrentFirstPane(1);
+              setComposing(false);
+              setSelectedConvo(null);
             }}
-            customClasses={[pageStyles.second_pane_back]}
+            customClasses={[pageStyles.third_pane_back]}
             icon={Back}
           />
-          <Container oneline flexGrow>{[convo.interlocutors, address.name].join(', ')}</Container>
+          <Container oneline flexGrow>{[...convo.interlocutors, address.name].join(', ')}</Container>
           <IconButton icon={Options} />
         </Stack>
-        <Stack pad col>
-          <Container flexGrow>
-            <b>{convo.subject}</b>
-          </Container>
-        </Stack>
+        <Container pad="0 1em 1em 1em">
+          <b>{convo.subject || '<No Subject>'}</b>
+        </Container>
       </Stack>
       {
           'mails' in convo
@@ -102,7 +102,9 @@ export function MailRow({ ...props }) {
               <Container scroll flexGrow>
                 <Stack col gap>
                   {
-                    convo.mails.map((mailId) => <MailContents mailId={mailId} key={mailId} />)
+                    (convo as StoredAs<Convo, 'mails', true>)
+                      .mails
+                      .map((mailId) => <MailContents mailId={mailId} key={mailId} />)
                   }
                 </Stack>
               </Container>
@@ -152,7 +154,7 @@ function MailContents({ mailId }: { mailId: string }) {
   const mail = mails[mailId];
 
   const [frameHeight, setFrameHeight] = useState(100);
-  const iframeEl = useRef();
+  const iframeEl = useRef(null);
 
   useEffect(() => {
     const listener = (event: MessageEvent) => {
@@ -177,9 +179,9 @@ function MailContents({ mailId }: { mailId: string }) {
     return () => window.removeEventListener('message', listener);
   }, [setFrameHeight]);
 
-  const mailEl = useRef();
+  const mailEl = useRef(null);
 
-  const [dateSent, setDateSent] = useState(null);
+  const [dateSent, setDateSent] = useState<Date | null>(null);
   const [isSameDate, setIsSameDate] = useState(false);
 
   useEffect(() => {
@@ -231,29 +233,44 @@ function MailContents({ mailId }: { mailId: string }) {
             </Container>
           </Stack>
         </Stack>
-        <iframe
-          style={{ height: frameHeight }}
-          title={mail.subject}
-          srcDoc={`<script>
+        {
+          mail.html
+            ? (
+              <iframe
+                style={{ height: frameHeight }}
+                title={mail.subject || '<No Subject>'}
+                srcDoc={`<script>
 // window.addEventListener('load', ()=>parent.postMessage({type:'loaded',id:"${mailId}"},"*"));
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-<body>${sanitize(mail.html)}</body>
-<style>body{background-color:white;font-family:'DM Sans',sans-serif;padding:1em;margin:0;overflow-y:hidden;}</style>
+<body>${mail.html
+                  ? sanitize(mail.html.replace(/http:\/\/((?:[-a-zA-Z0-9_]|\.(?=[^.])){1,256}\.[a-zA-Z0-9]{1,6}(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*))/g, (_, url) => `https://${url}`))
+                  : ''}</body>
+<style>body{background-color:white;font-family:'DM Sans',sans-serif;margin:1em;overflow-y:hidden;}</style>
 <script>
+function getAbsoluteHeight(el) {const styles = window.getComputedStyle(el);return el.offsetHeight + parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);}
 const resizeEl=document.querySelector('body')
-const sendHeight=()=>parent.postMessage({type:'resize',value:resizeEl.offsetHeight,id:"${mailId}"},"*");
+const sendHeight=()=>parent.postMessage({type:'resize',value:getAbsoluteHeight(resizeEl),id:"${mailId}"},"*");
 sendHeight();
 new ResizeObserver(()=>sendHeight()).observe(resizeEl);
 document.querySelectorAll('a').forEach(a=>a.target="_blank");
 document.querySelectorAll('form').forEach(a=>a.target="_blank");
 </script>`}
-          sandbox="allow-scripts allow-popups"
-          className={styles.message_content}
-          ref={iframeEl}
-        />
+                sandbox="allow-scripts allow-popups"
+                className={styles.message_content}
+                ref={iframeEl}
+              />
+            )
+            : (
+              <div className={styles.contentless} ref={iframeEl}>
+                <small>
+                  This E-Mail has no content
+                </small>
+              </div>
+            )
+        }
       </Stack>
     </div>
   );
@@ -261,12 +278,19 @@ document.querySelectorAll('form').forEach(a=>a.target="_blank");
 
 function ReplyBar({ ...props }) {
   const {
+    selectedConvo: [selectedConvo],
+    convos: [convos],
     BundledEditor,
   } = useAppContext();
+
+  if (!selectedConvo) throw new Error();
+
+  const editorRef = useRef<Editor>();
 
   const [showDefaultStyles, setShowDefaultStyles] = useState(false);
 
   const [, setCurrentReply] = useState('reply');
+  const [isSending, setIsSending] = useState(false);
 
   return (
     <Stack related {...props} uncollapsable>
@@ -282,12 +306,12 @@ function ReplyBar({ ...props }) {
         customClasses={[styles.inline_editor, showDefaultStyles && styles.inline_editor_focused]}
       >
         <BundledEditor
-          // onInit={(evt, editor) => {
-          //   editor.addEventListener('focus', () => {})
-          // }}
+          onInit={(evt: any, editor: Editor) => {
+            editorRef.current = editor;
+          }}
           onFocus={() => setShowDefaultStyles(true)}
           onBlur={() => setShowDefaultStyles(false)}
-          initialValue="<p></p>"
+          initialValue=""
           init={{
             menubar: false,
             plugins: [
@@ -305,13 +329,13 @@ removeformat`,
                 icon: 'reply',
                 tooltip: 'This is an example split-button',
                 onAction: (api) => {
-                  currentValue = { replyall: 'reply', reply: 'replyall' }[currentValue];
+                  currentValue = { replyall: 'reply', reply: 'replyall' }[currentValue] as string;
                   setCurrentReply(currentValue);
                   api.setIcon(currentValue);
                 },
                 onItemAction: (api, value) => {
-                  api.setIcon(currentValue);
                   currentValue = value;
+                  api.setIcon(currentValue);
                   setCurrentReply(currentValue);
                 },
                 fetch: (callback) => {
@@ -342,7 +366,22 @@ removeformat`,
         />
       </Stack>
       <Stack jc="flex-end" col>
-        <ClickableContainer surface>
+        <ClickableContainer
+          surface
+          disabled={!editorRef.current || isSending}
+          onFire={async () => {
+            setIsSending(true);
+            await fetch(`/api/mails/${(convos[selectedConvo] as StoredAs<Convo, 'mails', true>).mails.at(-1)}/reply`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ content: (editorRef.current as Editor).getContent() }),
+            });
+            setIsSending(false);
+            (editorRef.current as Editor).setContent('');
+          }}
+        >
+          {/* I currently don't have enough of the brains to figure out how to show the Undo */}
+          {/* timer so I'm not gonna implement it right now. */}
           <Send />
         </ClickableContainer>
       </Stack>

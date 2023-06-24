@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const passwordData = JSON.parse(arrayToUtf8(await ecies.decrypt(
         Buffer.from(req.body.password, 'base64'),
-        Buffer.from(process.env.USERS_TO_US_PRIVATE, 'base64'),
+        Buffer.from(process.env.USERS_TO_US_PRIVATE as string, 'base64'),
       )));
       actualPassword = passwordData.password;
     } catch (err) {

@@ -2,6 +2,8 @@ const styles = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 body {
   font-family: var(--fam, 'DM Sans'), sans-serif;
+  padding: 0 !important;
+  margin: 1em;
 }
 
 ::-webkit-scrollbar {

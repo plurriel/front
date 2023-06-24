@@ -17,9 +17,11 @@ export function MailsRow({ ...props }) {
   const {
     addresses: [addresses],
     folders: [folders],
-    selectedFolder: [selectedFolder],
+    selectedFolder: [selectedFolder, setSelectedFolder],
+    viewedAddress: [, setViewedAddress],
     currentFirstPane: [, setCurrentFirstPane],
-    composing: [, setComposing],
+    selectedConvo: [, setSelectedConvo],
+    composing: [composing, setComposing],
   } = useAppContext();
 
   if (!selectedFolder) {
@@ -39,7 +41,16 @@ export function MailsRow({ ...props }) {
       <Stack center surface>
         <IconButton
           onFire={() => {
-            setCurrentFirstPane(0);
+            setCurrentFirstPane((currentFirstPane) => {
+              if (currentFirstPane === 2) {
+                setSelectedConvo(null);
+                setComposing(false);
+                return 1;
+              }
+              setViewedAddress(selectedFolder.slice(0, 2) as [string, string]);
+              setSelectedFolder(null);
+              return 0;
+            });
           }}
           customClasses={[pageStyles.second_pane_back]}
           icon={Back}
@@ -66,7 +77,11 @@ export function MailsRow({ ...props }) {
           center
           w="fit-content"
           cta
-          onFire={() => setComposing(true)}
+          onFire={() => {
+            setComposing(true);
+            setCurrentFirstPane(2);
+          }}
+          highlight={composing}
           id="composebtn"
         >
           <Edit />
@@ -83,6 +98,8 @@ function MailsList() {
     convos: [convos, setConvos],
     selectedFolder: [selectedFolder],
   } = useAppContext();
+
+  if (!selectedFolder) throw new Error();
 
   const currentFolder = folders[selectedFolder[2]];
 
@@ -145,7 +162,7 @@ function ConvoPreview({
   ...props
 }: {
   interlocutors: string[],
-  subject: string,
+  subject: string | null,
   sendDate: Date,
   mailIdx: string,
 }) {
@@ -156,9 +173,12 @@ function ConvoPreview({
     folders: [folders],
     currentFirstPane: [, setCurrentFirstPane],
   } = useAppContext();
+
+  if (!selectedFolder) throw new Error();
+
   const isSelected = selectedConvo === mailIdx;
 
-  const [dateSent, setDateSent] = useState(null);
+  const [dateSent, setDateSent] = useState<null | Date>(null);
   const [isSameDate, setIsSameDate] = useState(false);
 
   useEffect(() => {
@@ -187,9 +207,10 @@ function ConvoPreview({
       <Stack center>
         <Stack flexGrow>
           <small>
-            {interlocutors.map(emailAddrUtils.extractDisplayName).join(', ')}
+            <Container oneline summarize>
+              {[...interlocutors, addresses[selectedFolder[1]].name].map(emailAddrUtils.extractDisplayName).join(', ')}
+            </Container>
           </small>
-
         </Stack>
         <small>
           {dateSent
@@ -198,14 +219,13 @@ function ConvoPreview({
               dateFormat,
             ).format(dateSent)
             : ''}
-
         </small>
       </Stack>
       <Container
-        oneline
-        customClasses={[!isSelected && styles.preview_subject]}
+        oneline={!isSelected}
+        customClasses={[!isSelected && styles.preview_subject, !subject && styles.subjectless]}
       >
-        {subject}
+        {subject || '<No Subject>'}
       </Container>
     </ClickableContainer>
   );

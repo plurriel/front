@@ -1,7 +1,7 @@
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/require-default-props */
 import React, { useMemo } from 'react';
-import cls from 'clsx';
+import cls, { ClassValue } from 'clsx';
 import styles from '@/styles/Layout.module.css';
 
 export interface ContainerOptions<T = typeof DivTag> {
@@ -12,7 +12,7 @@ export interface ContainerOptions<T = typeof DivTag> {
   gap?: string | boolean;
   flexGrow?: boolean;
   summarize?: boolean;
-  customClasses?: string[];
+  customClasses?: ClassValue[];
   surface?: boolean;
   highlight?: boolean;
   cta?: boolean;
@@ -26,13 +26,13 @@ export interface ContainerOptions<T = typeof DivTag> {
   style?: React.CSSProperties;
   unwrap?: boolean;
   related?: boolean;
-  customTag?: T extends React.FC ? T : never;
+  customTag?: T extends Element ? T : never;
   children?: React.ReactNode;
 }
 
 const DivTag = (a: React.HTMLProps<HTMLDivElement>) => <div {...a} />;
 
-export function Container<CustomTag = typeof DivTag>({
+export function Container<CustomTagT = typeof DivTag>({
   w,
   h,
   pad,
@@ -54,14 +54,12 @@ export function Container<CustomTag = typeof DivTag>({
   style,
   unwrap,
   related,
-  customTag,
+  customTag: CustomTag,
   children,
   ...props
-}: ContainerOptions<CustomTag>
-  & React.HTMLProps<CustomTag>) {
-  const Tag = useMemo(() => (customTag
-    ? ((propsInner: React.HTMLProps<typeof customTag>) => customTag({ ...propsInner }))
-    : DivTag), [customTag]);
+}: ContainerOptions<CustomTagT>
+  & React.HTMLProps<CustomTagT>) {
+  const Tag = useMemo(() => (CustomTag || DivTag), [CustomTag]) as React.JSX.ElementType;
   return (
     <Tag
       {...(props as any)}
@@ -162,11 +160,10 @@ export function ClickableContainer<CustomTag = typeof DivTag>({
   ...props
 }: CCOptions<CustomTag>
 & React.HTMLProps<CustomTag>) {
-  onFire = onFire || (() => {});
   const fire = () => {
     if (disabled) return true;
     if (toggleState) toggleState((previous) => !previous);
-    return onFire();
+    return (onFire || (() => {}))();
   };
   return (
     <Stack

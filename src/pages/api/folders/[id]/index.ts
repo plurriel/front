@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const folder = await prisma.folder.findUnique({
       where: {
-        id: crackOpen(req.query.id),
+        id: crackOpen(req.query.id as string | string[]),
       },
     });
 

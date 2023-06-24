@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const convo = await prisma.convo.findUnique({
       where: {
-        id: crackOpen(req.query.id),
+        id: crackOpen(req.query.id as string | string[]),
       },
       include: {
         mails: true,
@@ -23,17 +23,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
+    if (!convo) {
+      return res.status(404).json({
+        message: 'No such convo',
+      });
+    }
     if (!(await hasPermissions(['address', convo.folder.addressId], ['view', 'consult'], user.id))) {
       return res.status(401).json({
         message: 'Insufficient permissions - Must be able to view and consult address',
       });
     }
 
-    if (!convo) {
-      return res.status(404).json({
-        message: 'No such convo',
-      });
-    }
     return res.status(200).json(convo.mails);
   }
   return res.status(405).json({

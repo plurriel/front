@@ -3,6 +3,7 @@ import {
   object,
   string,
   InferType,
+  ValidationError,
 } from 'yup';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
@@ -18,8 +19,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      const subscriptionData = req.body;
-
       const subscriptionSchema = object({
         endpoint: string().required(),
         expirationTime: number().nullable(),
@@ -29,15 +28,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }).required(),
       }).required();
 
+      let subscriptionData: InferType<typeof subscriptionSchema>;
       try {
-        subscriptionSchema.validate(subscriptionData);
-      } catch (err) {
+        subscriptionData = await subscriptionSchema.validate(req.body, { strict: true });
+      } catch (err: unknown) {
         return res.status(400).json({
-          message: err.message,
+          message: (err as ValidationError)?.message,
         });
       }
 
-      let newSubscriptionArray = user.webPushSubData as InferType<typeof subscriptionSchema>[];
+      let newSubscriptionArray = user
+        .webPushSubData
+        .map((v) => JSON.parse(v)) as InferType<typeof subscriptionSchema>[];
 
       if (!Array.isArray(newSubscriptionArray)) newSubscriptionArray = [];
 

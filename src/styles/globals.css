@@ -160,6 +160,7 @@ small {
   border-radius: 0.5em;
   border: calc(1em / 3) solid transparent;
   background-clip: padding-box;
+  min-height: 1em;
 }
 ::-webkit-scrollbar-thumb:hover {
   border: calc(1em / 4) solid transparent;

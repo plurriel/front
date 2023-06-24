@@ -107,16 +107,6 @@
   }
 }
 
-.highlight {
-  background-color: var(--bgsel, var(--fg));
-  color: var(--fgsel, var(--bg));
-  fill: var(--fgsel, var(--bg));
-}
-.highlight:focus-visible, 
-.highlight :focus-visible {
-  outline-color: var(--fgsel, var(--bg));
-}
-
 .cta {
   --bgnext: var(--bgcta, var(--fg));
   --fgnext: var(--fgcta, var(--bg));
@@ -129,6 +119,16 @@
 
 .cta * {
   font-weight: bolder;
+}
+
+.highlight {
+  background-color: var(--bgsel, var(--fg));
+  color: var(--fgsel, var(--bg));
+  fill: var(--fgsel, var(--bg));
+}
+.highlight:focus-visible, 
+.highlight :focus-visible {
+  outline-color: var(--fgsel, var(--bg));
 }
 
 .expandable {
