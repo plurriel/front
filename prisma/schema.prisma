@@ -31,6 +31,8 @@ model Mail {
   subject         String?
   html            String?
 
+  unsuccessful    String[]
+
   inReplyTo       String?         @db.VarChar(995)
 
   convoId         String
@@ -142,10 +144,15 @@ model UsersOnSubdomainsLink {
   @@index([subdomainId])
 }
 
+// Note to future self
+// If you are ever to add to the Domain model and
+// happen to expect to use that in the front-end,
+// don't forget to change their select parameters
+// inside of main page
 model Domain {
   id              String          @id @default(cuid())
   name            String          @db.VarChar(253) @unique
-  privDkim        Bytes?          @db.ByteA
+  privDkim        Bytes           @db.ByteA
 
   usersLink       UsersOnDomainsLink[]
 
