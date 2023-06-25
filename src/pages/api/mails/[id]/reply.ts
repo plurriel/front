@@ -5,11 +5,12 @@ import {
   object,
   string,
 } from 'yup';
+import cuid2 from '@paralleldrive/cuid2';
 import { prisma } from '@/lib/prisma';
 import { getLogin } from '@/lib/login';
 import { hasPermissions } from '@/lib/authorization';
 import { crackOpen, emailAddrUtils } from '@/lib/utils';
-import { sendMail } from '@/lib/sendmail';
+import { channel } from '@/lib/amqplib';
 
 export const replyReqSchema = object({
   contents: string().optional(),
@@ -18,6 +19,7 @@ export const replyReqSchema = object({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'POST':
+      const now = Date.now();
       const user = await getLogin(req);
       if (user instanceof Error) {
         return res.status(412).json({
@@ -101,21 +103,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         mail.cc
           .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== address.name),
       );
+      const mailId = `c${cuid2.createId()}`;
+      const messageId = `<${mailId}@${address.name.split('@')[1]}`;
 
-      const mailData = await sendMail({
-        from: {
-          name: address.name,
-          sentFolder: address.folders[0],
-          domain: address.subdomain.domain,
+      const mailInDb = await prisma.mail.create({
+        data: {
+          inbound: false,
+          id: mailId,
+          from: address.name,
+          to: [...tos],
+          cc: [...ccs],
+          bcc: [],
+          at: new Date(now),
+          recvDelay: 0,
+          subject: `Re: ${mail.subject || ''}`,
+          messageId,
+          html: body.contents,
+          inReplyTo: mail.id,
+          unsuccessful: [...new Set([...tos, ...ccs].map((v) => emailAddrUtils.extractAddress(v)))],
+          convoId: mail.convoId,
         },
-        to: [...tos],
-        cc: [...ccs],
-        bcc: [],
-        subject: `Re: ${mail.subject}`,
-        contents: body.contents || '',
-        inReplyTo: mail,
       });
-      return res.status(200).json(mailData);
+
+      channel.sendToQueue('mail_submission', Buffer.from(crackOpen(mailId as string | string[]), 'ascii'));
+
+      return res.status(200).json(mailInDb);
     default:
       return res.status(405).json({
         message: 'Method not allowed',

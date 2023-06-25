@@ -1,8 +1,4 @@
-import { getLogin } from '@/lib/login';
-import { prisma } from '@/lib/prisma';
-import { hasPermissions } from '@/lib/authorization';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { crackOpen } from '@/lib/utils';
 import {
   InferType,
   ValidationError,
@@ -11,7 +7,12 @@ import {
   object,
   string,
 } from 'yup';
-import { sendMail } from '@/lib/sendmail';
+import { getLogin } from '@/lib/login';
+import { prisma } from '@/lib/prisma';
+import { hasPermissions } from '@/lib/authorization';
+import { crackOpen, emailAddrUtils } from '@/lib/utils';
+import cuid2 from '@paralleldrive/cuid2';
+import { channel } from '@/lib/amqplib';
 
 export const mailReqSchema = object({
   to: array(string().required()).required(),
@@ -25,6 +26,7 @@ export const mailReqSchema = object({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'POST':
+      const now = Date.now();
       const user = await getLogin(req);
       if (user instanceof Error) {
         return res.status(412).json({
@@ -52,7 +54,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               name: '',
             },
           },
-          subdomain: { select: { domain: true } },
         },
       });
 
@@ -80,19 +81,68 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         ];
       }
 
-      const mailData = await sendMail({
-        from: {
-          name: address.name,
-          sentFolder: address.folders[0],
-          domain: address.subdomain.domain,
+      const mailId = `c${cuid2.createId()}`;
+      const messageId = `<${mailId}@${address.name.split('@')[1]}`;
+
+      let convoId;
+      if (body.inReplyTo) {
+        const inReplyToMail = await prisma.mail.findFirst({
+          where: {
+            convo: {
+              folder: {
+                addressId: crackOpen(req.query.id as string | string[]),
+              },
+            },
+            messageId: body.inReplyTo,
+          },
+        });
+        if (!inReplyToMail) return res.status(404).json({ message: 'In Reply To mail could not be found' });
+        convoId = inReplyToMail.convoId;
+        await prisma.convo.update({
+          where: {
+            id: convoId,
+          },
+          data: {
+            latest: new Date(now),
+          },
+        });
+      } else {
+        const interlocutors = new Set(
+          [...body.to, ...body.cc, ...body.bcc]
+            .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== address.name),
+        );
+        convoId = (await prisma.convo.create({
+          data: {
+            subject: body.subject,
+            interlocutors: [...interlocutors],
+            folderId: address.folders[0].id,
+            latest: new Date(now),
+          },
+        })).id;
+      }
+
+      const mailInDb = await prisma.mail.create({
+        data: {
+          inbound: false,
+          id: mailId,
+          from: address.name,
+          to: body.to,
+          cc: body.cc,
+          bcc: body.bcc,
+          at: new Date(now),
+          recvDelay: 0,
+          subject: body.subject,
+          messageId,
+          html: body.contents,
+          inReplyTo: body.inReplyTo,
+          unsuccessful: [...body.to, ...body.cc, ...body.bcc],
+          convoId,
         },
-        to: body.to,
-        cc: body.cc,
-        bcc: body.bcc,
-        subject: body.subject || '',
-        contents: body.contents || '',
       });
-      return res.status(200).json(mailData);
+
+      channel.sendToQueue('mail_submission', Buffer.from(crackOpen(mailId as string | string[]), 'ascii'));
+
+      return res.status(200).json(mailInDb);
     default:
       return res.status(405).json({
         message: 'Method not allowed',
