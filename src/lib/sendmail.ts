@@ -1,7 +1,8 @@
 import cuid2 from '@paralleldrive/cuid2';
 import nodemailer from 'nodemailer';
 import { NodeHtmlMarkdown } from 'node-html-markdown';
-import { query } from 'dns-query';
+import dnsPromises from 'dns/promises';
+import dns from 'dns';
 import { parseDomain, ParseResultType } from 'parse-domain';
 import { createPrivateKey } from 'crypto';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -62,29 +63,23 @@ export async function sendMail({
       const parseResult = parseDomain(domain);
       console.log(parseResult);
       if (parseResult.type !== ParseResultType.Listed) return false;
-      const { answers } = await query(
-        { question: { type: 'MX', name: domain } },
-        { endpoints: ['1.1.1.1'] },
-      );
+      const answers = await dnsPromises.resolveMx(domain);
       console.log(answers);
       if (answers && answers.length) {
-        allMxes = answers.map((answer) => (answer as MxAnswer).data);
+        allMxes = answers;
       } else if (parseResult.subDomains.length) {
         console.log(domain.replace(/^[^.]+(?=\.)/g, '*'));
-        const { answers: answersWildcard } = await query(
-          { question: { type: 'MX', name: domain.replace(/^[^.]+(?=\.)/g, '*') } },
-          { endpoints: ['1.1.1.1'] },
-        );
+        const answersWildcard = await dnsPromises.resolveMx(domain.replace(/^[^.]+(?=\.)/g, '*'));
         if (answersWildcard && answersWildcard.length) {
           console.log(answersWildcard);
-          allMxes = answersWildcard.map((answer) => (answer as MxAnswer).data);
+          allMxes = answersWildcard;
         } else return false;
       } else return false;
     } catch (err) {
       console.error('mx fetch unsuccessful', err, domain);
       return false;
     }
-    const mxesRankedByPriority = allMxes.sort((a, b) => (a.preference || 0) - (b.preference || 0));
+    const mxesRankedByPriority = allMxes.sort((a, b) => a.priority - b.priority);
     console.log(allMxes, mxesRankedByPriority);
     domainssMxesRankedByPriority.push([domain, mxesRankedByPriority]);
     return true;
@@ -124,12 +119,15 @@ export async function sendMail({
       id: mailId,
       from: from.name,
       to,
+      cc,
+      bcc,
       at: now,
       recvDelay: 0,
       subject,
       messageId,
       html: contents,
       inReplyTo: inReplyTo?.id,
+      unsuccessful: [...to, ...cc, ...bcc],
       convoId,
     },
   });
