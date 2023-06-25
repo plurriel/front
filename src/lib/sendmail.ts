@@ -59,25 +59,32 @@ export async function sendMail({
   const domainssMxesRankedByPriority: [string, MxData[]][] = [];
   await Promise.all(domains.map(async (domain) => {
     let allMxes;
+    const parseResult = parseDomain(domain);
+    console.log(parseResult);
+    if (parseResult.type !== ParseResultType.Listed) return false;
     try {
-      const parseResult = parseDomain(domain);
-      console.log(parseResult);
-      if (parseResult.type !== ParseResultType.Listed) return false;
       const answers = await dnsPromises.resolveMx(domain);
       console.log(answers);
       if (answers && answers.length) {
         allMxes = answers;
-      } else if (parseResult.subDomains.length) {
-        console.log(domain.replace(/^[^.]+(?=\.)/g, '*'));
-        const answersWildcard = await dnsPromises.resolveMx(domain.replace(/^[^.]+(?=\.)/g, '*'));
-        if (answersWildcard && answersWildcard.length) {
-          console.log(answersWildcard);
-          allMxes = answersWildcard;
-        } else return false;
       } else return false;
     } catch (err) {
-      console.error('mx fetch unsuccessful', err, domain);
-      return false;
+      if (parseResult.subDomains.length) {
+        try {
+          console.log(domain.replace(/^[^.]+(?=\.)/g, '*'));
+          const answersWildcard = await dnsPromises.resolveMx(domain.replace(/^[^.]+(?=\.)/g, '*'));
+          if (answersWildcard && answersWildcard.length) {
+            console.log(answersWildcard);
+            allMxes = answersWildcard;
+          } else return false;
+        } catch (errWithin) {
+          console.error('mx fetch unsuccessful', errWithin, domain);
+          return false;
+        }
+      } else {
+        console.error('mx fetch unsuccessful', err, domain);
+        return false;
+      }
     }
     const mxesRankedByPriority = allMxes.sort((a, b) => a.priority - b.priority);
     console.log(allMxes, mxesRankedByPriority);
@@ -144,6 +151,7 @@ export async function sendMail({
         const transporter = nodemailer.createTransport({
           host: mx.exchange,
           port: 25,
+          logger: true,
         });
 
         // eslint-disable-next-line no-await-in-loop
