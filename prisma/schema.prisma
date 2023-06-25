@@ -19,7 +19,7 @@ datasource db {
 // }
 
 model Mail {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   inbound         Boolean
   from            String
   to              String[]
@@ -33,7 +33,9 @@ model Mail {
 
   unsuccessful    String[]
 
-  inReplyTo       String?         @db.VarChar(995)
+  inReplyTo       String?        
+  inReplyToMail   Mail?           @relation("Reply", fields: [inReplyTo], references: [id])
+  replies         Mail[]          @relation("Reply")
 
   convoId         String
   convo           Convo           @relation(fields: [convoId], references: [id])
@@ -42,7 +44,7 @@ model Mail {
 }
 
 model Convo {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   subject         String?
   interlocutors   String[]
   mails           Mail[]
@@ -65,7 +67,7 @@ enum FolderTypes {
 }
 
 model Folder {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   name            String
   type            FolderTypes
 
@@ -79,7 +81,7 @@ model Folder {
 }
 
 model Address {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   name            String          @db.VarChar(320) @unique
   catchAll        Boolean
 
@@ -112,7 +114,7 @@ model UsersOnAddressesLink {
 }
 
 model Subdomain {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   name            String          @db.VarChar(249) @unique
 
   domainId        String
@@ -125,9 +127,9 @@ model Subdomain {
 }
 
 model UsersOnSubdomainsLink {
-  userId          String          @db.VarChar(25)
+  userId          String         
   user            User            @relation(fields: [userId], references: [id])
-  subdomainId     String          @db.VarChar(25)
+  subdomainId     String         
   subdomain       Subdomain       @relation(fields: [subdomainId], references: [id])
 
   consult         Boolean?
@@ -150,7 +152,7 @@ model UsersOnSubdomainsLink {
 // don't forget to change their select parameters
 // inside of main page
 model Domain {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   name            String          @db.VarChar(253) @unique
   privDkim        Bytes           @db.ByteA
 
@@ -160,9 +162,9 @@ model Domain {
 }
 
 model UsersOnDomainsLink {
-  userId          String          @db.VarChar(25)
+  userId          String         
   user            User            @relation(fields: [userId], references: [id])
-  domainId        String          @db.VarChar(25)
+  domainId        String         
   domain          Domain          @relation(fields: [domainId], references: [id])
 
   consult         Boolean?
@@ -181,7 +183,7 @@ model UsersOnDomainsLink {
 }
 
 model User {
-  id              String          @id @default(cuid()) @db.VarChar(25)
+  id              String          @id @default(cuid())
   username        String          @db.VarChar(255) @unique
   webPushSubData  String[]
   passwordHash    String
