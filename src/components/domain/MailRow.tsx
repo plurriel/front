@@ -374,7 +374,7 @@ removeformat`,
             await fetch(`/api/mails/${(convos[selectedConvo] as StoredAs<Convo, 'mails', true>).mails.at(-1)}/reply`, {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ content: (editorRef.current as Editor).getContent() }),
+              body: JSON.stringify({ contents: (editorRef.current as Editor).getContent() }),
             });
             setIsSending(false);
             (editorRef.current as Editor).setContent('');
