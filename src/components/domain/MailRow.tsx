@@ -190,7 +190,7 @@ function MailContents({
           case 'resize':
             setFrameHeight(event.data.value);
             if (event.data.loaded) {
-              setLoadedFrames((lf) => [...lf.filter((v) => v !== mailId)]);
+              setLoadedFrames((lf) => lf && [...lf.filter((v) => v !== mailId)]);
             }
             break;
           // case 'loaded':
