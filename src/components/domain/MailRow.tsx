@@ -11,7 +11,7 @@ import styles from '@/styles/domain/MailRow.module.css';
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { Person } from '../PersonCard';
 import { ChevronDown } from '../icons/ChevronDown';
-import { StoredAs, useAppContext } from './AppContext';
+import { State, StoredAs, useAppContext } from './AppContext';
 
 import { Back } from '../icons/Back';
 import { IconButton } from '../IconButton';
@@ -61,6 +61,7 @@ export function MailRow({ ...props }) {
     if (selectedConvo) setComposing(false);
   }, [selectedConvo, setComposing]);
 
+  const loadedFramesState = useState<string[] | undefined>((convo as StoredAs<Convo, 'mails', true>)?.mails);
   // const editorRef = useRef(null);
 
   if (composing) return <CompositionRow {...props} />;
@@ -104,7 +105,13 @@ export function MailRow({ ...props }) {
                   {
                     (convo as StoredAs<Convo, 'mails', true>)
                       .mails
-                      .map((mailId) => <MailContents mailId={mailId} key={mailId} />)
+                      .map((mailId) => (
+                        <MailContents
+                          loadedFramesState={loadedFramesState as State<string[]>}
+                          mailId={mailId}
+                          key={mailId}
+                        />
+                      ))
                   }
                 </Stack>
               </Container>
@@ -145,16 +152,32 @@ export function MailRow({ ...props }) {
 //   );
 // }
 
-function MailContents({ mailId }: { mailId: string }) {
+function MailContents({
+  mailId,
+  loadedFramesState,
+}: {
+  mailId: string,
+  loadedFramesState: State<string[]>,
+}) {
   const {
     mails: [mails],
-    requestedMail: [requestedMail],
+    requestedMail: [requestedMail, setRequestedMail],
   } = useAppContext();
 
   const mail = mails[mailId];
 
   const [frameHeight, setFrameHeight] = useState(100);
-  const iframeEl = useRef(null);
+  const iframeEl = useRef<HTMLIFrameElement | null>(null);
+
+  const [loadedFrames, setLoadedFrames] = loadedFramesState;
+
+  useEffect(() => {
+    if (loadedFrames.length === 0 && requestedMail === mailId) {
+      console.log(mailId, requestedMail);
+      iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
+      setRequestedMail(null);
+    }
+  }, [loadedFrames]);
 
   useEffect(() => {
     const listener = (event: MessageEvent) => {
@@ -162,14 +185,17 @@ function MailContents({ mailId }: { mailId: string }) {
         switch (event.data.type) {
           case 'resize':
             setFrameHeight(event.data.value);
+            if (event.data.loaded) {
+              setLoadedFrames((lf) => [...lf.filter((v) => v !== mailId)]);
+            }
             break;
-          case 'loaded':
-            // if (requestedMail === mailId) {
-            //   console.log(mailId, requestedMail);
-            //   iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
-            //   setRequestedMail(null);
-            // }
-            break;
+          // case 'loaded':
+          //   // if (requestedMail === mailId) {
+          //   //   console.log(mailId, requestedMail);
+          //   //   iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
+          //   //   setRequestedMail(null);
+          //   // }
+          //   break;
           default:
             console.error(`Unrecognised event type "${event.data.type}"`, event);
         }
@@ -252,7 +278,7 @@ function MailContents({ mailId }: { mailId: string }) {
 <script>
 function getAbsoluteHeight(el) {const styles = window.getComputedStyle(el);return el.offsetHeight + parseFloat(styles.marginTop) + parseFloat(styles.marginBottom);}
 const resizeEl=document.querySelector('body')
-const sendHeight=()=>parent.postMessage({type:'resize',value:getAbsoluteHeight(resizeEl),id:"${mailId}"},"*");
+const sendHeight=()=>parent.postMessage({type:'resize',value:getAbsoluteHeight(resizeEl),loaded:document.readyState === 'complete',id:"${mailId}"},"*");
 sendHeight();
 new ResizeObserver(()=>sendHeight()).observe(resizeEl);
 document.querySelectorAll('a').forEach(a=>a.target="_blank");

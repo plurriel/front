@@ -88,12 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (body.inReplyTo) {
         const inReplyToMail = await prisma.mail.findFirst({
           where: {
-            convo: {
-              folder: {
-                addressId: crackOpen(req.query.id as string | string[]),
-              },
-            },
-            messageId: body.inReplyTo,
+            id: body.inReplyTo,
           },
         });
         if (!inReplyToMail) return res.status(404).json({ message: 'In Reply To mail could not be found' });

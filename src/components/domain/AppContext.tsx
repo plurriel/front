@@ -17,7 +17,7 @@ import {
 import BundledEditor from '../BundledEditor';
 
 type StateSetter<T> = Dispatch<SetStateAction<T>>;
-type State<T> = [T, StateSetter<T>];
+export type State<T> = [T, StateSetter<T>];
 
 export type StoredAs<CurrentScope, NextScopeName, Trusted = false> = NextScopeName extends string
   ? Trusted extends true
