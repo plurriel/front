@@ -6,4 +6,6 @@ const toCheck = [
   'USERS_TO_US_PRIVATE',
 
   'VAPID_PUBLIC',
+
+  'AMQP_URL',
 ];
