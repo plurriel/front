@@ -53,10 +53,6 @@ export function DomainRow({ ...props }) {
   );
 }
 
-function SelectTag(p: React.HTMLProps<HTMLSelectElement>) {
-  return <select {...p} />;
-}
-
 function CreateModal(
   {
     modalShown,
@@ -70,6 +66,7 @@ function CreateModal(
     type: 'subdomain';
     domainId: string;
     val: string;
+    code: number;
   }
   interface EmailStepData {
     type: 'email';
@@ -110,7 +107,7 @@ function CreateModal(
             });
             break;
           case 'subdomain':
-            await fetch(`/api/domains/${step[1].domainId}/subdomains`, {
+            const request = await fetch(`/api/domains/${step[1].domainId}/subdomains`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -118,9 +115,10 @@ function CreateModal(
                 name: step[1].val,
               }),
             });
+            setStep([step[0], { ...step[1], code: request.status }]);
             break;
           default:
-            console.log('wtf');
+            throw new Error('wtf');
         }
       }
     })();
@@ -216,7 +214,7 @@ function CreateModal(
               <Container
                 surface
                 oneline
-                customTag={SelectTag as unknown as HTMLSelectElement}
+                customTag="select"
                 onChange={({ target }) => setStep((step_) => [step_[0], {
                   ...step_[1],
                   subdomainId: (target as HTMLInputElement).value,
@@ -301,6 +299,62 @@ function CreateModal(
         );
       }
       return <b>wtf</b>;
+    case 2:
+      if (step[1].type === 'subdomain') {
+        return (
+          <>
+            <span>Subdomain</span>
+            <b>Subdomain successfully set!</b>
+            <Container surface>
+              <b>Note</b>
+              <span>
+                <p>
+                  Your subdomain may be deemed as untrustworthy if you don&amp;t set the following
+                  DNS record:
+                </p>
+                <Stack related col>
+                  <Stack>
+                    <Container surface>
+                      <small>Type</small>
+                    </Container>
+                    <Container surface flexGrow>
+                      MX
+                    </Container>
+                  </Stack>
+                  <Stack>
+                    <Container surface>
+                      <small>Name</small>
+                    </Container>
+                    <Container surface flexGrow>
+                      {subdomains[selectedSubdomainId].name}
+                    </Container>
+                  </Stack>
+                  <Stack>
+                    <Container surface>
+                      <small>Value</small>
+                    </Container>
+                    <Container surface flexGrow>
+                      mail.plurriel.email
+                    </Container>
+                  </Stack>
+                  <Stack>
+                    <Container surface>
+                      <small>Priority</small>
+                    </Container>
+                    <Container surface flexGrow>
+                      5
+                    </Container>
+                  </Stack>
+                </Stack>
+                <p>
+                  You should be able to send and receive either way, this is only a precaution to
+                  not end up in the Spam foldeer.
+                </p>
+              </span>
+            </Container>
+          </>
+        );
+      }
     default:
       requestAnimationFrame(() => setModalShown(false));
       return null;

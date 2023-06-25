@@ -50,7 +50,7 @@ interface HomeProps {
   convos: Record<string, StoredAs<Convo, 'mails'>>;
   mails: Record<string, Mail>;
   lastToggled: string[];
-  selectedFolder: [string, string, string];
+  selectedFolder: [string, string, string] | null;
   domain: StoredAs<Domain, 'subdomains', true>;
   selectedConvo: string | null;
   requestedMail: string | null;

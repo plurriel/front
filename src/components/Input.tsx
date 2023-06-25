@@ -7,10 +7,6 @@ interface AllTextInputOptions extends ContainerOptions {
   customClasses?: string[];
 }
 
-const inputEl = (
-  (p: React.HTMLProps<HTMLInputElement>) => <input {...p} />
-) as unknown as HTMLInputElement;
-
 export function TextInput({
   customClasses,
   ...props
@@ -22,7 +18,7 @@ export function TextInput({
         ...(customClasses || []),
       ]}
       type="text"
-      customTag={inputEl}
+      customTag="input"
       {...props}
     />
   );

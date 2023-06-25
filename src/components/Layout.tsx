@@ -26,7 +26,7 @@ export interface ContainerOptions<T = typeof DivTag> {
   style?: React.CSSProperties;
   unwrap?: boolean;
   related?: boolean;
-  customTag?: T extends Element ? T : never;
+  customTag?: React.ComponentType | string;
   children?: React.ReactNode;
 }
 
@@ -59,7 +59,7 @@ export function Container<CustomTagT = typeof DivTag>({
   ...props
 }: ContainerOptions<CustomTagT>
   & React.HTMLProps<CustomTagT>) {
-  const Tag = useMemo(() => (CustomTag || DivTag), [CustomTag]) as React.JSX.ElementType;
+  const Tag = useMemo(() => (CustomTag || DivTag), [CustomTag]);
   return (
     <Tag
       {...(props as any)}

@@ -32,5 +32,6 @@ module.exports = {
     'react/require-default-props': 'off',
     'no-unused-vars': 'off',
     'no-use-before-define': 'off',
+    'no-fallthrough': 'off',
   },
 };
