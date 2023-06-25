@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== address.name),
       );
       const mailId = `c${cuid2.createId()}`;
-      const messageId = `<${mailId}@${address.name.split('@')[1]}`;
+      const messageId = `<${mailId}@${address.name.split('@')[1]}>`;
 
       const mailInDb = await prisma.mail.create({
         data: {
