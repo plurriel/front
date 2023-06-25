@@ -64,6 +64,10 @@ export function MailRow({ ...props }) {
   const loadedFramesState = useState<string[] | undefined>((convo as StoredAs<Convo, 'mails', true>)?.mails);
   // const editorRef = useRef(null);
 
+  useEffect(() => {
+    loadedFramesState[1]((convo as StoredAs<Convo, 'mails', true>)?.mails);
+  }, [convo]);
+
   if (composing) return <CompositionRow {...props} />;
 
   if (!convo || !selectedFolder) {
@@ -172,7 +176,7 @@ function MailContents({
   const [loadedFrames, setLoadedFrames] = loadedFramesState;
 
   useEffect(() => {
-    if (loadedFrames.length === 0 && requestedMail === mailId) {
+    if (loadedFrames?.length === 0 && requestedMail === mailId) {
       console.log(mailId, requestedMail);
       iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
       setRequestedMail(null);
