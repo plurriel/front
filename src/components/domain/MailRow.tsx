@@ -172,13 +172,14 @@ function MailContents({
 
   const [frameHeight, setFrameHeight] = useState(100);
   const iframeEl = useRef<HTMLIFrameElement | null>(null);
+  const mailEl = useRef<HTMLDivElement | null>(null);
 
   const [loadedFrames, setLoadedFrames] = loadedFramesState;
 
   useEffect(() => {
     if (loadedFrames?.length === 0 && requestedMail === mailId) {
       console.log(mailId, requestedMail);
-      iframeEl.current?.scrollIntoView({ behavior: 'smooth' });
+      mailEl.current?.scrollIntoView({ behavior: 'smooth' });
       setRequestedMail(null);
     }
   }, [loadedFrames]);
@@ -208,8 +209,6 @@ function MailContents({
     window.addEventListener('message', listener);
     return () => window.removeEventListener('message', listener);
   }, [setFrameHeight]);
-
-  const mailEl = useRef(null);
 
   const [dateSent, setDateSent] = useState<Date | null>(null);
   const [isSameDate, setIsSameDate] = useState(false);
