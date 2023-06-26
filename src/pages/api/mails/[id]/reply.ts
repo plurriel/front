@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const mailInDb = await prisma.mail.create({
         data: {
-          inbound: false,
+          type: 'Outbound',
           id: mailId,
           from: address.name,
           to: [...tos],
