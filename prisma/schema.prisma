@@ -18,6 +18,16 @@ datasource db {
 //   content         Bytes           @db.ByteA
 // }
 
+model Attachment {
+  id              String          @id @default(cuid())
+  name            String          @db.VarChar(255)
+  mimeType        String          @db.VarChar(255)
+  url             String
+
+  mailId          String
+  mail            Mail            @relation(references: [id], fields: [mailId])
+}
+
 enum MailTypes {
   Inbound
   Outbound
@@ -36,7 +46,7 @@ model Mail {
   messageId       String?         @db.VarChar(995)
   subject         String?
   html            String?
-  attachments     String[]
+  attachments     Attachment[]
 
   unsuccessful    String[]
 
