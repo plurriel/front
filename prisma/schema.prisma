@@ -18,11 +18,16 @@ datasource db {
 //   content         Bytes           @db.ByteA
 // }
 
-
+enum MailTypes {
+  Inbound
+  Outbound
+  Draft
+}
 
 model Mail {
   id              String          @id @default(cuid())
   inbound         Boolean
+  type            MailTypes?
   from            String
   to              String[]
   cc              String[]
