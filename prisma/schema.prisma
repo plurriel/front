@@ -18,6 +18,8 @@ datasource db {
 //   content         Bytes           @db.ByteA
 // }
 
+
+
 model Mail {
   id              String          @id @default(cuid())
   inbound         Boolean
@@ -30,6 +32,7 @@ model Mail {
   messageId       String?         @db.VarChar(995)
   subject         String?
   html            String?
+  attachments     String[]
 
   unsuccessful    String[]
 
