@@ -46,8 +46,8 @@ model Mail {
   messageId       String?         @db.VarChar(995)
   subject         String?
   html            String?
-  folderId        String?
-  folder          Folder?         @relation(fields: [folderId], references: [id])
+  folderId        String
+  folder          Folder          @relation(fields: [folderId], references: [id])
   attachments     Attachment[]
 
   unsuccessful    String[]
@@ -69,11 +69,6 @@ model Convo {
   mails           Mail[]
 
   latest          DateTime
-
-  folderId        String 
-  folder          Folder          @relation(fields: [folderId], references: [id])
-
-  @@index([folderId])
 }
 
 enum FolderTypes {
@@ -93,7 +88,6 @@ model Folder {
   addressId       String
   address         Address         @relation(fields: [addressId], references: [id])
 
-  convos          Convo[]
   mails           Mail[]
 
   @@unique([name, type, addressId])
