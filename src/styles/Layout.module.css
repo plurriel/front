@@ -20,22 +20,15 @@
   gap: 0.5em;
   overflow: hidden;
 }
+.stack.reverse {
+  flex-direction: row-reverse;
+}
 
 .stack.v {
   flex-direction: column;
 }
-
-.surface {
-  --bgnext: var(--bg1);
-  --fgnext: var(--fg1);
-  --nsnext: var(--bg2);
-  /* --fgs: var(--bg); */
-  background-color: var(--bg);
-  color: var(--fg);
-  fill: var(--fg);
-  padding: 1em;
-  gap: 1em;
-  border-radius: 1em;
+.stack.reverse.v {
+  flex-direction: column-reverse;
 }
 
 .stack .fill {
@@ -45,18 +38,33 @@
 .surface .stack {
   gap: 0.5em;
 }
+.surface {
+  /* --fgs: var(--bg); */
+  background-color: var(--bg);
+  color: var(--fg);
+  fill: var(--fg);
+  padding: 1em;
+  gap: 1em;
+  border-radius: 1em;
+}
+.surface .surface {
+  border-radius: 0.5em;
+}
+
+.surface {
+  --bgnext: var(--bg1);
+  --fgnext: var(--fg1);
+  --nsnext: var(--bg2);
+}
 .surface .surface {
   --bgnext: var(--bg2);
   --fgnext: var(--fg2);
   --nsnext: var(--bg3);
-  /* --fgs: var(--bg); */
-  border-radius: 0.5em;
 }
 .surface .surface .surface {
   --bgnext: var(--bg3, var(--bg2));
   --fgnext: var(--fg3, var(--bg2));
   --nsnext: var(--bg4, var(--bg3));
-  /* --fgs: var(--bg); */
 }
 
 .center {
@@ -156,9 +164,9 @@
   position: relative;
 }
 
-.clickable:not(.highlight):not(.cta) {
+/* .clickable:not(.highlight):not(.cta) {
   background: var(--bg);
-}
+} */
 .clickable:not(.highlight):not(.cta):hover {
   background: var(--ns);
 }

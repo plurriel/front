@@ -1,0 +1,13 @@
+.context_menu {
+  pointer-events: all;
+  position: relative;
+  width: 192px;
+  background-color: var(--bg0);
+  color: var(--fg0);
+  display: flex;
+  flex-direction: column;
+  border-radius: 1em;
+  overflow: hidden;
+  --nsnext: var(--bg1);
+  box-shadow: 0px 8px 20px -3px var(--bg0);
+}

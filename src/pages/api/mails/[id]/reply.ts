@@ -27,37 +27,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      let body: InferType<typeof replyReqSchema>;
-      try {
-        body = await replyReqSchema.validate(req.body);
-      } catch (err) {
-        return res.status(400).json({
-          message: (err as ValidationError).message,
-        });
-      }
-
       const mailDb = await prisma.mail.findUnique({
         where: {
           id: crackOpen(req.query.id as string | string[]),
         },
         include: {
-          convo: {
+          folder: {
             select: {
-              folder: {
-                select: {
-                  address: {
-                    include: {
-                      folders: {
-                        where: {
-                          type: 'Sent',
-                          name: '',
-                        },
-                      },
-                      subdomain: {
-                        select: {
-                          domain: true,
-                        },
-                      },
+              address: {
+                include: {
+                  folders: {
+                    where: {
+                      type: 'Sent',
+                      name: '',
+                    },
+                  },
+                  subdomain: {
+                    select: {
+                      domain: true,
                     },
                   },
                 },
@@ -73,14 +60,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      if (!(await hasPermissions(['address', mailDb.convo.folder.address.id], ['view', 'consult', 'send'], user.id))) {
+      if (!(await hasPermissions(['address', mailDb.folder.address.id], ['view', 'consult', 'send'], user.id))) {
         return res.status(401).json({
           message: 'Insufficient permissions - Must be able to view, send from and consult address',
         });
       }
 
+      let body: InferType<typeof replyReqSchema>;
+      try {
+        body = await replyReqSchema.validate(req.body);
+      } catch (err) {
+        return res.status(400).json({
+          message: (err as ValidationError).message,
+        });
+      }
+
       const {
-        convo: { folder: { address } },
+        folder: { address },
         ...mail
       } = mailDb;
 
@@ -121,6 +117,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           html: body.contents,
           inReplyTo: mail.id,
           unsuccessful: [...new Set([...tos, ...ccs].map((v) => emailAddrUtils.extractAddress(v)))],
+          folderId: address.folders[0].id,
           convoId: mail.convoId,
         },
       });

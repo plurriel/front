@@ -104,6 +104,7 @@ export interface StackOptions<T = typeof DivTag> extends ContainerOptions<T> {
   col?: boolean;
   jc?: string | boolean;
   ai?: string | boolean;
+  reverse?: boolean;
 }
 
 export function Stack<CustomTag = typeof DivTag>({
@@ -114,6 +115,7 @@ export function Stack<CustomTag = typeof DivTag>({
   jc,
   ai,
   style,
+  reverse,
   ...props
 }: StackOptions<CustomTag>
   & React.HTMLProps<CustomTag>) {
@@ -133,6 +135,7 @@ export function Stack<CustomTag = typeof DivTag>({
         styles.stack,
         center && styles.center,
         col && styles.v,
+        reverse && styles.reverse,
         ...(customClasses || []),
       ]}
     >

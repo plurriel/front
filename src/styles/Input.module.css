@@ -6,7 +6,7 @@
 .input {
   -webkit-appearance: none;
   background-color: var(--ns);
-  color: var(--fg);
+  color: inherit;
   outline: none;
   border: none;
   font-size: inherit;

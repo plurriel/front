@@ -8,4 +8,8 @@ const toCheck = [
   'VAPID_PUBLIC',
 
   'AMQP_URL',
+
+  'BUCKET_URL',
+  'BUCKET_ACCESS_KEY',
+  'BUCKET_SECRET_ACCESS_KEY',
 ];

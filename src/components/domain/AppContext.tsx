@@ -1,8 +1,6 @@
 import {
   createContext,
   useContext,
-  Dispatch,
-  SetStateAction,
 } from 'react';
 
 import {
@@ -14,32 +12,32 @@ import {
   Domain,
 } from '@prisma/client';
 
+import { State } from '@/lib/utils';
 import BundledEditor from '../BundledEditor';
-
-type StateSetter<T> = Dispatch<SetStateAction<T>>;
-export type State<T> = [T, StateSetter<T>];
 
 export type StoredAs<CurrentScope, NextScopeName, Trusted = false> = NextScopeName extends string
   ? Trusted extends true
     ? CurrentScope & Record<NextScopeName, string[]>
-    : CurrentScope | CurrentScope & Record<NextScopeName, string[]>
+    : CurrentScope
+      | CurrentScope & Record<NextScopeName, null>
+      | CurrentScope & Record<NextScopeName, string[]>
   : never;
 
 interface AppContextValue {
   domain: StoredAs<Domain, 'subdomains', true>;
   subdomains: State<Record<string, StoredAs<Subdomain, 'addresses', true>>>;
   addresses: State<Record<string, StoredAs<Address, 'folders', true>>>;
-  folders: State<Record<string, StoredAs<Folder, 'convos'>>>;
+  folders: State<Record<string, StoredAs<Folder, 'mails'>>>;
   convos: State<Record<string, StoredAs<Convo, 'mails'>>>;
   mails: State<Record<string, Mail>>;
   selectedFolder: State<[string, string, string] | null>;
-  selectedConvo: State<string | null>;
+  selectedMail: State<string | null>;
   currentFirstPane: State<number>;
   viewedAddress: State<[string, string] | null>;
   toggledSubdomains: State<Set<string>>;
   requestedSubdomain: State<string | null>;
-  requestedMail: State<string | null>;
-  composing: State<boolean>;
+  composing: State<string | boolean>;
+  activeContextMenuState: State<State<[number, number] | null> | null>;
   BundledEditor: typeof BundledEditor | (() => null);
 }
 

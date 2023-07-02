@@ -41,6 +41,12 @@
   --fg: var(--fg1);
   overflow-x: scroll;
 }
+.tox-toolbar.tox-toolbar--scrolling {
+  gap: 0;
+}
+.tox-toolbar.tox-toolbar--scrolling > *:not(:last-child) {
+  margin-right: 0.5em;
+}
 
 .tox-toolbar__group {
   background-color: var(--bg2);
@@ -619,10 +625,19 @@
 .tox-toolbar.tox-toolbar--scrolling::after {
   content: "";
   flex: 1;
-  background: linear-gradient(90deg, var(--bg), var(--ns) 2em);
+  background: linear-gradient(90deg, var(--bg) 0.5em, var(--ns) 2.5em);
   border-radius: 0 0.5em 0.5em 0;
   border-top-left-radius: 0px;
   border-top-right-radius: 0.5em;
   border-bottom-right-radius: 0.5em;
   border-bottom-left-radius: 0px;
+}
+
+.tox-swatch.tox-swatch--remove svg * {
+  stroke: var(--fg0);
+}
+.tox-swatch.tox-swatch--remove {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

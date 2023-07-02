@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 export const emailAddrUtils = {
   extractDisplayName(v: string) {
     // I <3 regex
@@ -25,3 +27,6 @@ interface Folder {
 }
 
 export const getFolderName = (folder: Folder) => (folder.type !== 'Other' ? folder.type : folder.name);
+
+type StateSetter<T> = Dispatch<SetStateAction<T>>;
+export type State<T> = [T, StateSetter<T>];

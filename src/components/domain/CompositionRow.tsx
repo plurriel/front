@@ -1,14 +1,16 @@
-import React, { useRef, useState } from 'react';
+import { Mail } from '@prisma/client';
+import React, { useState } from 'react';
 import { Editor } from 'tinymce';
 import { InferType } from 'yup';
 import { mailReqSchema } from '@/pages/api/addresses/[id]/mail';
 import styles from '@/styles/domain/CompositionRow.module.css';
+import { mailPatchSchema } from '@/pages/api/mails/[id]';
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { useAppContext } from './AppContext';
 
-import editorStyles from '../content_style';
 import { TextInput } from '../Input';
 import { Send } from '../icons/Send';
+import { editorStyles } from '../content_style';
 // import { ChevronDown } from '../icons/ChevronDown';
 
 export function CompositionRow({
@@ -18,21 +20,69 @@ export function CompositionRow({
     subdomains: [subdomains],
     addresses: [addresses],
     selectedFolder: [selectedFolder],
-    composing: [, setComposing],
+    composing: [composing, setComposing],
+    mails: [mails, setMails],
     BundledEditor,
   } = useAppContext();
 
-  const editorRef = useRef<Editor>();
-
   const [subject, setSubject] = useState('');
+  const [contents, setContents] = useState('');
   const [recipients, setRecipients] = useState('');
+  // const [isLoading, setIsLoading] = useState(false);
   // const [doExpand, setDoExpand] = useState(false);
+
+  // useEffect(() => {
+  //   if (composing && isLoading) return;
+  //   if (composing) setIsLoading(true);
+  //   const abortController = new AbortController();
+  //   switch (composing) {
+  //     case false:
+  //       setIsLoading(true);
+  //       // return () => {};
+  //       break;
+  //     case true:
+  //       setIsLoading(false);
+  //       fetch(`/api/addresses/${(selectedFolder as [string, string, string])[1]}/draft`, {
+  //         method: 'POST',
+  //         headers: { 'content-type': 'application/json' },
+  //         body: '{}',
+  //         signal: abortController.signal,
+  //       })
+  //         .then((res) => res.json())
+  //         .then((json: Mail) => {
+  //           setComposing(json.id);
+  //         });
+  //       // return () => abortController.abort();
+  //       break;
+  //     default:
+  //       fetch(`/api/mails/${composing}`, {
+  //         method: 'GET',
+  //         signal: abortController.signal,
+  //       })
+  //         .then((res) => res.json())
+  //         .then((json: Mail) => {
+  //           setMails((lastMails) => {
+  //             const newMails = { ...lastMails };
+  //             newMails[json.id] = json;
+  //             return newMails;
+  //           });
+  //           setSubject(json.subject || '');
+  //           setContents(json.html || '');
+  //           setRecipients(json.to.join(', '));
+  //           setIsLoading(false);
+  //         });
+  //       // return () => abortController.abort();
+  //       break;
+  //   }
+  // }, [composing]);
 
   if (!selectedFolder) throw new Error();
 
   const [local, subdomain] = addresses[selectedFolder[1]].name.split('@');
 
-  const [isSending, setIsSending] = useState<boolean>(false);
+  const [sendAsLabel, setSendAsLabel] = useState('');
+
+  const [isSending, setIsSending] = useState<string | false>(false);
   const [abortSending, setAbortSending] = useState<AbortController | null>();
   const [isSendingTime, setIsSendingTime] = useState<number | null>(null);
 
@@ -43,18 +93,26 @@ export function CompositionRow({
       subject,
       bcc: [],
       cc: [],
-      contents: editorRef.current?.getContent() || '',
+      contents: contents || '',
     };
-    await fetch(`/api/addresses/${selectedFolder?.[1]}/mail`, {
+    return fetch(`/api/addresses/${selectedFolder?.[1]}/mail`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(reqBody),
-    });
+    }).then((res) => res.json());
   }
+
+  // if (composing === true) {
+  //   return (
+  //     <Stack surface col center {...props}>
+  //       <b>Loading draft...</b>
+  //     </Stack>
+  //   );
+  // }
 
   return (
     <Stack surface col {...props}>
-      <Stack related disabled={isSending}>
+      <Stack related disabled={Boolean(isSending)}>
         <Stack surface>
           <small>Subject:</small>
         </Stack>
@@ -63,11 +121,11 @@ export function CompositionRow({
             w
             onChange={({ target }) => setSubject((target as HTMLInputElement).value)}
             value={subject}
-            placeholder="No Subject"
+            placeholder="<No Subject>"
           />
         </Container>
       </Stack>
-      <Stack col gap="0" disabled={isSending}>
+      <Stack col gap="0" disabled={Boolean(isSending)}>
         <Stack related>
           <Stack surface>
             <small>From:</small>
@@ -75,13 +133,16 @@ export function CompositionRow({
           <Container
             flexGrow
             surface
-            customClasses={[styles.hide_until_hover]}
+            customClasses={[styles.send_as_label, !sendAsLabel && styles.hide_until_hover]}
             tabIndex={0}
           >
             {local}
             <span>
               +
-              <input />
+              <TextInput
+                onChange={({ target }) => setSendAsLabel((target as HTMLInputElement).value)}
+                value={sendAsLabel}
+              />
             </span>
             @
             {subdomain}
@@ -175,14 +236,17 @@ export function CompositionRow({
           </Stack>
         </Container> */}
       </Stack>
-      <Container flexGrow scroll disabled={isSending}>
+      <Container flexGrow scroll disabled={Boolean(isSending)}>
         <Container br>
           {BundledEditor && (
           <BundledEditor
             // onInit={(evt, editor) => { editorRef.current = editor; }}
             initialValue={`<p></p><p>Sent from <a href="https://plurriel.email">Plurriel</a> over <a href="${subdomains[selectedFolder[0]].name}">${subdomains[selectedFolder[0]].name}</a></p>`}
-            onInit={(evt: any, editor: Editor) => {
-              editorRef.current = editor;
+            // onInit={(evt: any, editor: Editor) => {
+            //   editorRef.current = editor;
+            // }}
+            onEditorChange={(evt: any, editor: Editor) => {
+              setContents(editor.getContent());
             }}
             init={{
               menubar: false,
@@ -205,69 +269,118 @@ export function CompositionRow({
           )}
         </Container>
       </Container>
-      <Stack jc="flex-end">
-        {isSending && (
-          <>
-            <Container pad>
-              Sending in
-              {' '}
-              {isSendingTime}
-            </Container>
-            <Stack related>
-              <ClickableContainer
-                onFire={() => {
+      <Stack jc="space-between">
+        <Container>
+          {isSending === 'mail' && (
+            <>
+              <Container pad>
+                Sending in
+                {' '}
+                {isSendingTime}
+              </Container>
+              <Stack related>
+                <ClickableContainer
+                  onFire={() => {
+                    setIsSending(false);
+                    (abortSending as AbortController).abort();
+                    setAbortSending(null);
+                  }}
+                  surface
+                >
+                  Cancel
+                </ClickableContainer>
+                <ClickableContainer
+                  onFire={async () => {
+                    setIsSending(false);
+                    (abortSending as AbortController).abort();
+                    setAbortSending(null);
+                    await send();
+                    setComposing(false);
+                  }}
+                  surface
+                >
+                  Send now
+                </ClickableContainer>
+              </Stack>
+            </>
+          )}
+        </Container>
+        <Stack>
+          <ClickableContainer
+            surface
+            br
+            onFire={async () => {
+              setIsSending('draft');
+              if (composing === true) {
+                await fetch(`/api/addresses/${(selectedFolder as [string, string, string])[1]}/draft`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: '{}',
+                })
+                  .then((res) => res.json())
+                  .then((json: Mail) => {
+                    setMails((lastMails) => {
+                      const newMails = { ...lastMails };
+                      newMails[json.id] = json;
+                      return newMails;
+                    });
+                    setComposing(json.id);
+                  });
+              } else {
+                const latestDraftVersion = mails[composing as string];
+
+                const sendToBack: InferType<typeof mailPatchSchema> = {};
+                const eqSet = (xs: Set<any>, ys: Set<any>) => xs.size === ys.size
+                  && [...xs].every((x) => ys.has(x));
+
+                const newSetOfRecipients = new Set(recipients.split(/, ?/g));
+                if (!eqSet(newSetOfRecipients, new Set(latestDraftVersion.to))) {
+                  sendToBack.to = [...newSetOfRecipients];
+                }
+                if ((latestDraftVersion.subject || '') !== subject) sendToBack.subject = subject;
+                if ((latestDraftVersion.html || '') !== contents) sendToBack.html = contents;
+                await fetch(`/api/mails/${composing}`, {
+                  method: 'PATCH',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify(sendToBack),
+                });
+                setComposing(false);
+              }
+              setIsSending(false);
+            }}
+          >
+            Save to Draft
+          </ClickableContainer>
+          <ClickableContainer
+            cta
+            surface
+            disabled={Boolean(isSending)}
+            onFire={() => {
+              setIsSending('mail');
+              setIsSendingTime(5);
+              const abortController = new AbortController();
+              setAbortSending(abortController);
+              const sentDate = Date.now();
+              const onUpdate = async () => {
+                if (abortController.signal.aborted) return null;
+                const currentTimeSinceSent = Date.now() - sentDate;
+                if (currentTimeSinceSent > 5_000) {
                   setIsSending(false);
-                  (abortSending as AbortController).abort();
-                  setAbortSending(null);
-                }}
-                surface
-              >
-                Cancel
-              </ClickableContainer>
-              <ClickableContainer
-                onFire={async () => {
-                  setIsSending(false);
-                  (abortSending as AbortController).abort();
-                  setAbortSending(null);
                   await send();
                   setComposing(false);
-                }}
-                surface
-              >
-                Send now
-              </ClickableContainer>
-            </Stack>
-          </>
-        )}
-        <ClickableContainer
-          cta
-          surface
-          disabled={isSending}
-          onFire={() => {
-            setIsSending(true);
-            setIsSendingTime(5);
-            const abortController = new AbortController();
-            setAbortSending(abortController);
-            const sentDate = Date.now();
-            const onUpdate = async () => {
-              if (abortController.signal.aborted) return null;
-              const currentTimeSinceSent = Date.now() - sentDate;
-              if (currentTimeSinceSent > 5_000) {
-                setIsSending(false);
-                await send();
-                setComposing(false);
+                  return null;
+                }
+                setIsSendingTime(5 - Math.floor(currentTimeSinceSent / 1000));
+                setTimeout(onUpdate, 100);
                 return null;
-              }
-              setIsSendingTime(5 - Math.floor(currentTimeSinceSent / 1000));
+              };
               setTimeout(onUpdate, 100);
-              return null;
-            };
-            setTimeout(onUpdate, 100);
-          }}
-        >
-          <Send />
-          Send
-        </ClickableContainer>
+            }}
+          >
+            <Send />
+            Send
+          </ClickableContainer>
+        </Stack>
       </Stack>
     </Stack>
   );

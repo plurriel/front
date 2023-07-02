@@ -33,5 +33,7 @@ module.exports = {
     'no-unused-vars': 'off',
     'no-use-before-define': 'off',
     'no-fallthrough': 'off',
+    'no-console': 'off',
+    'max-len': ['warn', { code: 120 }],
   },
 };

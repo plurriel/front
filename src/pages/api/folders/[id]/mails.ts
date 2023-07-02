@@ -19,9 +19,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse,
         id: crackOpen(req.query.id as string | string[]),
       },
       select: {
-        convos: {
+        mails: {
           orderBy: {
-            latest: 'desc',
+            at: 'desc',
           },
         },
         addressId: true,
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse,
       });
     }
 
-    return res.status(200).json(folder.convos);
+    return res.status(200).json(folder.mails);
   }
   return res.status(405).json({
     message: 'Method not allowed',

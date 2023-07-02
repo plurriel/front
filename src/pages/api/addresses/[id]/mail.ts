@@ -34,15 +34,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         });
       }
 
-      let body: InferType<typeof mailReqSchema>;
-      try {
-        body = await mailReqSchema.validate(req.body);
-      } catch (err) {
-        return res.status(400).json({
-          message: (err as ValidationError).message,
-        });
-      }
-
       const address = await prisma.address.findUnique({
         where: {
           id: crackOpen(req.query.id as string | string[]),
@@ -66,6 +57,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!(await hasPermissions(['address', address.id], ['view', 'send'], user.id))) {
         return res.status(401).json({
           message: 'Insufficient permissions - Must be able to view and send from address',
+        });
+      }
+
+      let body: InferType<typeof mailReqSchema>;
+      try {
+        body = await mailReqSchema.validate(req.body);
+      } catch (err) {
+        return res.status(400).json({
+          message: (err as ValidationError).message,
         });
       }
 
@@ -110,7 +110,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           data: {
             subject: body.subject,
             interlocutors: [...interlocutors],
-            folderId: address.folders[0].id,
+            // folderId: address.folders[0].id,
             latest: new Date(now),
           },
         })).id;
@@ -131,6 +131,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           html: body.contents,
           inReplyTo: body.inReplyTo,
           unsuccessful: [...body.to, ...body.cc, ...body.bcc],
+          folderId: address.folders[0].id,
           convoId,
         },
       });

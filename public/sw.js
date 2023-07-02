@@ -56,8 +56,8 @@ self.addEventListener('notificationclick', async (event) => {
     case 'MAILRECEPTION':
       event.waitUntil((async () => {
         const mailData = await fetch(`/api/mails/${notifData[0]}`).then((res) => res.json());
-        const convo = await fetch(`/api/convos/${mailData.convoId}`).then((res) => res.json());
-        const folder = await fetch(`/api/folders/${convo.folderId}`).then((res) => res.json());
+        // const convo = await fetch(`/api/convos/${mailData.convoId}`).then((res) => res.json());
+        const folder = await fetch(`/api/folders/${mailData.folderId}`).then((res) => res.json());
         self.clients.openWindow(`/${notifData[1]}/${getFolderName(folder)}/${notifData[0]}`);
       })());
       break;

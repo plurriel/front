@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Convo, Folder } from '@prisma/client';
+import { Convo, Folder, Mail } from '@prisma/client';
 import Image from 'next/image';
 import pageStyles from '@/styles/domain.module.css';
 import { emailAddrUtils, getFolderName } from '@/lib/utils';
@@ -20,9 +20,16 @@ export function MailsRow({ ...props }) {
     selectedFolder: [selectedFolder, setSelectedFolder],
     viewedAddress: [, setViewedAddress],
     currentFirstPane: [, setCurrentFirstPane],
-    selectedConvo: [, setSelectedConvo],
+    selectedMail: [selectedMail, setSelectedMail],
     composing: [composing, setComposing],
   } = useAppContext();
+
+  // useEffect(() => {
+  //   if (composing) setSelectedMail(null);
+  // }, [composing, setSelectedMail]);
+  useEffect(() => {
+    if (selectedMail) setComposing(false);
+  }, [selectedMail, setComposing]);
 
   if (!selectedFolder) {
     return (
@@ -43,7 +50,7 @@ export function MailsRow({ ...props }) {
           onFire={() => {
             setCurrentFirstPane((currentFirstPane) => {
               if (currentFirstPane === 2) {
-                setSelectedConvo(null);
+                setSelectedMail(null);
                 setComposing(false);
                 return 1;
               }
@@ -77,11 +84,11 @@ export function MailsRow({ ...props }) {
           center
           w="fit-content"
           cta
-          onFire={() => {
-            setComposing(true);
+          onFire={async () => {
             setCurrentFirstPane(2);
+            setComposing(true);
           }}
-          highlight={composing}
+          highlight={Boolean(composing && !selectedMail)}
           id="composebtn"
         >
           <Edit />
@@ -95,7 +102,7 @@ export function MailsRow({ ...props }) {
 function MailsList() {
   const {
     folders: [folders, setFolders],
-    convos: [convos, setConvos],
+    mails: [mails, setMails],
     selectedFolder: [selectedFolder],
   } = useAppContext();
 
@@ -103,31 +110,36 @@ function MailsList() {
 
   const currentFolder = folders[selectedFolder[2]];
 
+  const [_, setHadConvos] = useState(new Set<string>());
+
   useEffect(() => {
     const controller = new AbortController();
     (async () => {
-      if (!('convos' in currentFolder)) {
-        const convosInFolder = await fetch(`/api/folders/${currentFolder.id}/convos`, { signal: controller.signal })
+      if (!('mails' in currentFolder)) {
+        const mailsInFolder: Mail[] = await fetch(`/api/folders/${currentFolder.id}/mails`, {
+          signal: controller.signal,
+        })
           .then((res) => res.json());
-        if (!convosInFolder) throw new Error('Access is missing');
-        setConvos((convos_) => {
-          const newConvos = { ...convos_ };
+        if (!mailsInFolder) throw new Error('Access is missing');
+        setMails((mails_) => {
+          const newMails = { ...mails_ };
           setFolders((folders_) => {
             const newFolders = { ...folders_ };
-            (newFolders[selectedFolder[2]] as StoredAs<Folder, 'convos', true>).convos = convosInFolder.map((convo: Convo) => {
-              newConvos[convo.id] = convo;
-              return convo.id;
-            });
+            (newFolders[selectedFolder[2]] as StoredAs<Folder, 'mails', true>)
+              .mails = mailsInFolder.map((mail: Mail) => {
+                newMails[mail.id] = mail;
+                return mail.id;
+              });
             return newFolders;
           });
-          return newConvos;
+          return newMails;
         });
       }
     })();
-  }, [currentFolder, setConvos, setFolders, selectedFolder]);
+  }, [currentFolder, setMails, setFolders, selectedFolder]);
 
-  if (!('convos' in currentFolder)) return <Stack col h center>Loading...</Stack>;
-  if (!currentFolder.convos.length) {
+  if (!('mails' in currentFolder) || !currentFolder.mails) return <Stack col h center>Loading...</Stack>;
+  if (!currentFolder.mails.length) {
     return (
       <Stack col h center>
         <Image width="96" height="144" src="/no_mails.svg" alt="Empty address" />
@@ -137,18 +149,28 @@ function MailsList() {
     );
   }
 
+  const latest: Record<string, string> = {};
+  currentFolder.mails.forEach((mailId) => {
+    const mail = mails[mailId];
+    if (!mail) return;
+    if (!latest[mail.convoId]) latest[mail.convoId] = mailId;
+    else if (new Date(mails[latest[mail.convoId]].at).getTime() < new Date(mail.at).getTime()) latest[mail.convoId] = mailId;
+  });
+
   return (
     <Stack col>
       {
-        currentFolder.convos.map((convoId) => convos[convoId] && (
-        <ConvoPreview
-          interlocutors={convos[convoId].interlocutors}
-          subject={convos[convoId].subject}
-          sendDate={convos[convoId].latest}
-          mailIdx={convoId}
-          key={convoId}
-        />
-        ))
+        currentFolder.mails.map((mailId) => mails[mailId]
+          && latest[mails[mailId].convoId] === mailId
+          && (
+            <ConvoPreview
+              interlocutors={mails[mailId].type === 'Inbound' ? [mails[mailId].from] : mails[mailId].to}
+              subject={mails[mailId].subject}
+              sendDate={mails[mailId].at}
+              mailId={mailId}
+              key={mailId}
+            />
+          ))
       }
     </Stack>
   );
@@ -158,16 +180,16 @@ function ConvoPreview({
   interlocutors,
   subject,
   sendDate,
-  mailIdx,
+  mailId,
   ...props
 }: {
   interlocutors: string[],
   subject: string | null,
   sendDate: Date,
-  mailIdx: string,
+  mailId: string,
 }) {
   const {
-    selectedConvo: [selectedConvo, setSelectedConvo],
+    selectedMail: [selectedMail, setSelectedMail],
     selectedFolder: [selectedFolder],
     addresses: [addresses],
     folders: [folders],
@@ -176,7 +198,7 @@ function ConvoPreview({
 
   if (!selectedFolder) throw new Error();
 
-  const isSelected = selectedConvo === mailIdx;
+  const isSelected = selectedMail === mailId;
 
   const [dateSent, setDateSent] = useState<null | Date>(null);
   const [isSameDate, setIsSameDate] = useState(false);
@@ -197,11 +219,15 @@ function ConvoPreview({
       surface
       highlight={isSelected}
       onFire={() => {
-        setSelectedConvo(mailIdx);
-        window.history.pushState({}, '', `/${addresses[selectedFolder[1]].name}/${getFolderName(folders[selectedFolder[2]])}/${mailIdx}`);
+        setSelectedMail(mailId);
+        window.history.pushState(
+          {},
+          '',
+          `/${addresses[selectedFolder[1]].name}/${getFolderName(folders[selectedFolder[2]])}/${mailId}`,
+        );
         setCurrentFirstPane(2);
       }}
-      gap="0"
+      // gap="0"
       {...props}
     >
       <Stack center>

@@ -15,7 +15,7 @@ import { TopBar } from '@/components/domain/TopBar';
 import { getLogin } from '@/lib/login';
 import { hasPermissions, hasPermissionsWithin } from '@/lib/authorization';
 import { prisma } from '@/lib/prisma';
-import { crackOpen, getFolderName } from '@/lib/utils';
+import { State, crackOpen, getFolderName } from '@/lib/utils';
 import {
   Domain,
   Subdomain,
@@ -26,6 +26,7 @@ import {
   FolderTypes,
 } from '@prisma/client';
 import { GetServerSideProps, NextApiRequest } from 'next';
+import { ContextMenuContextProvider } from '@/components/ContextMenu';
 
 export async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -52,8 +53,7 @@ interface HomeProps {
   lastToggled: string[];
   selectedFolder: [string, string, string] | null;
   domain: StoredAs<Domain, 'subdomains', true>;
-  selectedConvo: string | null;
-  requestedMail: string | null;
+  selectedMail: string | null;
   requestedSubdomain: string | null;
 }
 
@@ -66,8 +66,7 @@ export default function Home({
   lastToggled,
   selectedFolder,
   domain,
-  selectedConvo,
-  requestedMail,
+  selectedMail,
   requestedSubdomain,
 }: HomeProps) {
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function Home({
   const addressesState = useState(addresses);
   const foldersState = useState(folders);
   const mailsState = useState(mails);
-  const composingState = useState(false);
+  const composingState = useState<string | boolean>(false);
   const convosState = useState(
     Object.fromEntries(
       Object.entries(convos)
@@ -87,15 +86,15 @@ export default function Home({
   const toggledSubdomainsState = useState(new Set(lastToggled));
   const selectedFolderState = useState(selectedFolder);
   const viewedAddressState = useState(selectedFolder?.slice(0, 2) as [string, string] | null);
-  const selectedConvoState = useState(selectedConvo);
+  const selectedMailState = useState(selectedMail);
   // eslint-disable-next-line no-nested-ternary
-  const currentFirstPaneState = useState(selectedConvo
+  const currentFirstPaneState = useState(selectedMail
     ? 2
     : selectedFolder
       ? 1
       : 0);
-  const requestedMailState = useState(requestedMail);
   const requestedSubdomainState = useState(requestedSubdomain);
+  const activeContextMenuStateState = useState<State<[number, number] | null> | null>(null);
 
   useEffect(() => {
     setCookie('selected', selectedFolderState[0]?.join(','), { path: `/${domain.name}` });
@@ -130,10 +129,8 @@ export default function Home({
   }
 
   function scrollToAndViewMail(convoId: string, mailId: string) {
-    selectedConvoState[1](convoId);
+    selectedMailState[1](convoId);
     currentFirstPaneState[1](2);
-
-    requestedMailState[1](mailId);
   }
 
   useEffect(() => {
@@ -179,7 +176,7 @@ export default function Home({
           if (pathMail) {
             scrollToAndViewMail(pathMail.convoId, pathMailId);
           } else {
-            selectedConvoState[1](pathMailId);
+            selectedMailState[1](pathMailId);
           }
         }
       } else {
@@ -203,10 +200,10 @@ export default function Home({
     toggledSubdomains: toggledSubdomainsState,
     viewedAddress: viewedAddressState,
     selectedFolder: selectedFolderState,
-    selectedConvo: selectedConvoState,
+    selectedMail: selectedMailState,
     currentFirstPane: currentFirstPaneState,
-    requestedMail: requestedMailState,
     requestedSubdomain: requestedSubdomainState,
+    activeContextMenuState: activeContextMenuStateState,
     BundledEditor,
   }), [
     domain,
@@ -218,36 +215,38 @@ export default function Home({
     toggledSubdomainsState,
     viewedAddressState,
     selectedFolderState,
-    selectedConvoState,
+    selectedMailState,
     currentFirstPaneState,
     composingState,
-    requestedMailState,
     requestedSubdomainState,
     BundledEditor,
+    activeContextMenuStateState,
   ]);
 
   return (
-    <AppContext.Provider value={providerData}>
-      <Container id={styles.reply_bar_tools} surface />
-      <Stack col customClasses={[styles.page]}>
-        <TopBar customClasses={[styles.topbar]} />
-        <Stack
-          customClasses={[
-            [
-              styles.require_first,
-              styles.require_second,
-              styles.require_third,
-            ][currentFirstPaneState[0]],
-            styles.main,
-          ]}
-          flexGrow
-        >
-          <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
-          <MailsRow customClasses={[styles.mails]} />
-          <MailRow customClasses={[styles.mail]} />
+    <ContextMenuContextProvider>
+      <AppContext.Provider value={providerData}>
+        <Container id={styles.reply_bar_tools} surface />
+        <Stack col customClasses={[styles.page]}>
+          <TopBar customClasses={[styles.topbar]} />
+          <Stack
+            customClasses={[
+              [
+                styles.require_first,
+                styles.require_second,
+                styles.require_third,
+              ][currentFirstPaneState[0]],
+              styles.main,
+            ]}
+            flexGrow
+          >
+            <DomainRow customClasses={[styles.address]} subdomains={subdomains} />
+            <MailsRow customClasses={[styles.mails]} />
+            <MailRow customClasses={[styles.mail]} />
+          </Stack>
         </Stack>
-      </Stack>
-    </AppContext.Provider>
+      </AppContext.Provider>
+    </ContextMenuContextProvider>
   );
 }
 
@@ -381,9 +380,9 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
       },
       select: {
         id: true,
-        convos: {
+        mails: {
           orderBy: {
-            latest: 'desc',
+            at: 'desc',
           },
         },
       },
@@ -399,13 +398,13 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
     }
 
     result.selectedFolder = [urlSubdomainId, selectedAddress.id, selectedFolder.id];
-    result.folders[selectedFolder.id].convos = selectedFolder.convos.map((convo) => {
+    result.folders[selectedFolder.id].mails = selectedFolder.mails.map((mail) => {
       // Dirty hack....
-      result.convos[convo.id] = {
-        ...convo,
-        latest: convo.latest.getTime(),
+      result.mails[mail.id] = {
+        ...mail,
+        at: mail.at.getTime(),
       };
-      return convo.id;
+      return mail.id;
     });
 
     if (params?.mail) {
@@ -413,13 +412,13 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
         return {
           redirect: {
             permanent: false,
-            destination: `/${urlSelectedLocal}/${crackOpen(params?.folder as string | string[])}`,
+            destination: `/${urlSelectedAddress}/${crackOpen(params?.folder as string | string[])}`,
           },
         };
       }
       const mail = await prisma.mail.findUnique({
         where: { id: crackOpen(params.mail) },
-        select: { convo: { include: { mails: true } } },
+        select: { convo: { include: { mails: { orderBy: { at: 'asc' } } } } },
       });
       console.log(3.9, Date.now() - now);
       let convo;
@@ -429,19 +428,19 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
       } else {
         convo = await prisma.convo.findUnique({
           where: { id: crackOpen(params.mail) },
-          include: { mails: true },
+          include: { mails: { orderBy: { at: 'asc' } } },
         });
         console.log(3.95, Date.now() - now);
         if (!convo) {
           return {
             redirect: {
               permanent: false,
-              destination: `/${urlSelectedLocal}/${crackOpen(params?.folder as string[] | string)}`,
+              destination: `/${urlSelectedAddress}/${crackOpen(params?.folder as string[] | string)}`,
             },
           };
         }
       }
-      result.selectedConvo = convo.id;
+      result.selectedMail = crackOpen(params.mail);
       (convo as unknown as StoredAs<Convo, 'mails', true>).mails = convo.mails.map((convoMail) => {
         (convoMail as any).at = convoMail.at.getTime();
         result.mails[convoMail.id] = convoMail;
@@ -471,22 +470,22 @@ export const getServerSideProps: GetServerSideProps = async function getServerSi
           id: selFolder,
         },
         select: {
-          convos: {
+          mails: {
             orderBy: {
-              latest: 'desc',
+              at: 'desc',
             },
           },
         },
       });
       console.log(4, Date.now() - now);
       if (folderContents) {
-        result.folders[selFolder].convos = folderContents.convos.map((convo) => {
+        result.folders[selFolder].mails = folderContents.mails.map((mail) => {
           // Dirty hack....
-          result.convos[convo.id] = {
-            ...convo,
-            latest: convo.latest.getTime(),
+          result.mails[mail.id] = {
+            ...mail,
+            at: mail.at.getTime(),
           };
-          return convo.id;
+          return mail.id;
         });
       } else {
         // TODO Find a fix that is domain-wide

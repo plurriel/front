@@ -1,4 +1,4 @@
-const styles = `
+export const editorStyles = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 body {
   font-family: var(--fam, 'DM Sans'), sans-serif;
@@ -19,5 +19,3 @@ body {
   border: calc(1em / 4) solid transparent;
 }
 `;
-
-export default styles;

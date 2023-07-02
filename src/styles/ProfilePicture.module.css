@@ -7,6 +7,10 @@
   user-select: none;
 }
 
+.pfp.brand {
+  border-radius: 0.25em;
+}
+
 .pfp:first-child {
   margin-left: -0.5em;
 }

@@ -9,6 +9,7 @@
   display: flex;
   align-items: center;
   gap: 1em;
+  border-radius: 0.5em;
 }
 .contentless::before, .contentless::after {
   content: '';
@@ -59,4 +60,41 @@
 
 .inline_editor_focused > div a {
   color: blue;
+}
+
+.invert {
+  color: var(--bg);
+  background-color: var(--fg);
+}
+
+.draft_indicator {
+  --fg: var(--error);
+}
+.draft_indicator.invert {
+  --ns: var(--error);
+}
+
+.hide_until_hover span {
+  display: none;
+}
+.send_as_label span {
+  font-weight: bold;
+}
+
+.send_as_label:hover span,
+.send_as_label:focus-visible span,
+.send_as_label span:focus-visible {
+  display: inline;
+}
+
+.send_as_label input {
+  border: none;
+  padding: 0;
+  appearance: none;
+  height: 2em;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  background-color: var(--ns);
+  margin: -1em 0.25em;
+  font: inherit;
 }

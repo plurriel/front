@@ -5,6 +5,7 @@ import {
   Main,
   NextScript,
 } from 'next/document';
+import { ContextMenuContextProvider, ContextMenuRoot } from '@/components/ContextMenu';
 
 export default function Document() {
   return (
@@ -13,6 +14,7 @@ export default function Document() {
       <body>
         <Main />
         <div id="modal_portal" />
+        <ContextMenuRoot />
         <NextScript />
       </body>
     </Html>

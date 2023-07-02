@@ -460,7 +460,8 @@ function EmailAddress({
     addresses: [addresses],
     viewedAddress: [viewedAddress, setViewedAddress],
     selectedFolder: [selectedFolder, setSelectedFolder],
-    selectedConvo: [, setSelectedConvo],
+    selectedMail: [, setSelectedMail],
+    composing: [, setComposing],
     currentFirstPane: [currentFirstPane, setCurrentFirstPane],
   } = useAppContext();
 
@@ -509,8 +510,13 @@ function EmailAddress({
                   onFire={() => {
                     if (!isSelected || selectedFolder[2] !== folderId) {
                       setSelectedFolder([subdomainId, addressId, folderId]);
-                      window.history.pushState({}, '', `/${addresses[addressId].name}/${getFolderName(folders[folderId])}`);
-                      setSelectedConvo(null);
+                      window.history.pushState(
+                        {},
+                        '',
+                        `/${addresses[addressId].name}/${getFolderName(folders[folderId])}`,
+                      );
+                      setSelectedMail(null);
+                      setComposing(false);
                     }
                     if (currentFirstPane === 0) setCurrentFirstPane(1);
                   }}

@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           id: user.id,
         },
         data: {
-          webPushSubData: JSON.stringify(newSubscriptionArray),
+          webPushSubData: newSubscriptionArray.map((s) => JSON.stringify(s)),
         },
       });
       return res.status(201).json({
