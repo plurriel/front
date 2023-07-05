@@ -36,8 +36,8 @@ self.addEventListener('push', async (event) => {
         const mailData = await fetch(`/api/mails/${eventData.id}`).then((res) => res.json());
         self.registration.showNotification(mailData.subject || '<No Subject>', {
           body: `From: ${mailData.from}
-To: ${mailData.convo.folder.address.name}`,
-          tag: `MAILRECEPTION-${eventData.id}-${mailData.convo.folder.address.name}`,
+To: ${mailData.folder.address.name}`,
+          tag: `MAILRECEPTION-${eventData.id}-${mailData.folder.address.name}`,
         });
         break;
       default:
