@@ -87,6 +87,7 @@ export function MailsRow({ ...props }) {
           onFire={async () => {
             setCurrentFirstPane(2);
             setComposing(true);
+            setSelectedMail(null);
           }}
           highlight={Boolean(composing && !selectedMail)}
           id="composebtn"
