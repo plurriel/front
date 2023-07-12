@@ -46,6 +46,7 @@
 } */
 
 .inline_editor_focused > div {
+  --fg: black;
   --scroll-color: black;
   background-color: white;
   width: 100%;

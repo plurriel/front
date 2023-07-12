@@ -107,10 +107,8 @@ export function ContextMenuContextProvider({ children }: { children: React.React
 
   useEffect(() => {
     const listenerFn = ({ target }: { target: EventTarget | null }) => {
-      console.log('sfgaasgsfgsdfsdgsgh4eee 4t46y54t54', activeContextMenuElState);
       if (activeContextMenuElState[0]
         && !activeContextMenuElState[0].contains(target as HTMLElement)) {
-        console.log('Nuff showtime for you');
         activeContextMenuElState[1](null);
         activeContextMenuStateState[0]?.[1](null);
         activeContextMenuStateState[1](null);
@@ -124,8 +122,6 @@ export function ContextMenuContextProvider({ children }: { children: React.React
     activeContextMenuState: activeContextMenuStateState,
     activeContextMenuEl: activeContextMenuElState,
   }), [activeContextMenuStateState, activeContextMenuElState]);
-
-  console.log('aaaaaaaaaaaaaaa');
 
   return (
     <ContextMenuContext.Provider value={cmcValue}>

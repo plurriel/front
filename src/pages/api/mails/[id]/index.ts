@@ -70,7 +70,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id: crackOpen(req.query.id as string | string[]),
       },
       include: {
-        folder: { select: { address: { select: { id: true, name: true } } } },
+        folder: { select: { address: true } },
+        convo: { include: { mails: { take: 2 } } },
       },
     });
 
@@ -80,17 +81,75 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // if (!mail.folder.address.folders.length) {
+    //   mail.folder.address.folders = [
+    //     await prisma.folder.create({
+    //       data: {
+    //         type: 'Sent',
+    //         name: '',
+    //         addressId: mail.folder.address.id,
+    //       },
+    //     }),
+    //   ];
+    // }
+
     if (!(await hasPermissions(['address', mail.folder.address.id], ['view', 'consult'], user.id))) {
       return res.status(401).json({
         message: 'Insufficient permissions - Must be able to view and consult address',
       });
     }
 
+    if (mail.type !== 'Draft') {
+      return res.status(412).json({
+        message: 'Precondition failed - Mail must be draft',
+      });
+    }
+
+    const allInterlocutors = new Set([
+      ...mail.convo.interlocutors,
+      ...(body.to || []),
+      ...(body.cc || []),
+      ...(body.bcc || []),
+    ]);
+
+    // console.log(mail.convo.mails, mail.convo.mails.length === 1, body.subject);
+
     const newMail = await prisma.mail.update({
       where: {
         id: crackOpen(req.query.id as string | string[]),
       },
-      data: body,
+      data: {
+        to: body.to || undefined,
+        cc: body.cc || undefined,
+        bcc: body.bcc || undefined,
+        subject: body.subject || undefined,
+        html: body.html || undefined,
+        convo: {
+          update: {
+            subject: mail.convo.mails.length === 1 ? body.subject || undefined : undefined,
+            interlocutors: [...allInterlocutors],
+          },
+        },
+        folder: {
+          connectOrCreate: {
+            where: {
+              name_type_addressId: {
+                name: '',
+                type: 'Sent',
+                addressId: mail.folder.address.id,
+              },
+            },
+            create: {
+              name: '',
+              type: 'Sent',
+              addressId: mail.folder.address.id,
+            },
+          },
+        },
+      },
+      include: {
+        convo: true,
+      },
     });
 
     return res.status(200).json(newMail);

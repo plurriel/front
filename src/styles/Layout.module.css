@@ -121,6 +121,7 @@
   background-color: var(--bgcta, var(--fg));
   color: var(--fgcta, var(--bg));
   fill: var(--fgcta, var(--bg));
+  /* --fgnext: var(--fgcta, var(--bg)); */
   border-radius: 1em !important;
   font-weight: bold;
 }
@@ -133,6 +134,7 @@
   background-color: var(--bgsel, var(--fg));
   color: var(--fgsel, var(--bg));
   fill: var(--fgsel, var(--bg));
+  /* --fgnext: var(--fgsel, var(--bg)); */
 }
 .highlight:focus-visible, 
 .highlight :focus-visible {
@@ -142,7 +144,7 @@
 .expandable {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 500ms ease-in-out;
+  transition: grid-template-rows 400ms ease-out;
   overflow: hidden;
 }
 

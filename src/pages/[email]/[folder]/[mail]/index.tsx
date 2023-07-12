@@ -113,7 +113,7 @@ export default function Home({
   useEffect(() => {
     (async () => {
       const newValue = (await import('@/components/BundledEditor')).default;
-      console.log(newValue);
+      // console.log(newValue);
       setBundledEditor(() => newValue);
     })();
   }, [setBundledEditor]);
@@ -134,10 +134,10 @@ export default function Home({
   }
 
   useEffect(() => {
-    console.log('aaa');
+    // console.log('aaa');
     const listener = async () => {
       const urlParse = window.location.pathname.match(/^\/(?:((?:[A-z!#$%&'*+\-/=?^_`{|}~]+\.)*[A-z!#$%&'*+\-/=?^_`{|}~]+)@)?((?:[A-z0-9-]+\.)+[A-z0-9-]+)(?:\/([^/]+)(?:\/(c[0-9A-z]{24}))?)?\/?$/);
-      console.log(urlParse, window.location);
+      // console.log(urlParse, window.location);
       if (!urlParse) return window.location.reload();
       const [, pathLocalName, pathSubdomainName, pathFolderName, pathMailId] = urlParse;
       const pathSubdomain = Object.values(subdomainsState[0])

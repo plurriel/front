@@ -26,119 +26,122 @@ export const mailReqSchema = object({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   switch (req.method) {
     case 'POST':
-      const now = Date.now();
-      const user = await getLogin(req);
-      if (user instanceof Error) {
-        return res.status(412).json({
-          message: `Precondition Failed - Must log in before continuing + ${user.message}`,
-        });
-      }
-
-      const address = await prisma.address.findUnique({
-        where: {
-          id: crackOpen(req.query.id as string | string[]),
-        },
-        include: {
-          folders: {
-            where: {
-              type: 'Sent',
-              name: '',
-            },
-          },
-        },
+      return res.status(410).json({
+        message: 'Please use a draft from now on',
       });
+      // const now = Date.now();
+      // const user = await getLogin(req);
+      // if (user instanceof Error) {
+      //   return res.status(412).json({
+      //     message: `Precondition Failed - Must log in before continuing + ${user.message}`,
+      //   });
+      // }
 
-      if (!address) {
-        return res.status(404).json({
-          message: 'No such address',
-        });
-      }
+      // const address = await prisma.address.findUnique({
+      //   where: {
+      //     id: crackOpen(req.query.id as string | string[]),
+      //   },
+      //   include: {
+      //     folders: {
+      //       where: {
+      //         type: 'Sent',
+      //         name: '',
+      //       },
+      //     },
+      //   },
+      // });
 
-      if (!(await hasPermissions(['address', address.id], ['view', 'send'], user.id))) {
-        return res.status(401).json({
-          message: 'Insufficient permissions - Must be able to view and send from address',
-        });
-      }
+      // if (!address) {
+      //   return res.status(404).json({
+      //     message: 'No such address',
+      //   });
+      // }
 
-      let body: InferType<typeof mailReqSchema>;
-      try {
-        body = await mailReqSchema.validate(req.body);
-      } catch (err) {
-        return res.status(400).json({
-          message: (err as ValidationError).message,
-        });
-      }
+      // if (!(await hasPermissions(['address', address.id], ['view', 'send'], user.id))) {
+      //   return res.status(401).json({
+      //     message: 'Insufficient permissions - Must be able to view and send from address',
+      //   });
+      // }
 
-      if (!address.folders.length) {
-        address.folders = [
-          await prisma.folder.create({
-            data: {
-              type: 'Sent',
-              name: '',
-              addressId: address.id,
-            },
-          }),
-        ];
-      }
+      // let body: InferType<typeof mailReqSchema>;
+      // try {
+      //   body = await mailReqSchema.validate(req.body);
+      // } catch (err) {
+      //   return res.status(400).json({
+      //     message: (err as ValidationError).message,
+      //   });
+      // }
 
-      const mailId = `c${cuid2.createId()}`;
-      const messageId = `<${mailId}@${address.name.split('@')[1]}`;
+      // if (!address.folders.length) {
+      //   address.folders = [
+      //     await prisma.folder.create({
+      //       data: {
+      //         type: 'Sent',
+      //         name: '',
+      //         addressId: address.id,
+      //       },
+      //     }),
+      //   ];
+      // }
 
-      let convoId;
-      if (body.inReplyTo) {
-        const inReplyToMail = await prisma.mail.findFirst({
-          where: {
-            id: body.inReplyTo,
-          },
-        });
-        if (!inReplyToMail) return res.status(404).json({ message: 'In Reply To mail could not be found' });
-        convoId = inReplyToMail.convoId;
-        await prisma.convo.update({
-          where: {
-            id: convoId,
-          },
-          data: {
-            latest: new Date(now),
-          },
-        });
-      } else {
-        const interlocutors = new Set(
-          [...body.to, ...body.cc, ...body.bcc]
-            .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== address.name),
-        );
-        convoId = (await prisma.convo.create({
-          data: {
-            subject: body.subject,
-            interlocutors: [...interlocutors],
-            // folderId: address.folders[0].id,
-            latest: new Date(now),
-          },
-        })).id;
-      }
+      // const mailId = `c${cuid2.createId()}`;
+      // const messageId = `<${mailId}@${address.name.split('@')[1]}`;
 
-      const mailInDb = await prisma.mail.create({
-        data: {
-          type: 'Outbound',
-          id: mailId,
-          from: address.name,
-          to: body.to,
-          cc: body.cc,
-          bcc: body.bcc,
-          at: new Date(now),
-          recvDelay: 0,
-          subject: body.subject,
-          messageId,
-          html: body.contents,
-          inReplyTo: body.inReplyTo,
-          unsuccessful: [...body.to, ...body.cc, ...body.bcc],
-          folderId: address.folders[0].id,
-          convoId,
-        },
-      });
+      // let convoId;
+      // if (body.inReplyTo) {
+      //   const inReplyToMail = await prisma.mail.findFirst({
+      //     where: {
+      //       id: body.inReplyTo,
+      //     },
+      //   });
+      //   if (!inReplyToMail) return res.status(404).json({ message: 'In Reply To mail could not be found' });
+      //   convoId = inReplyToMail.convoId;
+      //   await prisma.convo.update({
+      //     where: {
+      //       id: convoId,
+      //     },
+      //     data: {
+      //       latest: new Date(now),
+      //     },
+      //   });
+      // } else {
+      //   const interlocutors = new Set(
+      //     [...body.to, ...body.cc, ...body.bcc]
+      //       .filter((addressDest) => emailAddrUtils.extractAddress(addressDest) !== address.name),
+      //   );
+      //   convoId = (await prisma.convo.create({
+      //     data: {
+      //       subject: body.subject,
+      //       interlocutors: [...interlocutors],
+      //       // folderId: address.folders[0].id,
+      //       latest: new Date(now),
+      //     },
+      //   })).id;
+      // }
 
-      channel.sendToQueue('mail_submission', Buffer.from(crackOpen(mailId as string | string[]), 'ascii'));
+      // const mailInDb = await prisma.mail.create({
+      //   data: {
+      //     type: 'Outbound',
+      //     id: mailId,
+      //     from: address.name,
+      //     to: body.to,
+      //     cc: body.cc,
+      //     bcc: body.bcc,
+      //     at: new Date(now),
+      //     recvDelay: 0,
+      //     subject: body.subject,
+      //     messageId,
+      //     html: body.contents,
+      //     inReplyTo: body.inReplyTo,
+      //     unsuccessful: [...body.to, ...body.cc, ...body.bcc],
+      //     folderId: address.folders[0].id,
+      //     convoId,
+      //   },
+      // });
 
-      return res.status(200).json(mailInDb);
+      // channel.sendToQueue('mail_submission', Buffer.from(crackOpen(mailId as string | string[]), 'ascii'));
+
+      // return res.status(200).json(mailInDb);
     default:
       return res.status(405).json({
         message: 'Method not allowed',

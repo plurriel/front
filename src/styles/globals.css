@@ -220,6 +220,7 @@ a {
   text-decoration: none;
   color: var(--link);
   fill: var(--link);
+  --fg: var(--link);
 }
 
 input {
@@ -254,6 +255,7 @@ select {
 .skip_to {
   padding: 0.5em;
   margin: -0.5em 0;
+  pointer-events: none;
 }
 
 .skip_to:not(:focus-visible) > * {

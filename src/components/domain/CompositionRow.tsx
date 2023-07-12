@@ -5,6 +5,7 @@ import { InferType } from 'yup';
 import { mailReqSchema } from '@/pages/api/addresses/[id]/mail';
 import styles from '@/styles/domain/CompositionRow.module.css';
 import { mailPatchSchema } from '@/pages/api/mails/[id]';
+import { draftReqSchema } from '@/pages/api/addresses/[id]/draft';
 import { ClickableContainer, Container, Stack } from '../Layout';
 import { useAppContext } from './AppContext';
 
@@ -86,19 +87,58 @@ export function CompositionRow({
   const [abortSending, setAbortSending] = useState<AbortController | null>();
   const [isSendingTime, setIsSendingTime] = useState<number | null>(null);
 
+  async function saveDraft() {
+    if (composing === true) {
+      const recipientsSet = new Set(recipients.split(/, ?/g));
+      recipientsSet.delete('');
+      const draftBody: InferType<typeof draftReqSchema> = {
+        subject,
+        inReplyTo: undefined,
+        contents,
+        to: [...recipientsSet],
+        cc: [],
+        bcc: [],
+      };
+      return fetch(`/api/addresses/${(selectedFolder as [string, string, string])[1]}/draft`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(draftBody),
+      })
+        .then((res) => res.json())
+        .then((json: Mail) => {
+          setMails((lastMails) => {
+            const newMails = { ...lastMails };
+            newMails[json.id] = json;
+            return newMails;
+          });
+          return json.id;
+        });
+    }
+    const latestDraftVersion = mails[composing as string];
+
+    const sendToBack: InferType<typeof mailPatchSchema> = {};
+    const eqSet = (xs: Set<any>, ys: Set<any>) => xs.size === ys.size
+      && [...xs].every((x) => ys.has(x));
+
+    const newSetOfRecipients = new Set(recipients.split(/, ?/g));
+    if (!eqSet(newSetOfRecipients, new Set(latestDraftVersion.to))) {
+      sendToBack.to = [...newSetOfRecipients];
+    }
+    if ((latestDraftVersion.subject || '') !== subject) sendToBack.subject = subject;
+    if ((latestDraftVersion.html || '') !== contents) sendToBack.html = contents;
+    await fetch(`/api/mails/${composing}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(sendToBack),
+    });
+    return composing;
+  }
+
   async function send() {
-    const reqBody: InferType<typeof mailReqSchema> = {
-      inReplyTo: undefined,
-      to: recipients.split(/, ?/g),
-      subject,
-      bcc: [],
-      cc: [],
-      contents: contents || '',
-    };
-    return fetch(`/api/addresses/${selectedFolder?.[1]}/mail`, {
+    const id = await saveDraft();
+    return fetch(`/api/mails/${id}/send`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(reqBody),
     }).then((res) => res.json());
   }
 
@@ -311,41 +351,7 @@ export function CompositionRow({
             br
             onFire={async () => {
               setIsSending('draft');
-              if (composing === true) {
-                await fetch(`/api/addresses/${(selectedFolder as [string, string, string])[1]}/draft`, {
-                  method: 'POST',
-                  headers: { 'content-type': 'application/json' },
-                  body: '{}',
-                })
-                  .then((res) => res.json())
-                  .then((json: Mail) => {
-                    setMails((lastMails) => {
-                      const newMails = { ...lastMails };
-                      newMails[json.id] = json;
-                      return newMails;
-                    });
-                    setComposing(json.id);
-                  });
-              } else {
-                const latestDraftVersion = mails[composing as string];
-
-                const sendToBack: InferType<typeof mailPatchSchema> = {};
-                const eqSet = (xs: Set<any>, ys: Set<any>) => xs.size === ys.size
-                  && [...xs].every((x) => ys.has(x));
-
-                const newSetOfRecipients = new Set(recipients.split(/, ?/g));
-                if (!eqSet(newSetOfRecipients, new Set(latestDraftVersion.to))) {
-                  sendToBack.to = [...newSetOfRecipients];
-                }
-                if ((latestDraftVersion.subject || '') !== subject) sendToBack.subject = subject;
-                if ((latestDraftVersion.html || '') !== contents) sendToBack.html = contents;
-                await fetch(`/api/mails/${composing}`, {
-                  method: 'PATCH',
-                  headers: { 'content-type': 'application/json' },
-                  body: JSON.stringify(sendToBack),
-                });
-                setComposing(false);
-              }
+              await saveDraft();
               setIsSending(false);
             }}
           >

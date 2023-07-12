@@ -1,10 +1,12 @@
 /* eslint-disable react/function-component-definition */
 /* eslint-disable react/require-default-props */
-import React, { useMemo } from 'react';
+import React, { HTMLProps, useMemo } from 'react';
 import cls, { ClassValue } from 'clsx';
 import styles from '@/styles/Layout.module.css';
 
-export interface ContainerOptions<T = typeof DivTag> {
+const DivTag = (a: React.HTMLProps<HTMLDivElement>) => <div {...a} />;
+
+export interface ContainerOptions<T = typeof DivTag> extends HTMLProps<T> {
   w?: string | boolean;
   h?: string | boolean;
   pad?: string | boolean;
@@ -28,9 +30,8 @@ export interface ContainerOptions<T = typeof DivTag> {
   related?: boolean;
   customTag?: React.ComponentType | string;
   children?: React.ReactNode;
+  margin?: string | boolean;
 }
-
-const DivTag = (a: React.HTMLProps<HTMLDivElement>) => <div {...a} />;
 
 export function Container<CustomTagT = typeof DivTag>({
   w,
@@ -54,6 +55,7 @@ export function Container<CustomTagT = typeof DivTag>({
   style,
   unwrap,
   related,
+  margin,
   customTag: CustomTag,
   children,
   ...props
@@ -70,6 +72,7 @@ export function Container<CustomTagT = typeof DivTag>({
             height: h === true ? '100%' : h,
             padding: pad === true ? '1em' : pad,
             borderRadius: br === true ? '1em' : br,
+            margin: margin === true ? '1em' : margin,
             gap: gap === true ? '1em' : gap,
             ...style,
           }).filter(([, v]) => v != null),

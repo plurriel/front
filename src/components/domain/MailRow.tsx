@@ -1,4 +1,6 @@
+/* eslint-disable camelcase */
 import React, {
+  CSSProperties,
   useCallback,
   useEffect,
   useRef,
@@ -8,10 +10,10 @@ import { Mail, Convo } from '@prisma/client';
 import { sanitize } from 'isomorphic-dompurify';
 import { Editor } from 'tinymce';
 import { InferType } from 'yup';
-import { mailReqSchema } from '@/pages/api/addresses/[id]/mail';
+import { draftReqSchema } from '@/pages/api/addresses/[id]/draft';
 import { mailPatchSchema } from '@/pages/api/mails/[id]';
 
-import { emailAddrUtils, State } from '@/lib/utils';
+import { emailAddrUtils, getFolderName, State } from '@/lib/utils';
 
 import pageStyles from '@/styles/domain.module.css';
 import styles from '@/styles/domain/MailRow.module.css';
@@ -38,6 +40,7 @@ export function MailRow({ ...props }) {
     convos: [convos, setConvos],
     currentFirstPane: [, setCurrentFirstPane],
     composing: [composing, setComposing],
+    folders: [folders],
   } = useAppContext();
 
   const mail = selectedMail ? mails[selectedMail] : null;
@@ -101,23 +104,27 @@ export function MailRow({ ...props }) {
 
   return (
     <Stack surface col {...props}>
-      <Stack col surface pad="0" br="1em 1em 0.5em 0.5em" gap="0">
-        <Stack related uncollapsable pad>
-          <IconButton
-            onFire={() => {
-              setCurrentFirstPane(1);
-              setComposing(false);
-              setSelectedMail(null);
-            }}
-            customClasses={[pageStyles.third_pane_back]}
-            icon={Back}
-          />
-          <Container oneline flexGrow>{[...convo.interlocutors, address.name].join(', ')}</Container>
-          <IconButton icon={Options} />
+      <Stack surface margin="-1em -1em 0 -1em" br="0 0 0.5em 0.5em" oneline id={styles.domain}>
+        <IconButton
+          onFire={() => {
+            setCurrentFirstPane(1);
+            setComposing(false);
+            setSelectedMail(null);
+            window.history.pushState(
+              {},
+              '',
+              `/${address.name}/${getFolderName(folders[selectedFolder[2]])}`,
+            );
+          }}
+          customClasses={[pageStyles.third_pane_back]}
+          icon={Back}
+        />
+        <Stack flexGrow col gap="0" margin="-0.5em 0">
+          <Container oneline flexGrow>
+            <small>{[...convo.interlocutors, address.name].join(', ')}</small>
+          </Container>
+          {convo.subject || '<No Subject>'}
         </Stack>
-        <Container pad="0 1em 1em 1em">
-          <b>{convo.subject || '<No Subject>'}</b>
-        </Container>
       </Stack>
       {
           'mails' in convo
@@ -216,7 +223,7 @@ function MailContents({
 
   useEffect(() => {
     if (loadedFrames?.length === 0 && selectedMail === mailId) {
-      console.log(mailId, selectedMail);
+      // console.log(mailId, selectedMail);
       mailEl.current?.scrollIntoView({ behavior: 'smooth' });
       // setSelectedMail(null);
     }
@@ -249,15 +256,16 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
   const {
     composing: [composing, setComposing],
     mails: [mails, setMails],
+    convos: [convos, setConvos],
     addresses: [addresses],
     selectedFolder: [selectedFolder],
     BundledEditor,
   } = useAppContext();
 
-  const [subject, setSubject] = useState('');
-  const [recipients, setRecipients] = useState('');
-
   if (!selectedFolder) throw new Error();
+
+  const [subject, setSubject] = useState(mail.subject || '');
+  const [recipients, setRecipients] = useState(mail.to.join(', '));
 
   const [local, subdomain] = addresses[selectedFolder[1]].name.split('@');
 
@@ -267,19 +275,57 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
   const [abortSending, setAbortSending] = useState<AbortController | null>();
   const [isSendingTime, setIsSendingTime] = useState<number | null>(null);
 
+  async function saveDraft() {
+    const latestDraftVersion = mails[composing as string];
+
+    const sendToBack: InferType<typeof mailPatchSchema> = {};
+    const eqSet = (xs: Set<any>, ys: Set<any>) => xs.size === ys.size
+    && [...xs].every((x) => ys.has(x));
+
+    // console.log(recipients, sendToBack, latestDraftVersion);
+    if (latestDraftVersion.subject !== subject) {
+      sendToBack.subject = subject;
+    }
+
+    const newSetOfRecipients = new Set(recipients.split(/, ?/g));
+    newSetOfRecipients.delete('');
+    if (!eqSet(newSetOfRecipients, new Set(latestDraftVersion.to))) {
+      sendToBack.to = [...newSetOfRecipients];
+    }
+    const contents = editorRef.current?.getContent();
+    if ((latestDraftVersion.html || '') !== contents) sendToBack.html = contents;
+    setIsSending('draft');
+    const patchData: { convo: Convo } & Mail = await fetch(`/api/mails/${composing}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(sendToBack),
+    }).then((v) => v.json());
+    const {
+      convo: patchedConvo,
+      ...patchedMail
+    } = patchData;
+    setIsSending(false);
+    setMails((oldMails: typeof mails) => {
+      const newMails = { ...oldMails };
+      newMails[patchedMail.id] = patchedMail;
+      return newMails;
+    });
+    setConvos((oldConvos: typeof convos) => {
+      const newConvos = { ...oldConvos };
+      newConvos[patchedConvo.id] = {
+        ...newConvos[patchedConvo.id],
+        ...patchedConvo,
+      };
+      return newConvos;
+    });
+    setComposing(false);
+  }
+
   async function send() {
-    const reqBody: InferType<typeof mailReqSchema> = {
-      inReplyTo: undefined,
-      to: recipients.split(/, ?/g),
-      subject,
-      bcc: [],
-      cc: [],
-      contents: editorRef.current?.getContent() || '',
-    };
-    return fetch(`/api/addresses/${selectedFolder?.[1]}/mail`, {
+    await saveDraft();
+    return fetch(`/api/mails/${composing}/send`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(reqBody),
     }).then((res) => res.json());
   }
 
@@ -302,11 +348,11 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
 
   function handleElLoad(iframeElm?: HTMLIFrameElement) {
     if (!iframeElm) return;
-    console.log('aaasdasdsa');
+    // console.log('aaasdasdsa');
     const frameWindow: Window | null = (iframeElm as HTMLIFrameElement).contentWindow;
     if (!frameWindow) return;
     const frameDocument: Document | undefined = frameWindow.document;
-    console.log('aaasdasdsa');
+    // console.log('aaasdasdsa');
 
     // frameDocument.addEventListener('contextmenu', (evt) => {
     //   evt.preventDefault();
@@ -336,12 +382,14 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
     return BundledEditor && (
       <>
         <Stack related disabled={Boolean(isSending)}>
-          <Stack surface>
+          <Stack surface pad="0.5em">
             <small>Subject:</small>
           </Stack>
           <Container flexGrow>
             <TextInput
               w
+              h="2em"
+              pad="0.5em"
               onChange={({ target }) => setSubject((target as HTMLInputElement).value)}
               value={subject}
               placeholder="<No Subject>"
@@ -350,17 +398,20 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
         </Stack>
         <Stack col gap="0" disabled={Boolean(isSending)}>
           <Stack related>
-            <Stack surface>
+            <Stack surface pad="0.5em">
               <small>From:</small>
             </Stack>
             <Container
               flexGrow
+              pad="0.5em"
               surface
               customClasses={[styles.send_as_label, !sendAsLabel && styles.hide_until_hover]}
               tabIndex={0}
             >
               {local}
               <TextInput
+                h="1em"
+                pad="1"
                 onChange={({ target }) => setSendAsLabel((target as HTMLInputElement).value)}
                 value={sendAsLabel}
               />
@@ -370,12 +421,14 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
           </Stack>
           <Container pad="0.5em 0 0 0">
             <Stack related>
-              <Stack surface>
+              <Stack surface pad="0.5em">
                 <small>To:</small>
               </Stack>
               <Container flexGrow>
                 <TextInput
                   w
+                  h="2em"
+                  pad="0.5em"
                   onChange={({ target }) => {
                     let newValue = (target as HTMLInputElement).value
                       .toLowerCase()
@@ -398,7 +451,7 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
             </Stack>
           </Container>
         </Stack>
-        <Container>
+        <Container style={{ '--tmcepad': '0.5em' } as CSSProperties}>
           <BundledEditor
             onInit={(evt: any, editor: Editor) => {
               editorRef.current = editor;
@@ -420,7 +473,7 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
                 let currentValue = 'reply';
                 editor.ui.registry.addSplitButton('myButton', {
                   icon: 'reply',
-                  tooltip: 'This is an example split-button',
+                  tooltip: 'Reply mode',
                   onAction: (api) => {
                     currentValue = { replyall: 'reply', reply: 'replyall' }[currentValue] as string;
                     // setCurrentReply(currentValue);
@@ -500,28 +553,7 @@ function MailView({ mail, setLoadedFrames }: { mail: Mail, setLoadedFrames: Stat
               surface
               br
               onFire={async () => {
-                const latestDraftVersion = mails[composing as string];
-
-                const sendToBack: InferType<typeof mailPatchSchema> = {};
-                // const eqSet = (xs: Set<any>, ys: Set<any>) => xs.size === ys.size
-                //   && [...xs].every((x) => ys.has(x));
-
-                // TODO: Worry about saving metadata (fuck)
-                const contents = editorRef.current?.getContent();
-                if ((latestDraftVersion.html || '') !== contents) sendToBack.html = contents;
-                setIsSending('draft');
-                const patchData: Mail = await fetch(`/api/mails/${composing}`, {
-                  method: 'PATCH',
-                  headers: { 'content-type': 'application/json' },
-                  body: JSON.stringify(sendToBack),
-                }).then((v) => v.json());
-                setIsSending(false);
-                setMails((oldMails: typeof mails) => {
-                  const newMails = { ...oldMails };
-                  newMails[mail.id] = patchData;
-                  return newMails;
-                });
-                setComposing(false);
+                await saveDraft();
               }}
             >
               Save Draft
@@ -645,7 +677,7 @@ function MailMetaIndication({ mail }: { mail: Mail }) {
   return (
     <Stack>
       <Stack flexGrow reverse={mail.type !== 'Inbound'}>
-        <Stack surface>
+        <Stack surface oneline pad="0.5em">
           <small>
             From:
           </small>
@@ -658,7 +690,7 @@ function MailMetaIndication({ mail }: { mail: Mail }) {
             }
           />
         </Stack>
-        <Stack surface>
+        <Stack surface oneline pad="0.5em">
           <small>
             At:
           </small>
@@ -673,6 +705,7 @@ function MailMetaIndication({ mail }: { mail: Mail }) {
           mail.type === 'Draft' && !composing && (
             <ClickableContainer
               surface
+              pad="0.5em"
               customClasses={[styles.draft_indicator, mail.id === composing && styles.invert]}
               onFire={() => {
                 if (composing !== mail.id) setComposing(mail.id);
@@ -680,6 +713,7 @@ function MailMetaIndication({ mail }: { mail: Mail }) {
                   setComposing(false);
                 }
               }}
+              oneline
             >
               <b>
                 Edit Draft
@@ -688,17 +722,22 @@ function MailMetaIndication({ mail }: { mail: Mail }) {
           )
         }
       </Stack>
-      <Stack surface>
-        <IconButton icon={ChevronDown} />
+      <Stack surface pad="0.5em">
+        <IconButton icon={ChevronDown} revpad="0.5em" />
       </Stack>
     </Stack>
   );
 }
 
+type ReplyType = 'reply' | 'replyall';
+
 function ReplyBar({ ...props }) {
   const {
     selectedMail: [selectedMail],
     convos: [convos],
+    mails: [mails],
+    addresses: [addresses],
+    selectedFolder: [selectedFolder],
     BundledEditor,
   } = useAppContext();
 
@@ -708,16 +747,104 @@ function ReplyBar({ ...props }) {
 
   const [showDefaultStyles, setShowDefaultStyles] = useState(false);
 
-  const [, setCurrentReply] = useState('reply');
+  const [currentReply, setCurrentReply] = useState<'reply' | 'replyall'>('reply');
   const [isSending, setIsSending] = useState(false);
+
+  const [createdAs__hidden, setCreatedAs] = useState<string | boolean>(false);
+
+  const [lastTimeout__hidden, setLastTimeout] = useState<number>(Date.now() - 1000);
+  const [lastContent__hidden, setLastContent] = useState('');
+
+  const [resolveQueue__hidden, setResolveQueue] = useState<(() => void)[]>([]);
+
+  // Will reassign due to dependency within a function that will not be changed
+  let lastTimeout = lastTimeout__hidden;
+  let lastContent = lastContent__hidden;
+  let createdAs = createdAs__hidden;
+  let resolveQueue = resolveQueue__hidden;
+
+  const createDraft = async () => {
+    if (!editorRef.current) return;
+    if (typeof createdAs === 'string') return;
+    if (createdAs === true) {
+      // ESLint dumb as fuck
+      // eslint-disable-next-line consistent-return
+      return new Promise<void>((r) => {
+        resolveQueue.push(r);
+        resolveQueue = [...resolveQueue];
+        setResolveQueue(resolveQueue);
+      });
+    }
+    const currentContent = editorRef.current.getContent();
+    createdAs = true;
+    setCreatedAs(true);
+    const latestMail = mails[
+      (convos[mails[selectedMail].convoId] as StoredAs<Convo, 'mails', true>).mails.at(-1) as string
+    ];
+    await fetch(`/api/addresses/${addresses[(selectedFolder as [string, string, string])[1]].id}/draft`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        to: [latestMail.from, ...(({ reply: [], replyall: latestMail.to } as const)[currentReply])],
+        cc: ({ reply: [], replyall: latestMail.cc } as const)[currentReply],
+        bcc: [],
+        subject: latestMail.inReplyTo
+          && latestMail.subject
+          && latestMail.subject.startsWith('Re')
+          ? latestMail.subject
+          : `Re: ${latestMail.subject || '<No Subject>'}`,
+        contents: currentContent,
+        inReplyTo: latestMail.id,
+      } as InferType<typeof draftReqSchema>),
+    })
+      .then(async (response) => {
+        const responseData = await response.json() as Mail;
+
+        setCreatedAs(responseData.id);
+
+        lastContent = currentContent;
+        setLastContent(lastContent);
+
+        lastTimeout = Date.now();
+        setLastTimeout(lastTimeout);
+
+        resolveQueue.forEach((f) => f());
+        resolveQueue = [];
+        setResolveQueue(resolveQueue);
+      });
+  };
+
+  const saveDraft = async () => {
+    if (!editorRef.current) return;
+    if (typeof createdAs !== 'string') return;
+    const currentContent = editorRef.current.getContent();
+
+    if (currentContent !== lastContent) {
+      await fetch(`/api/mails/${createdAs}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          html: currentContent,
+        } as InferType<typeof mailPatchSchema>),
+      })
+        .then(() => {
+          lastContent = currentContent;
+          setLastContent(lastContent);
+        });
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(saveDraft, 5_000);
+    return () => {
+      clearInterval(interval);
+      // console.log('useEffect dismount triggered!');
+      saveDraft();
+    };
+  });
 
   return (
     <Stack related {...props} uncollapsable>
-      <Stack col>
-        <Stack surface>
-          <small>Reply:</small>
-        </Stack>
-      </Stack>
       <Stack
         flexGrow
         surface
@@ -727,6 +854,13 @@ function ReplyBar({ ...props }) {
         <BundledEditor
           onInit={(evt: any, editor: Editor) => {
             editorRef.current = editor;
+          }}
+          onEditorChange={async (evt: any, editor: Editor) => {
+            const currentContent = editor.getContent();
+            if (!createdAs) {
+              createDraft();
+            }
+            // Currently creating....
           }}
           onFocus={() => setShowDefaultStyles(true)}
           onBlur={() => setShowDefaultStyles(false)}
@@ -743,17 +877,17 @@ bold italic forecolor | alignleft aligncenter \
 alignright alignjustify | bullist numlist outdent indent | \
 removeformat`,
             setup: (editor: Editor) => {
-              let currentValue = 'reply';
+              let currentValue: ReplyType = 'reply';
               editor.ui.registry.addSplitButton('myButton', {
                 icon: 'reply',
                 tooltip: 'This is an example split-button',
                 onAction: (api) => {
-                  currentValue = { replyall: 'reply', reply: 'replyall' }[currentValue] as string;
+                  currentValue = ({ replyall: 'reply', reply: 'replyall' })[currentValue] as ReplyType;
                   setCurrentReply(currentValue);
                   api.setIcon(currentValue);
                 },
                 onItemAction: (api, value) => {
-                  currentValue = value;
+                  currentValue = value as ReplyType;
                   api.setIcon(currentValue);
                   setCurrentReply(currentValue);
                 },
@@ -781,19 +915,25 @@ removeformat`,
             autoresize: true,
             icons: 'adaptive_default',
             inline: true,
+            placeholder: 'Reply...',
           }}
         />
       </Stack>
-      <Stack jc="flex-end" col>
+      <Stack ai="flex-end">
         <ClickableContainer
           surface
           disabled={!editorRef.current || isSending}
           onFire={async () => {
             setIsSending(true);
-            await fetch(`/api/mails/${(convos[selectedMail] as StoredAs<Convo, 'mails', true>).mails.at(-1)}/reply`, {
+            const currentContent = editorRef.current?.getContent() || '';
+            if (!createdAs) {
+              await createDraft();
+            } else if (currentContent !== lastContent) {
+              await saveDraft();
+            }
+            await fetch(`/api/mails/${createdAs}/send`, {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ contents: (editorRef.current as Editor).getContent() }),
             });
             setIsSending(false);
             (editorRef.current as Editor).setContent('');

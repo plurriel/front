@@ -16,6 +16,7 @@ import { IconButton } from '../IconButton';
 export function MailsRow({ ...props }) {
   const {
     addresses: [addresses],
+    subdomains: [subdomains],
     folders: [folders],
     selectedFolder: [selectedFolder, setSelectedFolder],
     viewedAddress: [, setViewedAddress],
@@ -45,17 +46,27 @@ export function MailsRow({ ...props }) {
 
   return (
     <Stack col surface {...props}>
-      <Stack center surface>
+      <Stack center surface br="0 0 0.5em 0.5em" margin="-1em -1em 0 -1em">
         <IconButton
           onFire={() => {
             setCurrentFirstPane((currentFirstPane) => {
               if (currentFirstPane === 2) {
                 setSelectedMail(null);
                 setComposing(false);
+                window.history.pushState(
+                  {},
+                  '',
+                  `/${currentAddress.name}/${getFolderName(folders[selectedFolder[2]])}`,
+                );
                 return 1;
               }
               setViewedAddress(selectedFolder.slice(0, 2) as [string, string]);
               setSelectedFolder(null);
+              window.history.pushState(
+                {},
+                '',
+                `/${subdomains[currentAddress.subdomainId].name}/`,
+              );
               return 0;
             });
           }}

@@ -1,3 +1,7 @@
+:root {
+  --tmcepad: 1em;
+}
+
 .tox-tinymce {
   border: none;
   border-radius: none;
@@ -46,6 +50,22 @@
 }
 .tox-toolbar.tox-toolbar--scrolling > *:not(:last-child) {
   margin-right: 0.5em;
+}
+.tox-platform-touch .tox-toolbar.tox-toolbar--scrolling > *:not(:last-child) {
+  margin-right: unset;
+}
+
+.tox-anchorbar {
+  display: none;
+}
+
+.tox-platform-touch .tox-toolbar.tox-toolbar--scrolling::after {
+  content: unset;
+}
+
+.tox-platform-touch .tox-toolbar__primary,
+.tox-platform-touch .tox-toolbar {
+  overflow-x: unset;
 }
 
 .tox-toolbar__group {
@@ -106,8 +126,8 @@
 .tox .tox-tbtn--bespoke {
   display: flex;
   flex: 1;
-  padding: 1em;
-  height: 3em;
+  padding: var(--tmcepad);
+  height: calc(1em + 2 * var(--tmcepad));
 }
 
 .tox .tox-tbtn--bespoke .tox-tbtn__select-label {
@@ -135,7 +155,7 @@
 }
 
 .tox-icon.tox-tbtn__icon-wrap {
-  padding: 1em;
+  padding: var(--tmcepad);
   border-radius: 0.5em;
 }
 
@@ -184,7 +204,7 @@
 }
 
 .tox .tox-statusbar__text-container > * {
-  padding: 1em;
+  padding: var(--tmcepad);
 }
 
 .tox .tox-statusbar__resize-handle {
@@ -342,7 +362,7 @@
   display: flex;
   font-size: 16px;
   justify-content: space-between;
-  padding: 1em;
+  padding: var(--tmcepad);
   padding-bottom: 0;
   position: relative;
 }
@@ -358,7 +378,7 @@
   display: flex;
   gap: 1em;
   justify-content: space-between;
-  padding: 1em;
+  padding: var(--tmcepad);
   padding-top: 0;
 }
 
@@ -395,7 +415,7 @@
   appearance: none;
   border: none;
   line-height: 1em;
-  padding: 1em;
+  padding: var(--tmcepad);
   border-radius: 1em;
   font: inherit;
   background-color: var(--ns);
@@ -428,7 +448,7 @@
   flex: 1;
   display: flex;
   background-color: var(--ns);
-  padding: 1em;
+  padding: var(--tmcepad);
   border-radius: 1em;
 }
 
@@ -437,7 +457,7 @@
 }
 
 .tox-button[title="Close"] {
-  padding: 1em;
+  padding: var(--tmcepad);
   position: absolute;
   right: 0;
   top: 0;
@@ -446,7 +466,7 @@
 .tox-button {
   background-color: var(--ns);
   color: var(--fg);
-  padding: 1em;
+  padding: var(--tmcepad);
   border-radius: 1em;
 }
 
@@ -640,4 +660,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.mce-content-body[data-mce-placeholder]:not(.mce-visualblocks)::before {
+  color: var(--fg);
+  content: attr(data-mce-placeholder);
+  position: absolute;
+  bottom: calc(var(--em) * 1px);
+  opacity: 0.75;
+  font-weight: 300;
+  font-size: smaller;
+  line-height: calc(var(--em) * 1px);
 }

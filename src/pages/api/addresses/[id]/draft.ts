@@ -119,6 +119,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           cc: body.cc,
           bcc: body.bcc,
           at: new Date(now),
+          subject: body.subject,
+          html: body.contents,
           recvDelay: 0,
           convoId,
           folderId: address.folders[0].id,

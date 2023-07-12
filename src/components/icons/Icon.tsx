@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { HTMLProps } from 'react';
 import cls from 'clsx';
 import styles from '@/styles/Icon.module.css';
 
-export interface IconProps {
+export interface IconProps extends Omit<HTMLProps<SVGElement>, 'ref'> {
   block?: boolean;
   customClasses?: string[];
-  size?: string | false;
+  dimensions?: string | number;
 }
 
 export function Icon({

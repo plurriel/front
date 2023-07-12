@@ -18,6 +18,7 @@ import { Rainbow } from '../Skeleton';
 import { TextInput } from '../Input';
 import { ArrowForward } from '../icons/ArrowForward';
 import { Folder } from '../icons/Folder';
+import { Draft } from '../icons/Draft';
 
 export function DomainRow({ ...props }) {
   const {
@@ -28,7 +29,7 @@ export function DomainRow({ ...props }) {
 
   return (
     <Stack col surface flexGrow id={styles.address} {...props}>
-      <Stack surface oneline id={styles.domain}>
+      <Stack surface margin="-1em -1em 0 -1em" br="0 0 0.5em 0.5em" oneline id={styles.domain}>
         <IconButton icon={Back} />
         <Person name={domain.name} />
       </Stack>
@@ -498,11 +499,11 @@ function EmailAddress({
       </ClickableContainer>
       <Container expandable expanded={isExpanded ?? undefined}>
         <Container>
-          <Stack related col pad="0.5em 0 0 0">
+          <Stack related col>
             {
               address.folders.map((folderId) => (
                 <ClickableContainer
-                  pad
+                  pad="0.5em 1em"
                   key={folderId}
                   highlight={isExpanded
                     ? (isSelected && folderId === selectedFolder?.[2]) ?? undefined
@@ -540,6 +541,8 @@ export function RelevantIcon({ type }: { type: string }) {
       return <Inbox />;
     case 'Sent':
       return <Send />;
+    case 'Drafts':
+      return <Draft />;
     case 'Spam':
       return <ReportSpam />;
     case 'Deleted':
