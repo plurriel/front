@@ -215,6 +215,7 @@ function CreateModal(
               <Container
                 surface
                 oneline
+                pad="1em 3em 1em 1em"
                 customTag="select"
                 onChange={({ target }) => setStep((step_) => [step_[0], {
                   ...step_[1],
