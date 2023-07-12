@@ -32,7 +32,7 @@ export function ContextMenu({
   children,
   // nItems,
 }: ContextMenuProps) {
-  console.log(useContext(ContextMenuContext));
+  // console.log(useContext(ContextMenuContext));
   const {
     activeContextMenuState: [activeContextMenuState, setActiveContextMenuState],
     activeContextMenuEl: [, setActiveContextMenuEl],
@@ -66,7 +66,7 @@ export function ContextMenu({
   // }, [cmElRef]);
   const handleRef = useCallback((node: HTMLDivElement) => {
     setActiveContextMenuEl(node);
-    console.log('eeeeeeeeee', node);
+    // console.log('eeeeeeeeee', node);
   }, []);
 
   const GAP_CONTEXT_MENU = 0;

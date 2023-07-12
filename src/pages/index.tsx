@@ -41,7 +41,7 @@ export default function Landing({
 }
 
 function AllDomainsView({ domains, name }: { domains: Record<string, string>, name: string }) {
-  console.log(domains);
+  // console.log(domains);
   return (
     <Stack related col w="256px">
       <Container surface>
@@ -73,7 +73,7 @@ async function getAllAuthData(userId: string, requestedPerms: string[]) {
   const requestedPermsObject = makeObject(requestedPerms, () => true);
   const includeRequestedPerms = makeObject(requestedPerms, () => true);
   const usersLinkQuery = { some: { ...requestedPermsObject, userId } };
-  console.log(usersLinkQuery);
+  // console.log(usersLinkQuery);
   const domains = await prisma.domain.findMany({
     where: {
       usersLink: usersLinkQuery,
