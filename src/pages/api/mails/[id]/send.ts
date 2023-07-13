@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    if (!['Draft', 'Inbound'].includes(mail.type)) {
+    if (!['Draft', 'Outbound'].includes(mail.type)) {
       return res.status(412).json({
         message: 'Precondition failed - Mail must be draft or outbound',
       });
@@ -55,6 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
         data: {
           type: 'Outbound',
+          unsuccessful: [...mail.to, ...mail.cc, ...mail.bcc],
         },
       });
     }
