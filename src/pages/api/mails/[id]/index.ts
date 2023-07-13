@@ -119,11 +119,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id: crackOpen(req.query.id as string | string[]),
       },
       data: {
-        to: body.to || undefined,
-        cc: body.cc || undefined,
-        bcc: body.bcc || undefined,
-        subject: body.subject || undefined,
-        html: body.html || undefined,
+        to: body.to ?? undefined,
+        cc: body.cc ?? undefined,
+        bcc: body.bcc ?? undefined,
+        subject: body.subject ?? undefined,
+        html: body.html ?? undefined,
         convo: {
           update: {
             subject: mail.convo.mails.length === 1 ? body.subject || undefined : undefined,
